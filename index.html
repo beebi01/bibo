@@ -95,11 +95,18 @@
     }
 
     /* 團體照片區 */
+    .group-photo-section {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
     .group-photo-section img {
       width: 100%;
       height: auto;
       border-radius: 10px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      max-width: 1000px; /* 限制圖片最大寬度 */
+      margin: 0 auto; /* 使圖片居中 */
     }
 
     /* 成員介紹區域 */
@@ -122,6 +129,7 @@
 
     /* 成員資料區 */
     .members-section {
+      text-align: center; /* 使所有內容置中 */
       margin-top: 40px;
       display: flex;
       flex-wrap: wrap;
