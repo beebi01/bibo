@@ -7,61 +7,76 @@
   <style>
     /* 基本樣式 */
     body {
-      font-family: 'Arial', sans-serif;
-      background-image: url('photos/bg7.jpg');
-      background-repeat: no-repeat;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background: url('photos/bg7.jpg') no-repeat center center fixed;
       background-size: cover;
-      background-attachment: fixed;
-      color: #fff;
+      color: #f7f7f7;
       margin: 0;
       padding: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
+      height: 100vh;
     }
 
     header {
-      background-color: rgba(176, 224, 230, 0.9); /* 淡藍色背景 */
+      background: #ffffff;  /* 明亮的背景顏色 */
+      color: #333;
       text-align: center;
-      padding: 20px 0;
+      padding: 40px 0;
       width: 100%;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 40px;
+      border-radius: 8px;
     }
 
     h1 {
-      font-size: 2.5em;
+      font-size: 3em;
       margin: 0;
-      color: #333;
+      color: #2f4f4f;
     }
 
     p {
       font-size: 1.2em;
+      color: #4b4b4b;
       margin-top: 10px;
-      color: #333;
     }
 
     /* 內容區域 */
     main {
-      padding: 30px;
-      max-width: 1200px;
+      background: #ffffff;  /* 明亮背景，沒有透明感 */
+      padding: 40px;
       width: 100%;
+      max-width: 900px;
+      border-radius: 20px;
       text-align: center;
-      background-color: rgba(0, 0, 0, 0.6); /* 半透明背景 */
-      border-radius: 15px;
-      margin-top: 30px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    }
-
-    h2 {
-      font-size: 2em;
-      color: #f1f1f1;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
     }
 
     .section-header {
-      font-size: 1.8em;
-      background-color: #CF9E9E;
-      padding: 10px;
-      border-radius: 8px;
+      font-size: 2.2em;
+      background-color: #F9A8D4;  /* 清新粉色背景 */
+      padding: 15px 25px;
+      margin-bottom: 25px;
+      border-radius: 50px;
       display: inline-block;
+      color: #fff;
+      font-weight: bold;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      color: #2f4f4f;
+    }
+
+    p.audio-description {
+      font-size: 1.1em;
+      color: #666;
       margin-bottom: 20px;
     }
 
@@ -72,11 +87,11 @@
     /* 響應式設計 */
     @media (max-width: 768px) {
       header {
-        padding: 15px 0;
+        padding: 20px 0;
       }
 
       h1 {
-        font-size: 2em;
+        font-size: 2.2em;
       }
 
       p {
@@ -88,10 +103,14 @@
       }
 
       h2 {
-        font-size: 1.5em;
+        font-size: 2em;
+      }
+
+      .section-header {
+        font-size: 1.8em;
+        padding: 10px 20px;
       }
     }
-
   </style>
 </head>
 <body>
@@ -106,7 +125,7 @@
       <div class="section-header">我的偶像</div>
 
       <h2>- Audio -</h2>
-      <p>最喜歡的一首歌曲</p>
+      <p class="audio-description">最喜歡的一首歌曲，讓我們一起聆聽！</p>
 
       <div class="audio-player">
         <audio controls autoplay muted>
