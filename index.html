@@ -51,6 +51,37 @@
       100% { opacity: 1; }
     }
 
+    /* 頁面結構 */
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      padding: 20px;
+      margin: 0 auto;
+    }
+
+    /* 導航條 */
+    nav {
+      display: flex;
+      justify-content: center;
+      background-color: #333;
+      padding: 15px 0;
+      width: 100%;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      margin: 0 10px;
+      font-size: 1.1rem;
+      transition: background-color 0.3s ease;
+    }
+
+    nav a:hover {
+      background-color: #1DA1F2;
+      border-radius: 5px;
+    }
+
     /* 主要內容區 */
     main {
       margin-top: 20px;
@@ -62,12 +93,6 @@
       width: 90%;
       margin-bottom: 40px;
       animation: slideUp 1s ease-out;
-    }
-
-    /* 往上滑動的動畫 */
-    @keyframes slideUp {
-      0% { transform: translateY(30px); opacity: 0; }
-      100% { transform: translateY(0); opacity: 1; }
     }
 
     /* 成員介紹區域 */
@@ -131,59 +156,20 @@
       color: #1DA1F2;
     }
 
-    .audio-player {
-      margin-top: 20px;
-      width: 100%;
-      max-width: 600px;
-    }
-
-    /* 聯絡表單 */
-    .contact-section {
-      margin-top: 50px;
-      width: 100%;
-      max-width: 600px;
-      text-align: center;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .contact-section h2 {
-      font-size: 2rem;
-      color: #1DA1F2;
-    }
-
-    .contact-section form {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .contact-section input,
-    .contact-section textarea {
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 1rem;
-    }
-
-    .contact-section button {
-      padding: 10px 20px;
-      background-color: #1DA1F2;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    .contact-section button:hover {
-      background-color: #1A91D0;
-    }
-
     /* 響應式設計 */
     @media (max-width: 768px) {
+      header h1 {
+        font-size: 2.5rem;
+      }
+
+      header p {
+        font-size: 1rem;
+      }
+
+      nav {
+        flex-direction: column;
+      }
+
       .member {
         width: 45%;
       }
@@ -191,23 +177,31 @@
       .audio-player {
         width: 100%;
       }
-
-      .contact-section {
-        width: 90%;
-      }
     }
 
     /* 超小螢幕優化 */
     @media (max-width: 480px) {
+      header h1 {
+        font-size: 2rem;
+      }
+
+      header p {
+        font-size: 0.9rem;
+      }
+
+      nav a {
+        font-size: 1rem;
+      }
+
+      .video-section iframe {
+        height: 300px;
+      }
+
       .member {
         width: 90%;
       }
 
       .audio-player {
-        width: 100%;
-      }
-
-      .contact-section {
         width: 100%;
       }
     }
@@ -228,7 +222,6 @@
     <a href="#">成員介紹</a>
     <a href="#">影片</a>
     <a href="#">音樂</a>
-    <a href="#">聯絡我們</a>
   </nav>
 
   <!-- 主要內容區 -->
@@ -256,27 +249,41 @@
           <p>年齡：22歲（截至2025年）</p>
           <p>秀彬是TXT的隊長，以其深沉的嗓音和卓越的領導能力而著稱。</p>
         </div>
-        <!-- 可以繼續其他成員 -->
+
+        <div class="member">
+          <img src="https://example.com/yeonjun.jpg" alt="Yeonjun">
+          <h3>然竣 (Yeonjun)</h3>
+          <p>年齡：23歲（截至2025年）</p>
+          <p>然竣是團內年紀最大的成員，擅長舞蹈與饒舌。</p>
+        </div>
+
+        <div class="member">
+          <img src="https://example.com/taehyun.jpg" alt="Taehyun">
+          <h3>太顯 (Taehyun)</h3>
+          <p>年齡：20歲（截至2025年）</p>
+          <p>太顯以其出色的歌唱實力和活潑的個性聞名。</p>
+        </div>
+
+        <div class="member">
+          <img src="https://example.com/hueningkai.jpg" alt="Huening Kai">
+          <h3>休寧凱 (Huening Kai)</h3>
+          <p>年齡：20歲（截至2025年）</p>
+          <p>休寧凱以迷人的外貌和強大的歌唱實力受到粉絲喜愛。</p>
+        </div>
+
+        <div class="member">
+          <img src="https://example.com/beomgyu.jpg" alt="Beomgyu">
+          <h3>杋圭 (Beomgyu)</h3>
+          <p>年齡：22歲（截至2025年）</p>
+          <p>杋圭以其強大的舞蹈技巧和開朗的個性而聞名。</p>
+        </div>
       </section>
 
       <!-- 音樂播放區 -->
       <section class="music-section">
         <h2>聽我們的最新歌曲</h2>
-        <audio class="audio-player" controls>
-          <source src="https://example.com/song.mp3" type="audio/mp3">
-          您的瀏覽器不支援音樂播放。
-        </audio>
-      </section>
-
-      <!-- 聯絡我們區域 -->
-      <section class="contact-section">
-        <h2>聯絡我們</h2>
-        <form action="your-backend-script.php" method="POST">
-          <input type="text" name="name" placeholder="你的名字" required>
-          <input type="email" name="email" placeholder="你的電子郵件" required>
-          <textarea name="message" rows="4" placeholder="留言內容" required></textarea>
-          <button type="submit">提交</button>
-        </form>
+        <!-- Spotify 音樂嵌入播放器 -->
+        <iframe src="https://open.spotify.com/embed/track/2T6EKDziNnozF3r8Us2hlF" width="100%" height="152" frameborder="0" allow="encrypted-media"></iframe>
       </section>
     </main>
   </div>
