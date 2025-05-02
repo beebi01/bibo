@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zhen's Webpage</title>
+  <title>TOMORROW X TOGETHER 成員介紹</title>
   <style>
     /* 全局基本樣式 */
     body {
@@ -16,6 +16,7 @@
       justify-content: center;
       align-items: flex-start;
       height: 100vh;
+      flex-direction: column;
     }
 
     /* 設定頁面結構 */
@@ -67,44 +68,36 @@
       transform: translateY(-5px);
     }
 
-    /* 音樂播放區 */
-    .audio-section {
-      margin-top: 20px;
-    }
-
-    .audio-section h2 {
-      font-size: 1.8rem;
-      color: #1DA1F2;
-    }
-
-    .audio-section p {
-      font-size: 1rem;
-      margin-bottom: 15px;
-    }
-
-    .audio-player {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .audio-player audio:hover {
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    /* YouTube 影片區 */
-    .video-section {
+    /* 成員介紹區域 */
+    .members-section {
       margin-top: 40px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
     }
 
-    .video-section iframe {
-      width: 100%;
-      max-width: 800px;
-      height: 450px;
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    .member {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 10px;
+      background-color: #f0f4f8;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .member img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin-right: 20px;
+    }
+
+    .member h2 {
+      font-size: 1.8rem;
+      margin: 0;
+    }
+
+    .member p {
+      font-size: 1rem;
+      color: #555;
     }
 
     /* 響應式設計 */
@@ -121,17 +114,13 @@
         padding: 20px;
       }
 
-      .audio-section h2 {
-        font-size: 1.6rem;
+      .member h2 {
+        font-size: 1.5rem;
       }
 
-      .audio-player audio {
-        width: 90%;
-      }
-
-      .video-section iframe {
-        width: 100%;
-        height: 400px;
+      .member img {
+        width: 80px;
+        height: 80px;
       }
     }
 
@@ -145,13 +134,13 @@
         font-size: 0.8rem;
       }
 
-      .audio-player audio {
-        width: 100%;
+      .member img {
+        width: 70px;
+        height: 70px;
       }
 
-      .video-section iframe {
-        width: 100%;
-        height: 300px;
+      .member h2 {
+        font-size: 1.2rem;
       }
     }
 
@@ -159,20 +148,68 @@
 </head>
 <body>
 
-    <div class="container">
+  <div class="container">
     <!-- 頁首 -->
     <header>
-      <h1>Hello!! Welcome to My Website</h1>
-      <p>By Zhen Chen</p>
+      <h1>TOMORROW X TOGETHER 成員介紹</h1>
+      <p>來自韓國的男團，致力於帶給粉絲充滿活力與正能量的音樂</p>
     </header>
 
     <!-- 主要內容區 -->
     <main>
-    </section>
+      <section class="members-section">
+        <h2>- TXT 成員介紹 -</h2>
 
-      <!-- YouTube 影片區 -->
-      <section class="video-section">
-        <iframe src="https://www.youtube.com/embed/W-LOSGElZ_M" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <!-- 成員 1: Soobin -->
+        <div class="member">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/e/e2/Soobin_at_Mnet_Asian_Music_Awards_in_2019.jpg" alt="Soobin">
+          <div>
+            <h2>Soobin (수빈)</h2>
+            <p><strong>年齡：</strong>22歲 (生於 2000年12月5日)</p>
+            <p><strong>介紹：</strong>Soobin是TOMORROW X TOGETHER的隊長和主唱，擁有柔和的嗓音和穩定的領導力。他是團體中的中心人物，擁有極高的人氣。</p>
+          </div>
+        </div>
+
+        <!-- 成員 2: Yeonjun -->
+        <div class="member">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c6/Yeonjun_at_Mnet_Asian_Music_Awards_in_2019.jpg" alt="Yeonjun">
+          <div>
+            <h2>Yeonjun (연준)</h2>
+            <p><strong>年齡：</strong>24歲 (生於 1999年9月13日)</p>
+            <p><strong>介紹：</strong>Yeonjun是TXT的主舞、主Rapper，也是團體中最年長的成員。他以多才多藝的才華和幽默感贏得了許多粉絲的喜愛。</p>
+          </div>
+        </div>
+
+        <!-- 成員 3: Beomgyu -->
+        <div class="member">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/1/16/Beomgyu_at_Mnet_Asian_Music_Awards_in_2019.jpg" alt="Beomgyu">
+          <div>
+            <h2>Beomgyu (범규)</h2>
+            <p><strong>年齡：</strong>22歲 (生於 2001年3月13日)</p>
+            <p><strong>介紹：</strong>Beomgyu是TXT的主唱之一，並且以其靈活的舞蹈和獨特的嗓音著稱。他是團體中的溫暖氣氛製造者。</p>
+          </div>
+        </div>
+
+        <!-- 成員 4: Taehyun -->
+        <div class="member">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/a/a3/Taehyun_at_Mnet_Asian_Music_Awards_in_2019.jpg" alt="Taehyun">
+          <div>
+            <h2>Taehyun (태현)</h2>
+            <p><strong>年齡：</strong>22歲 (生於 2002年2月5日)</p>
+            <p><strong>介紹：</strong>Taehyun是TOMORROW X TOGETHER的主唱之一，以其甜美的嗓音和穩定的舞蹈實力著稱。他總是展現出成熟穩重的形象。</p>
+          </div>
+        </div>
+
+        <!-- 成員 5: Huening Kai -->
+        <div class="member">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/1/10/Huening_Kai_at_Mnet_Asian_Music_Awards_in_2019.jpg" alt="Huening Kai">
+          <div>
+            <h2>Huening Kai (휴닝카이)</h2>
+            <p><strong>年齡：</strong>21歲 (生於 2002年8月14日)</p>
+            <p><strong>介紹：</strong>Huening Kai是TXT的主唱、主舞之一，擁有多元的文化背景。他因其可愛的外貌和卓越的音樂才華受到了眾多粉絲的喜愛。</p>
+          </div>
+        </div>
+
       </section>
     </main>
   </div>
