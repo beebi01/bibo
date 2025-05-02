@@ -3,150 +3,177 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zhen's Webpage</title>
+  <title>TXT Official Website</title>
   <style>
-    /* 全局基本樣式 */
+    /* 全局樣式 */
     body {
       font-family: 'Arial', sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #F5F8FA;
-      color: #14171A;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      height: 100vh;
-    }
-
-    /* 設定頁面結構 */
-    .container {
+      background-color: #F4F6F9;
+      color: #333;
+      line-height: 1.6;
       display: flex;
       flex-direction: column;
-      width: 100%;
-      max-width: 1000px;
-      margin: 0 20px;
+      justify-content: flex-start;
+      align-items: center;
     }
 
-    /* 頁首區域設計 */
+    /* 頁首 */
     header {
       background-color: #1DA1F2;
       color: white;
+      width: 100%;
       padding: 20px;
       text-align: center;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      transition: box-shadow 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
     header h1 {
-      font-size: 2.5rem;
+      font-size: 3rem;
       margin: 0;
     }
 
     header p {
+      font-size: 1.2rem;
       margin-top: 10px;
-      font-size: 1rem;
-      color: rgba(255, 255, 255, 0.8);
+      opacity: 0.8;
     }
 
-    header:hover {
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    /* 頁面結構 */
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      padding: 20px;
+      margin: 0 auto;
     }
 
-    /* 主要內容區域設計 */
-    main {
-      background-color: white;
-      padding: 30px;
-      margin-top: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
-    }
-
-    main:hover {
-      transform: translateY(-5px);
-    }
-
-    /* 音樂播放區 */
-    .audio-section {
-      margin-top: 20px;
-    }
-
-    .audio-section h2 {
-      font-size: 1.8rem;
-      color: #1DA1F2;
-    }
-
-    .audio-section p {
-      font-size: 1rem;
-      margin-bottom: 15px;
-    }
-
-    .audio-player {
+    /* 導航條 */
+    nav {
       display: flex;
       justify-content: center;
-      align-items: center;
+      background-color: #333;
+      padding: 15px 0;
+      width: 100%;
     }
-    .audio-player audio:hover {
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      margin: 0 10px;
+      font-size: 1.1rem;
+      transition: background-color 0.3s ease;
+    }
+
+    nav a:hover {
+      background-color: #1DA1F2;
+      border-radius: 5px;
+    }
+
+    /* 主要內容區 */
+    main {
+      margin-top: 20px;
+      padding: 30px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     }
 
     /* YouTube 影片區 */
     .video-section {
       margin-top: 40px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      text-align: center;
     }
 
     .video-section iframe {
       width: 100%;
-      max-width: 800px;
-      height: 450px;
+      max-width: 900px;
+      height: 500px;
       border-radius: 10px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
 
-    /* TXT 成員區域 */
+    /* 團體照片區 */
+    .group-photo-section {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .group-photo-section img {
+      width: 80%;
+      max-width: 1000px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 成員介紹區域 */
     .members-section {
       margin-top: 40px;
+      padding: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
     }
 
     .member {
-      display: flex;
-      align-items: center;
-      margin-bottom: 30px;
+      background-color: #f9f9f9;
+      width: 280px;
+      margin: 15px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      padding: 20px;
+      transition: transform 0.3s ease;
     }
 
-    .member img {
-      border-radius: 50%;
-      width: 100px;
-      height: 100px;
-      margin-right: 20px;
+    .member:hover {
+      transform: translateY(-10px);
     }
 
-    .member-info {
-      max-width: 800px;
-    }
-
-    .member-info h3 {
+    .member h3 {
       font-size: 1.8rem;
       color: #1DA1F2;
+      margin: 10px 0;
     }
 
-    .member-info p {
+    .member p {
       font-size: 1rem;
       color: #555;
     }
 
-    .member-info a {
-      color: #1DA1F2;
+    .member a {
       text-decoration: none;
+      color: #1DA1F2;
       font-weight: bold;
     }
 
     /* 響應式設計 */
     @media (max-width: 768px) {
+      header h1 {
+        font-size: 2.5rem;
+      }
+
+      header p {
+        font-size: 1rem;
+      }
+
+      nav {
+        flex-direction: column;
+      }
+
+      .video-section iframe {
+        height: 400px;
+      }
+
+      .member {
+        width: 45%;
+      }
+    }
+
+    /* 超小螢幕優化 */
+    @media (max-width: 480px) {
       header h1 {
         font-size: 2rem;
       }
@@ -155,54 +182,16 @@
         font-size: 0.9rem;
       }
 
-      main {
-        padding: 20px;
-      }
-
-      .audio-section h2 {
-        font-size: 1.6rem;
-      }
-
-      .audio-player audio {
-        width: 90%;
+      nav a {
+        font-size: 1rem;
       }
 
       .video-section iframe {
-        width: 100%;
-        height: 400px;
-      }
-
-      .member img {
-        width: 80px;
-        height: 80px;
-      }
-
-      .member-info h3 {
-        font-size: 1.6rem;
-      }
-
-      .member-info p {
-        font-size: 0.9rem;
-      }
-    }
-
-    /* 超小螢幕優化 */
-    @media (max-width: 480px) {
-      header h1 {
-        font-size: 1.8rem;
-      }
-
-      header p {
-        font-size: 0.8rem;
-      }
-
-      .audio-player audio {
-        width: 100%;
-      }
-
-      .video-section iframe {
-        width: 100%;
         height: 300px;
+      }
+
+      .member {
+        width: 90%;
       }
     }
 
@@ -210,72 +199,73 @@
 </head>
 <body>
 
-  <div class="container">
-    <!-- 頁首 -->
-    <header>
-      <h1>Hello!! Welcome to My Website</h1>
-      <p>By Zhen Chen</p>
-    </header>
+  <!-- 頁首 -->
+  <header>
+    <h1>TXT Official Website</h1>
+    <p>Welcome to the official homepage of TXT</p>
+  </header>
 
-    <!-- 主要內容區 -->
+  <!-- 導航欄 -->
+  <nav>
+    <a href="#">首頁</a>
+    <a href="#">成員介紹</a>
+    <a href="#">影片</a>
+    <a href="#">音樂</a>
+    <a href="#">聯絡我們</a>
+  </nav>
+
+  <!-- 主要內容區 -->
+  <div class="container">
     <main>
+      <!-- 團體照片區 -->
+      <section class="group-photo-section">
+        <h2>TXT 團體照片</h2>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Tomorrow_X_Together_%28TXT%29_2019_1.png/800px-Tomorrow_X_Together_%28TXT%29_2019_1.png" alt="TXT Group Photo">
+      </section>
+
       <!-- YouTube 影片區 -->
       <section class="video-section">
+        <h2>最新影片</h2>
         <iframe src="https://www.youtube.com/embed/W-LOSGElZ_M" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
       </section>
 
-      <!-- TXT 成員區 -->
+      <!-- TXT 成員介紹區 -->
       <section class="members-section">
         <h2>TXT 成員介紹</h2>
 
         <!-- 成員 1 -->
         <div class="member">
-          <img src="https://images.app.goo.gl/5nheXYGZnaBzNptx9" alt="Soobin">
-          <div class="member-info">
-            <h3>蘇賓 (Soobin)</h3>
-            <p>年齡：22歲（截至2025年）</p>
-            <p>蘇賓是TXT的領隊，以其深沉的嗓音和卓越的領導能力而著稱。他以真誠與親切感受到粉絲的喜愛。<a href="https://zh.wikipedia.org/wiki/%E8%98%87%E8%B3%93">了解更多</a></p>
-          </div>
+          <h3>蘇賓 (Soobin)</h3>
+          <p>年齡：22歲（截至2025年）</p>
+          <p>蘇賓是TXT的領隊，以其深沉的嗓音和卓越的領導能力而著稱。<a href="https://zh.wikipedia.org/wiki/%E8%98%87%E8%B3%93">了解更多</a></p>
         </div>
 
         <!-- 成員 2 -->
         <div class="member">
-          <img src="https://images.app.goo.gl/YuPVne8x1HXHzsS79" alt="Yeonjun">
-          <div class="member-info">
-            <h3>賢俊 (Yeonjun)</h3>
-            <p>年齡：23歲（截至2025年）</p>
-            <p>賢俊是團內年紀最大的成員，擅長舞蹈與饒舌。他以非凡的魅力和才華獲得了大量粉絲的喜愛。<a href="https://zh.wikipedia.org/wiki/%E8%B3%A2%E4%BF%8A">了解更多</a></p>
-          </div>
+          <h3>賢俊 (Yeonjun)</h3>
+          <p>年齡：23歲（截至2025年）</p>
+          <p>賢俊是團內年紀最大的成員，擅長舞蹈與饒舌。<a href="https://zh.wikipedia.org/wiki/%E8%B3%A2%E4%BF%8A">了解更多</a></p>
         </div>
 
         <!-- 成員 3 -->
         <div class="member">
-          <img src="https://images.app.goo.gl/c8F1ZpdK4kHgVupz8" alt="Taehyun">
-          <div class="member-info">
-            <h3>泰賢 (Taehyun)</h3>
-            <p>年齡：20歲（截至2025年）</p>
-            <p>泰賢以其出色的歌唱實力和活潑的個性聞名，擁有多才多藝的演唱和表演能力。<a href="https://zh.wikipedia.org/wiki/%E6%B3%B0%E8%B3%A2">了解更多</a></p>
-          </div>
+          <h3>泰賢 (Taehyun)</h3>
+          <p>年齡：20歲（截至2025年）</p>
+          <p>泰賢以其出色的歌唱實力和活潑的個性聞名。<a href="https://zh.wikipedia.org/wiki/%E6%B3%B0%E8%B3%A2">了解更多</a></p>
         </div>
 
         <!-- 成員 4 -->
         <div class="member">
-          <img src="https://images.app.goo.gl/g9Ceo5j5ZmSTmmXK9" alt="Huening Kai">
-          <div class="member-info">
-            <h3>休寧凱 (Huening Kai)</h3>
-            <p>年齡：20歲（截至2025年）</p>
-            <p>休寧凱以迷人的外貌、強大的歌唱實力和國際化背景受到粉絲喜愛。他擁有一大群國際粉絲。<a href="https://zh.wikipedia.org/wiki/%E4%BC%91%E5%AF%A7%E5%87%B1">了解更多</a></p>
-          </div>
+          <h3>休寧凱 (Huening Kai)</h3>
+          <p>年齡：20歲（截至2025年）</p>
+          <p>休寧凱以迷人的外貌和強大的歌唱實力受到粉絲喜愛。<a href="https://zh.wikipedia.org/wiki/%E4%BC%91%E5%AF%A7%E5%87%B1">了解更多</a></p>
         </div>
 
         <!-- 成員 5 -->
         <div class="member">
-          <img src="https://images.app.goo.gl/i9hSkXm1yNwF6jmn6" alt="Beomgyu">
-          <div class="member-info">
-            <h3>範圭 (Beomgyu)</h3>
-            <p>年齡：22歲（截至2025年）</p>
-            <p>範圭以其強大的舞蹈技巧和開朗的個性而聞名，總是帶給團體許多活力和幽默感。<a href="https://zh.wikipedia.org/wiki/%E7%AF%84%E5%9F%AD">了解更多</a></p>
-          </div>
+          <h3>範圭 (Beomgyu)</h3>
+          <p>年齡：22歲（截至2025年）</p>
+          <p>範圭以其強大的舞蹈技巧和開朗的個性而聞名。<a href="https://zh.wikipedia.org/wiki/%E7%AF%84%E5%9F%AD">了解更多</a></p>
         </div>
       </section>
     </main>
