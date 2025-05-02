@@ -1,17 +1,52 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<!-- DOCTYPE=document type -->
+<html lang="en">
+<!-- lang="zh-TW" -->
 <head>
-  <meta charset="UTF-8">
-  <title>題庫查詢系統</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Zhen's Webpage</title>
+  <meta charset="utf-8"></meta>
+  <style>
+    div {
+          background-image:url('photos/bg3.jpg');
+          height:500px;
+          width:500px;
+        }
+    body {
+          background-image:url('photos/bg7.jpg');
+          background-repeat: no-repeat;
+          background-size: cover;
+          background-attachment: fixed;
+        }
+    header, footer {
+          display: block;
+          background-color: powderblue;
+          text-align: center;}
+    table,th,td {
+          border: 1px solid black;
+          border-collapse: collapse;
+          padding: 5px;
+                }
+    th {
+          color:green;
+      }
+  </style>
+<!-- Another table style:border-spacing:10px;td {text-align:right;}-->
+
 </head>
 <body>
-  <h1>題庫查詢系統</h1>
-  <input type="text" id="searchInput" placeholder="輸入關鍵字搜尋題目...">
-  <button onclick="searchQuestions()">搜尋</button>
+  <header>
+    <h1>Hello!! Welcome to My Website</h1>
+    <p>By Zhen Chen</p>
+  </header>
+<main>
+<section>
 
-  <div id="results"></div>
+<p Style="background-color:#CF9E9E;",>我的偶像</p>
 
-  <script src="script.js"></script>
-</body>
-</html>
+<h2>-Audio-</h2>
+<p> 最喜歡的一首歌曲
+</p>
+<audio controls autoplay muted>
+<source src="sample.mp3" type="audio/mpeg">
+Your browser does not support the audio element.
+</audio>
