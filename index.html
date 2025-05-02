@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -112,19 +112,19 @@
       margin-top: 40px;
       padding: 20px;
       display: flex;
-      flex-wrap: wrap;
-      justify-content: space-around;
+      justify-content: space-between;
+      gap: 20px;
+      overflow-x: auto;
+      max-width: 100%;
     }
 
     .member {
       background-color: #f9f9f9;
-      width: 280px;
-      margin: 15px;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      width: 200px;
       text-align: center;
-      padding: 20px;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       transition: transform 0.3s ease;
     }
 
@@ -132,21 +132,31 @@
       transform: translateY(-10px);
     }
 
+    .member img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
     .member h3 {
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       color: #1DA1F2;
-      margin: 10px 0;
+      margin-top: 10px;
     }
 
     .member p {
       font-size: 1rem;
       color: #555;
+      margin-top: 5px;
     }
 
     .member a {
       text-decoration: none;
       color: #1DA1F2;
       font-weight: bold;
+      margin-top: 10px;
+      display: inline-block;
     }
 
     /* 響應式設計 */
@@ -235,6 +245,7 @@
 
         <!-- 成員 1 -->
         <div class="member">
+          <img src="https://example.com/soobin.jpg" alt="Soobin">
           <h3>秀彬 (Soobin)</h3>
           <p>年齡：22歲（截至2025年）</p>
           <p>秀彬是TXT的隊長，以其深沉的嗓音和卓越的領導能力而著稱。<a href="https://zh.wikipedia.org/wiki/%E8%98%87%E8%B3%93">了解更多</a></p>
@@ -242,6 +253,7 @@
 
         <!-- 成員 2 -->
         <div class="member">
+          <img src="https://example.com/yeonjun.jpg" alt="Yeonjun">
           <h3>然竣(Yeonjun)</h3>
           <p>年齡：23歲（截至2025年）</p>
           <p>然竣是團內年紀最大的成員，擅長舞蹈與饒舌。<a href="https://zh.wikipedia.org/wiki/%E8%B3%A2%E4%BF%8A">了解更多</a></p>
@@ -249,6 +261,7 @@
 
         <!-- 成員 3 -->
         <div class="member">
+          <img src="https://example.com/taehyun.jpg" alt="Taehyun">
           <h3>太顯 (Taehyun)</h3>
           <p>年齡：20歲（截至2025年）</p>
           <p>太顯以其出色的歌唱實力和活潑的個性聞名。<a href="https://zh.wikipedia.org/wiki/%E6%B3%B0%E8%B3%A2">了解更多</a></p>
@@ -256,13 +269,15 @@
 
         <!-- 成員 4 -->
         <div class="member">
+          <img src="https://example.com/hueningkai.jpg" alt="Huening Kai">
           <h3>休寧凱 (Huening Kai)</h3>
           <p>年齡：20歲（截至2025年）</p>
-          <p>休寧凱以迷人的外貌和強大的歌唱實力受到粉絲喜愛。<a href="https://zh.wikipedia.org/wiki/%E4%BC%91%E5%AF%A7%E5%87%B1">了解更多</a></p>
+          <p>休寧凱以迷人的外貌和強大的歌唱實力受到粉絲喜愛。<a href="https://zh.wikipedia.org/wiki/%E4%BC%91%E5%AF%A9%E5%87%B1">了解更多</a></p>
         </div>
 
         <!-- 成員 5 -->
         <div class="member">
+          <img src="https://example.com/beomgyu.jpg" alt="Beomgyu">
           <h3>杋圭 (Beomgyu)</h3>
           <p>年齡：22歲（截至2025年）</p>
           <p>杋圭以其強大的舞蹈技巧和開朗的個性而聞名。<a href="https://zh.wikipedia.org/wiki/%E7%AF%84%E5%9F%AD">了解更多</a></p>
