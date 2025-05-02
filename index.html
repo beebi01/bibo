@@ -1,138 +1,118 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zhen's Webpage</title>
-  <style>
-    /* 全局基本樣式 */
-    body {
-      font-family: 'Arial', sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #F5F8FA; /* 淺灰色背景 */
-      color: #14171A; /* 深色文字 */
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      height: 100vh;
-    }
+<h2>Video</h2>
+<p>type: mp4: video/mp4; WebM: video/webm; ogg: video/ogg;<br>
+height, width<br>loop </p>
+<video controls autoplay muted loop width="300">
+<source src="sample.mp4" type="video/mp4">
+<source src="sample.ogg" type="video/ogg">
+Your browser does not support the video element.
+</video>
+<h2>Video from YouTube</h2>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/VxnpG7Blq8g?si=nbjNo8ewPfcvKHlb" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
-    /* 設定頁面結構 */
-    .container {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      max-width: 1000px;
-      margin: 0 20px;
-    }
+<iframe width="560" height="315" src="https://www.youtube.com/embed/CoQfichK5Iw?si=C70kJA20DETosSqP" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay;  clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</section>
+<section>
+<h2>Table</h2>
+<table>
+<tr>
+<th>First Name</th>
+<th>Last Name</th>
+<th>Age</th>
+</tr>
+<tr>
+<td>Jack</td>
+<td>Smith</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Anna</td>
+<td>Butcher</td>
+<td>10</td>
+</tr>
+</table>
+<br>
+<h2>Table2</h2>
+<table>
+<tr>
+<th>First Name</th>
+<td>Jack</td>
+<td>Anna</td>
+</tr>
+<tr>
+<th>Last Name</th>
+<td>Smith</td>
+<td>Butcher</td>
+</tr>
+<tr>
+<th style="color:blue;">Age</th>
+<td>8</td>
+<td>10</td>
+</tr>
+</table>
+<!-- WEEK 10 -->
+<h2>Merge Cells from multiple rows: rowspan</h2>
+<table style="width:100%">
+<caption>Uni Info</caption>
+<tr>
+<th>Name:</th>
+<td>Tzu Chi University</td>
+</tr>
+<tr>
+<th rowspan="2">Campus:</th>
+<td>Main</td>
+</tr>
+<tr>
+<td>Jieren</td>
+</tr>
+</table>
 
-    /* 頁面標題區 */
-    header {
-      background-color: #1DA1F2; /* Twitter 藍色背景 */
-      color: white;
-      padding: 20px;
-      text-align: center;
-      border-radius: 8px;
-    }
-
-    header h1 {
-      font-size: 2.5rem;
-      margin: 0;
-    }
-
-    header p {
-      margin-top: 10px;
-      font-size: 1rem;
-      color: rgba(255, 255, 255, 0.8);
-    }
-
-    /* 主要內容區域 */
-    main {
-      background-color: white;
-      padding: 30px;
-      margin-top: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    /* 音樂播放區 */
-    .audio-section {
-      margin-top: 20px;
-    }
-
-    .audio-section h2 {
-      font-size: 1.8rem;
-      color: #1DA1F2; /* Twitter 藍色 */
-    }
-
-    .audio-section p {
-      font-size: 1rem;
-      margin-bottom: 15px;
-    }
-
-    .audio-player {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .audio-player audio {
-      width: 80%;
-      border-radius: 8px;
-      background-color: #F5F8FA;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    /* 響應式設計 */
-    @media (max-width: 768px) {
-      header h1 {
-        font-size: 2rem;
-      }
-
-      header p {
-        font-size: 0.9rem;
-      }
-
-      main {
-        padding: 20px;
-      }
-
-      .audio-section h2 {
-        font-size: 1.6rem;
-      }
-
-      .audio-player audio {
-        width: 90%;
-      }
-    }
-
-  </style>
-</head>
-<body>
-
-  <div class="container">
-    <!-- 頁首 -->
-    <header>
-      <h1>Hello!! Welcome to My Website</h1>
-      <p>By Zhen Chen</p>
-    </header>
-
-    <!-- 主要內容區 -->
-    <main>
-      <section class="audio-section">
-        <h2>- Audio -</h2>
-        <p>最喜歡的一首歌曲，讓我們一起聆聽！</p>
-
-        <div class="audio-player">
-          <audio controls autoplay muted>
-            <source src="sample.mp3" type="audio/mpeg">
-            Your browser does not support the audio element.
-          </audio>
-        </div>
-      </section>
-    </main>
-  </div>
-
-</body>
-</html>
+<h2>Table 2: Merge Cells from multiple columns:colspan</h2>
+<table>
+<tr>
+<th>Name:</th>
+<th colspan="2">Campus:</th>
+</tr>
+<tr>
+<td>TCU</td>
+<td>Main</td>
+<td>Jieren</td>
+</tr>
+</table>
+<h2>Un-ordered List 1: ul</h2>
+<p>My favor food:</p>
+<ul>
+<li>strawberry</li>
+<li>tofu</li>
+<li>sandwich</li>
+</ul>
+<h2>Ordered List 2: ol</h2>
+<p>My favor food:</p>
+<ol>
+<li>strawberry</li>
+<li>tofu</li>
+<li>sandwich</li>
+</ol>
+<h2>Un-ordered List 3 with gif bullet points: ul</h2>
+<p>My favor food:</p>
+<ul style="list-style-image:url('totoro2.gif');">
+<li>strawberry</li>
+<li>tofu</li>
+<li>sandwich</li>
+</ul>
+<h2>Un-ordered List 4 without bullet points: ul</h2>
+<p>My favor food:</p>
+<ul style="list-style-type:none; margin:0; padding:50;">
+<li>strawberry</li>
+<li>tofu</li>
+<li>sandwich</li>
+</ul>
+<h2>Description List: dl</h2>
+<dl>
+<dt>Jack:</dt>
+<dd>boy, age 12</dd>
+<dt>Anna:</dt>
+<dd>girl, age 10</dd>
+</dl>
+<!-- dl: description list
+dt: description term
+dd: description details -->
