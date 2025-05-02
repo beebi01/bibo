@@ -1,30 +1,101 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zhen's Webpage</title>
-  <meta charset="utf-8">
   <style>
-    div {
-      background-image: url('photos/bg3.jpg');
-      height: 500px;
-      width: 500px;
-    }
-
+    /* 基本樣式 */
     body {
+      font-family: 'Arial', sans-serif;
       background-image: url('photos/bg7.jpg');
       background-repeat: no-repeat;
       background-size: cover;
       background-attachment: fixed;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     header {
-      display: block;
-      background-color: powderblue;
+      background-color: rgba(176, 224, 230, 0.9); /* 淡藍色背景 */
       text-align: center;
+      padding: 20px 0;
+      width: 100%;
     }
+
+    h1 {
+      font-size: 2.5em;
+      margin: 0;
+      color: #333;
+    }
+
+    p {
+      font-size: 1.2em;
+      margin-top: 10px;
+      color: #333;
+    }
+
+    /* 內容區域 */
+    main {
+      padding: 30px;
+      max-width: 1200px;
+      width: 100%;
+      text-align: center;
+      background-color: rgba(0, 0, 0, 0.6); /* 半透明背景 */
+      border-radius: 15px;
+      margin-top: 30px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    h2 {
+      font-size: 2em;
+      color: #f1f1f1;
+    }
+
+    .section-header {
+      font-size: 1.8em;
+      background-color: #CF9E9E;
+      padding: 10px;
+      border-radius: 8px;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+
+    .audio-player {
+      margin-top: 20px;
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+      header {
+        padding: 15px 0;
+      }
+
+      h1 {
+        font-size: 2em;
+      }
+
+      p {
+        font-size: 1em;
+      }
+
+      main {
+        padding: 20px;
+      }
+
+      h2 {
+        font-size: 1.5em;
+      }
+    }
+
   </style>
 </head>
 <body>
+
   <header>
     <h1>Hello!! Welcome to My Website</h1>
     <p>By Zhen Chen</p>
@@ -32,15 +103,19 @@
 
   <main>
     <section>
-      <p style="background-color:#CF9E9E;">我的偶像</p>
+      <div class="section-header">我的偶像</div>
 
-      <h2>-Audio-</h2>
+      <h2>- Audio -</h2>
       <p>最喜歡的一首歌曲</p>
-      <audio controls autoplay muted>
-        <source src="sample.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-      </audio>
+
+      <div class="audio-player">
+        <audio controls autoplay muted>
+          <source src="sample.mp3" type="audio/mpeg">
+          Your browser does not support the audio element.
+        </audio>
+      </div>
     </section>
   </main>
+
 </body>
 </html>
