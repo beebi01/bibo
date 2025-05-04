@@ -234,7 +234,15 @@
       .member {
         width: 90%;
       }
-    }
+	#lyrics-slider {
+		font-size: 1.5rem;
+		color: #1DA1F2;
+		margin: 40px auto;
+		max-width: 90%;
+		text-align: center;
+	}
+}
+
   </style>
   
 </head>
@@ -325,6 +333,31 @@
 		<h2>團體特色</h2>
 		<p>TXT以強烈的概念敘事、青春成長主題以及融合多種曲風（如K-pop、搖滾、電子與Hyperpop）聞名。他們的音樂作品常圍繞青春期的困惑、夢想與情感波動，並透過精心設計的MV與專輯概念故事線展現「概念偶像」的形象。</p>
       </section>
+	
+	<script>
+	const lyrics = [
+		'"I know I love you..."',
+		'"My life before you was a mess..."',
+		'"0X1=LOVESONG, I’m losing my way..."',
+		'"You make me a better me..."',
+		'"Even if I fall, I’ll stand up again with you..."'
+	];
+	let index = 0;
+  
+	setInterval(() => {
+		index = (index + 1) % lyrics.length;
+		const lyric = document.getElementById("lyric-line");
+		lyric.style.opacity = 0;
+		setTimeout(() => {
+		lyric.textContent = lyrics[index];
+		lyric.style.opacity = 1;
+		}, 500);
+		}, 4000);
+	</script>
+	<!-- 動態歌詞輪播區 -->
+	<div id="lyrics-slider" style="text-align: center; font-size: 1.5rem; font-style: italic; color: #1DA1F2; margin: 40px auto;">
+		<p id="lyric-line" style="transition: opacity 1s ease;">"I know I love you..."</p>
+	</div>
 
       <!-- 主打歌介紹 -->
       <section class="hit-songs">
@@ -343,20 +376,19 @@
         <h2>聽我們的最新歌曲</h2>
         <iframe src="https://open.spotify.com/embed/track/3wBeIjb0vtiTwIQPce2stZ?si=A6-B0zj0Qu6jczyRXJwAdA&context=spotify%3Aalbum%3A5BeSpFkdJkSc9phzT3bJSs" width="100%" height="152" frameborder="0" allow="encrypted-media"></iframe>
       </section>
-<!-- Apple Music 區塊 -->
-<div class="music-section">
-  <h2>TXT 在 Apple Music 上</h2>
-  <iframe allow="autoplay *; encrypted-media *;" frameborder="0" height="150"
-    style="width:100%;max-width:660px;overflow:hidden;background:transparent;"
-    sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
-	<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/tw/song/deja-vu/1733097066"></iframe>
-
-  <p style="margin-top: 20px;">
-    🔗
-    <a href="https://music.apple.com/tw/artist/tomorrow-x-together/1454642552" target="_blank" style="color: #1DA1F2; font-weight: bold;">
-      查看 TXT 的 Apple Music 全部作品
-    </a>
-  </p>
+	<!-- Apple Music 區塊 -->
+	<div class="music-section">
+		<h2>TXT 在 Apple Music 上</h2>
+	<iframe allow="autoplay *; encrypted-media *;" frameborder="0" height="150"
+	style="width:100%;max-width:660px;overflow:hidden;background:transparent;"
+	sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
+		<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/tw/song/deja-vu/1733097066"></iframe>
+	<p style="margin-top: 20px;">
+		🔗
+	<a href="https://music.apple.com/tw/artist/tomorrow-x-together/1454642552" target="_blank" style="color: #1DA1F2; font-weight: bold;">
+		查看 TXT 的 Apple Music 全部作品
+	</a>
+	</p>
 </div>
 
     </main>
