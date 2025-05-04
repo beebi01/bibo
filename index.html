@@ -22,7 +22,6 @@
       background-attachment: fixed;
     }
 
-    /* 頁首 */
     header {
       background-color: rgba(29, 161, 242, 0.9);
       color: white;
@@ -44,13 +43,11 @@
       opacity: 0.8;
     }
 
-    /* 動畫效果 */
     @keyframes fadeIn {
       0% { opacity: 0; }
       100% { opacity: 1; }
     }
 
-    /* 頁面結構 */
     .container {
       width: 100%;
       max-width: 1200px;
@@ -58,7 +55,6 @@
       margin: 0 auto;
     }
 
-    /* 導航條 */
     nav {
       display: flex;
       justify-content: center;
@@ -81,7 +77,6 @@
       border-radius: 5px;
     }
 
-    /* 主要內容區 */
     main {
       margin-top: 20px;
       padding: 30px;
@@ -94,7 +89,6 @@
       animation: slideUp 1s ease-out;
     }
 
-    /* 團體照片區 */
     .group-photo-section {
       text-align: center;
       margin-bottom: 40px;
@@ -105,31 +99,36 @@
       height: auto;
       border-radius: 10px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-      max-width: 1000px; /* 限制圖片最大寬度 */
-      margin: 0 auto; /* 使圖片居中 */
+      max-width: 1000px;
+      margin: 0 auto;
     }
 
-    /* 成員介紹區域 */
-    .members-introduction {
+    .members-introduction,
+    .group-features,
+    .hit-songs {
       text-align: center;
       margin-top: 40px;
+      padding: 20px;
     }
 
-    .members-introduction h2 {
+    .members-introduction h2,
+    .group-features h2,
+    .hit-songs h2 {
       font-size: 2rem;
       color: #1DA1F2;
     }
 
-    .members-introduction p {
+    .members-introduction p,
+    .group-features p,
+    .hit-songs p {
       font-size: 1.2rem;
       color: #555;
       max-width: 800px;
       margin: 20px auto;
     }
 
-    /* 成員資料區 */
     .members-section {
-      text-align: center; /* 使所有內容置中 */
+      text-align: center;
       margin-top: 40px;
       display: flex;
       flex-wrap: wrap;
@@ -177,7 +176,6 @@
       margin-top: 5px;
     }
 
-    /* 音樂播放區 */
     .music-section {
       margin-top: 50px;
       text-align: center;
@@ -189,17 +187,15 @@
       color: #1DA1F2;
     }
 
-    /* YouTube 影片區 */
     .video-section iframe {
       width: 100%;
       max-width: 900px;
-      height: 500px; /* 設定固定高度來保證顯示效果 */
+      height: 500px;
       border-radius: 10px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
       margin: 0 auto;
     }
 
-    /* 響應式設計 */
     @media (max-width: 768px) {
       header h1 {
         font-size: 2.5rem;
@@ -216,13 +212,8 @@
       .member {
         width: 45%;
       }
-
-      .audio-player {
-        width: 100%;
-      }
     }
 
-    /* 超小螢幕優化 */
     @media (max-width: 480px) {
       header h1 {
         font-size: 2rem;
@@ -243,23 +234,31 @@
       .member {
         width: 90%;
       }
-
-      .audio-player {
-        width: 100%;
-      }
     }
-
   </style>
+  
 </head>
+
+<script src="https://unpkg.com/scrollreveal"></script>
+<script>
+  ScrollReveal().reveal('.group-photo-section, .video-section, .members-introduction, .group-features, .hit-songs, .members-section, .music-section', {
+    duration: 1200,
+    origin: 'bottom',
+    distance: '50px',
+    easing: 'ease-in-out',
+    reset: false,
+    interval: 100
+  });
+</script>
+
+
 <body>
 
-  <!-- 頁首 -->
   <header>
     <h1>Welcome to My Website</h1>
     <p>Welcome to my homepage of TXT</p>
   </header>
 
-  <!-- 導航欄 -->
   <nav>
     <a href="#">首頁</a>
     <a href="#">成員介紹</a>
@@ -267,32 +266,32 @@
     <a href="#">音樂</a>
   </nav>
 
-  <!-- 主要內容區 -->
   <div class="container">
     <main>
-      <!-- 團體照片區 -->
       <section class="group-photo-section">
         <h2>TXT 團體照片</h2>
         <img src="https://pbs.twimg.com/media/GpoVd_eawAAc7yV?format=jpg&name=large" alt="TXT Group Photo">
       </section>
 
-      <!-- YouTube 影片區 -->
       <section class="video-section">
         <h2>最新影片</h2>
         <iframe src="https://www.youtube.com/embed/W-LOSGElZ_M" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
       </section>
 
-      <!-- TXT 成員介紹區 -->
       <section class="members-introduction">
         <h2>TXT 成員介紹</h2>
-        <p>TXT（Tomorrow X Together）是一個韓國男子音樂組合，成員來自不同的背景，並在音樂、舞蹈和表演方面都有卓越的才華。</p>
+        <p>TXT（Tomorrow X Together） 是由韓國娛樂公司 BigHit Music（現為 HYBE LABELS 旗下）於 2019 年推出的男子音樂團體。團名「Tomorrow X Together」意指「你和我攜手一起創造明天」，展現出團體合作與成長的概念。</p>
       </section>
 
-      <!-- 成員資料區 -->
       <section class="members-section">
-        
-        <!-- 成員卡片 -->
-        <div class="member">
+		<div class="member">
+          <img src="https://i.pinimg.com/736x/cc/35/76/cc3576b35f3cab29a75522e1972b2f44.jpg" alt="Yeonjun">
+          <h3>然竣 (Yeonjun)</h3>
+          <p>年齡：23歲（截至2025年）</p>
+          <p>然竣是團內年紀最大的成員，擅長舞蹈與饒舌。</p>
+        </div>
+		
+		<div class="member">
           <img src="https://im.marieclaire.com.tw/m800c533h100b0/assets/mc/202411/672C96213AC461730975265.jpeg" alt="Soobin">
           <h3>秀彬 (Soobin)</h3>
           <p>年齡：22歲（截至2025年）</p>
@@ -300,12 +299,12 @@
         </div>
 
         <div class="member">
-          <img src="https://i.pinimg.com/736x/cc/35/76/cc3576b35f3cab29a75522e1972b2f44.jpg" alt="Yeonjun">
-          <h3>然竣 (Yeonjun)</h3>
-          <p>年齡：23歲（截至2025年）</p>
-          <p>然竣是團內年紀最大的成員，擅長舞蹈與饒舌。</p>
+          <img src="https://scontent.ftpe7-4.fna.fbcdn.net/v/t39.30808-6/480562531_650427614230297_3605095857789815515_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=127cfc&_nc_ohc=57LfbcX7vwoQ7kNvwH2yPwn&_nc_oc=AdmEVIuoFz8_FbHfC4F09Xk8MlAboZPkUa0N8J3Qzb5t5MrlYZaFQ5KEjnNVkRrHWeQ5c-OeejV4HdGqUHAUo4tI&_nc_zt=23&_nc_ht=scontent.ftpe7-4.fna&_nc_gid=gEAs2kwPw3Xrs2QKFpnqvw&oh=00_AfHj56NYF2psCWRxmuGTHJ0WaqQyU7shzkhGhUR4XLBI7g&oe=681B231C" alt="Beomgyu">
+          <h3>杋圭 (Beomgyu)</h3>
+          <p>年齡：22歲（截至2025年）</p>
+          <p>杋圭以其強大的舞蹈技巧和開朗的個性而聞名。</p>
         </div>
-
+		
         <div class="member">
           <img src="https://i.pinimg.com/736x/22/07/f4/2207f44e50c54e8932f56e4c654e9d0c.jpg" alt="Taehyun">
           <h3>太顯 (Taehyun)</h3>
@@ -320,21 +319,48 @@
           <p>休寧凱以迷人的外貌和強大的歌唱實力受到粉絲喜愛。</p>
         </div>
 
-        <div class="member">
-          <img src="https://scontent.ftpe7-4.fna.fbcdn.net/v/t39.30808-6/480562531_650427614230297_3605095857789815515_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=127cfc&_nc_ohc=57LfbcX7vwoQ7kNvwH2yPwn&_nc_oc=AdmEVIuoFz8_FbHfC4F09Xk8MlAboZPkUa0N8J3Qzb5t5MrlYZaFQ5KEjnNVkRrHWeQ5c-OeejV4HdGqUHAUo4tI&_nc_zt=23&_nc_ht=scontent.ftpe7-4.fna&_nc_gid=gEAs2kwPw3Xrs2QKFpnqvw&oh=00_AfHj56NYF2psCWRxmuGTHJ0WaqQyU7shzkhGhUR4XLBI7g&oe=681B231C" alt="Beomgyu">
-          <h3>杋圭 (Beomgyu)</h3>
-          <p>年齡：22歲（截至2025年）</p>
-          <p>杋圭以其強大的舞蹈技巧和開朗的個性而聞名。</p>
-        </div>
+      </section>
+	<!-- 團體特色介紹 -->
+	<section class="group-features">
+		<h2>團體特色</h2>
+		<p>TXT以強烈的概念敘事、青春成長主題以及融合多種曲風（如K-pop、搖滾、電子與Hyperpop）聞名。他們的音樂作品常圍繞青春期的困惑、夢想與情感波動，並透過精心設計的MV與專輯概念故事線展現「概念偶像」的形象。</p>
       </section>
 
-      <!-- 音樂播放區 -->
+      <!-- 主打歌介紹 -->
+      <section class="hit-songs">
+        <h2>代表作品</h2>
+        <p>自出道以來，TXT推出多首膾炙人口的歌曲，包括：</p>
+        <p>
+          <strong>〈CROWN〉</strong>（出道曲，展現青春蛻變主題）、<br>
+          <strong>〈Run Away〉</strong>（展現友情與逃離現實的想像）、<br>
+          <strong>〈Blue Hour〉</strong>（描繪5點53分天空下的浪漫瞬間）、<br>
+          <strong>〈0X1=LOVESONG〉</strong>（表現內心矛盾與愛的救贖）、<br>
+          <strong>〈Sugar Rush Ride〉</strong> 與 <strong>〈Chasing That Feeling〉</strong> 等，<br/>都展現出TXT在音樂風格與概念表達上的多樣性與深度。
+        </p>
+      </section>
+
       <section class="music-section">
         <h2>聽我們的最新歌曲</h2>
-        <!-- Spotify 音樂嵌入播放器 -->
         <iframe src="https://open.spotify.com/embed/track/3wBeIjb0vtiTwIQPce2stZ?si=A6-B0zj0Qu6jczyRXJwAdA&context=spotify%3Aalbum%3A5BeSpFkdJkSc9phzT3bJSs" width="100%" height="152" frameborder="0" allow="encrypted-media"></iframe>
       </section>
+<!-- Apple Music 區塊 -->
+<div class="music-section">
+  <h2>TXT 在 Apple Music 上</h2>
+  <iframe allow="autoplay *; encrypted-media *;" frameborder="0" height="150"
+    style="width:100%;max-width:660px;overflow:hidden;background:transparent;"
+    sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
+	<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/tw/song/deja-vu/1733097066"></iframe>
+
+  <p style="margin-top: 20px;">
+    🔗
+    <a href="https://music.apple.com/tw/artist/tomorrow-x-together/1454642552" target="_blank" style="color: #1DA1F2; font-weight: bold;">
+      查看 TXT 的 Apple Music 全部作品
+    </a>
+  </p>
+</div>
+
     </main>
   </div>
+
 </body>
 </html>
