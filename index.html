@@ -241,6 +241,151 @@
 		max-width: 90%;
 		text-align: center;
 	}
+	.parallax {
+		background-image: url('your-image-url.jpg');
+		height: 100vh;
+		background-position: center;
+		background-attachment: fixed;
+		background-size: cover;
+	}
+	@keyframes textColorChange {
+		0% { color: #ff0000; }
+		50% { color: #00ff00; }
+		100% { color: #0000ff; }
+		}
+		
+	h2 {
+		animation: textColorChange 3s infinite;
+	}
+	
+	body {
+		font-family: 'Roboto', sans-serif;
+	}
+	.member {
+		perspective: 1000px;
+	}
+		
+	.member-inner {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		transition: transform 0.8s;
+		transform-style: preserve-3d;
+	}
+		
+	.member:hover .member-inner {
+		transform: rotateY(180deg);
+	}
+		
+	.member-front, .member-back {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		backface-visibility: hidden;
+		border-radius: 10px;
+		overflow: hidden;
+	}
+		
+	.member-front {
+		background-color: #f9f9f9;
+	}
+		
+	.member-back {
+		background-color: #1DA1F2;
+		color: white;
+		transform: rotateY(180deg);
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		padding: 15px;
+	}
+	.member-inner.flipped {
+		transform: rotateY(180deg);
+	}
+	    .music-section h2 {
+      font-size: 2rem;
+      color: #1DA1F2;
+    }
+
+    .video-section iframe {
+      width: 100%;
+      max-width: 900px;
+      height: 500px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      margin: 0 auto;
+    }
+
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 2.5rem;
+      }
+
+      header p {
+        font-size: 1rem;
+      }
+
+      nav {
+        flex-direction: column;
+      }
+
+      .member {
+        width: 45%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      header h1 {
+        font-size: 2rem;
+      }
+
+      header p {
+        font-size: 0.9rem;
+      }
+
+      nav a {
+        font-size: 1rem;
+      }
+
+      .video-section iframe {
+        height: 300px;
+      }
+
+      .member {
+        width: 90%;
+      }
+
+      #lyrics-slider {
+        font-size: 1.5rem;
+        color: #1DA1F2;
+        margin: 40px auto;
+        max-width: 90%;
+        text-align: center;
+      }
+
+      .parallax {
+        background-image: url('your-image-url.jpg');
+        height: 100vh;
+        background-position: center;
+        background-attachment: fixed;
+        background-size: cover;
+      }
+
+      @keyframes textColorChange {
+        0% { color: #ff0000; }
+        50% { color: #00ff00; }
+        100% { color: #0000ff; }
+      }
+
+      h2 {
+        animation: textColorChange 3s infinite;
+      }
+
+      body {
+        font-family: 'Roboto', sans-serif;
+      }
+    }
 }
 
   </style>
@@ -258,10 +403,22 @@
     interval: 100
   });
 </script>
+<script>
+  // 點擊翻轉效果（for mobile）
+  document.querySelectorAll('.member').forEach(card => {
+    card.addEventListener('click', () => {
+      card.querySelector('.member-inner').classList.toggle('flipped');
+    });
+  });
+</script>
+
 
 
 <body>
+	<section class="parallax"></section>
 
+	
+	
   <header>
     <h1>Welcome to My Website</h1>
     <p>Welcome to my homepage of TXT</p>
@@ -291,43 +448,89 @@
         <p>TXT（Tomorrow X Together） 是由韓國娛樂公司 BigHit Music（現為 HYBE LABELS 旗下）於 2019 年推出的男子音樂團體。團名「Tomorrow X Together」意指「你和我攜手一起創造明天」，展現出團體合作與成長的概念。</p>
       </section>
 
-      <section class="members-section">
+
+
+		<section class="members-section">
 		<div class="member">
-          <img src="https://i.pinimg.com/736x/cc/35/76/cc3576b35f3cab29a75522e1972b2f44.jpg" alt="Yeonjun">
-          <h3>然竣 (Yeonjun)</h3>
-          <p>年齡：23歲（截至2025年）</p>
-          <p>然竣是團內年紀最大的成員，擅長舞蹈與饒舌。</p>
-        </div>
+			<div class="member-inner">
+			<div class="member-front">
+				<img src="https://i.pinimg.com/736x/cc/35/76/cc3576b35f3cab29a75522e1972b2f44.jpg" alt="Yeonjun">
+				<h3>然竣 (Yeonjun)</h3>
+				<p>年齡：23歲（截至2025年）</p>
+				<p>擅長舞蹈與饒舌，團內的氛圍製造機。</p>
+			</div>
+			<div class="member-back">
+				<h3>關於然竣</h3>
+				<p>BigHit 傳奇練習生。</p>
+				<p>愛吃辣、愛打電動。</p>
+			</div>
+			</div>
+		</div>
 		
 		<div class="member">
-          <img src="https://im.marieclaire.com.tw/m800c533h100b0/assets/mc/202411/672C96213AC461730975265.jpeg" alt="Soobin">
-          <h3>秀彬 (Soobin)</h3>
-          <p>年齡：22歲（截至2025年）</p>
-          <p>秀彬是TXT的隊長，以其深沉的嗓音和卓越的領導能力而著稱。</p>
-        </div>
-
-        <div class="member">
-          <img src="https://scontent.ftpe7-4.fna.fbcdn.net/v/t39.30808-6/480562531_650427614230297_3605095857789815515_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=127cfc&_nc_ohc=57LfbcX7vwoQ7kNvwH2yPwn&_nc_oc=AdmEVIuoFz8_FbHfC4F09Xk8MlAboZPkUa0N8J3Qzb5t5MrlYZaFQ5KEjnNVkRrHWeQ5c-OeejV4HdGqUHAUo4tI&_nc_zt=23&_nc_ht=scontent.ftpe7-4.fna&_nc_gid=gEAs2kwPw3Xrs2QKFpnqvw&oh=00_AfHj56NYF2psCWRxmuGTHJ0WaqQyU7shzkhGhUR4XLBI7g&oe=681B231C" alt="Beomgyu">
-          <h3>杋圭 (Beomgyu)</h3>
-          <p>年齡：22歲（截至2025年）</p>
-          <p>杋圭以其強大的舞蹈技巧和開朗的個性而聞名。</p>
-        </div>
+			<div class="member-inner">
+			<div class="member-front">
+				<img src="https://im.marieclaire.com.tw/m800c533h100b0/assets/mc/202411/672C96213AC461730975265.jpeg" alt="Soobin">
+				<h3>秀彬 (Soobin)</h3>
+				<p>年齡：22歲（截至2025年）</p>
+				<p>隊長，溫柔的存在。</p>
+			</div>
+			<div class="member-back">
+				<h3>關於秀彬</h3>
+				<p>喜歡養倉鼠和看書。</p>
+				<p>曾主持音樂節目《Music Bank》。</p>
+			</div>
+			</div>
+		</div>
 		
-        <div class="member">
-          <img src="https://i.pinimg.com/736x/22/07/f4/2207f44e50c54e8932f56e4c654e9d0c.jpg" alt="Taehyun">
-          <h3>太顯 (Taehyun)</h3>
-          <p>年齡：20歲（截至2025年）</p>
-          <p>太顯以其出色的歌唱實力和活潑的個性聞名。</p>
-        </div>
-
-        <div class="member">
-          <img src="https://i.pinimg.com/736x/aa/45/1a/aa451af0791d3bfe2bef573c0c546ff4.jpg" alt="Huening Kai">
-          <h3>休寧凱 (Huening Kai)</h3>
-          <p>年齡：20歲（截至2025年）</p>
-          <p>休寧凱以迷人的外貌和強大的歌唱實力受到粉絲喜愛。</p>
-        </div>
-
-      </section>
+		<div class="member">
+			<div class="member-inner">
+			<div class="member-front">
+				<img src="https://scontent.ftpe7-4.fna.fbcdn.net/v/t39.30808-6/480562531_650427614230297_3605095857789815515_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=127cfc&_nc_ohc=57LfbcX7vwoQ7kNvwH2yPwn&_nc_oc=AdmEVIuoFz8_FbHfC4F09Xk8MlAboZPkUa0N8J3Qzb5t5MrlYZaFQ5KEjnNVkRrHWeQ5c-OeejV4HdGqUHAUo4tI&_nc_zt=23&_nc_ht=scontent.ftpe7-4.fna&_nc_gid=gEAs2kwPw3Xrs2QKFpnqvw&oh=00_AfHj56NYF2psCWRxmuGTHJ0WaqQyU7shzkhGhUR4XLBI7g&oe=681B231C" alt="Beomgyu">
+				<h3>杋圭 (Beomgyu)</h3>
+				<p>年齡：22歲（截至2025年）</p>
+				<p>團內的氣氛擔當，有創作才能。</p>
+			</div>
+			<div class="member-back">
+				<h3>關於杋圭</h3>
+				<p>喜歡彈吉他與寫歌。</p>
+				<p>粉絲說他像「搞笑擔當」+「小太陽」☀️</p>
+			</div>
+			</div>
+		</div>
+		
+		<div class="member">
+			<div class="member-inner">
+			<div class="member-front">
+				<img src="https://i.pinimg.com/736x/22/07/f4/2207f44e50c54e8932f56e4c654e9d0c.jpg" alt="Taehyun">
+				<h3>太顯 (Taehyun)</h3>
+				<p>年齡：20歲（截至2025年）</p>
+				<p>主唱之一，聲音細膩有力。</p>
+			</div>
+			<div class="member-back">
+				<h3>關於太顯</h3>
+				<p>從小就是童星出身。</p>
+				<p>擁有很強的語言學習能力（會英文）。</p>
+			</div>
+			</div>
+		</div>
+		
+		<div class="member">
+			<div class="member-inner">
+			<div class="member-front">
+				<img src="https://i.pinimg.com/736x/aa/45/1a/aa451af0791d3bfe2bef573c0c546ff4.jpg" alt="Huening Kai">
+				<h3>休寧凱 (Huening Kai)</h3>
+				<p>年齡：20歲（截至2025年）</p>
+				<p>最年幼成員，充滿可愛魅力。</p>
+			</div>
+			<div class="member-back">
+				<h3>關於休寧凱</h3>
+				<p>爸爸是美國人，擁有混血魅力。</p>
+				<p>擅長鋼琴、創作與表演。</p>
+			</div>
+			</div>
+		</div>
+		</section>
 	<!-- 團體特色介紹 -->
 	<section class="group-features">
 		<h2>團體特色</h2>
@@ -378,21 +581,23 @@
       </section>
 	<!-- Apple Music 區塊 -->
 	<div class="music-section">
-		<h2>TXT 在 Apple Music 上</h2>
-	<iframe allow="autoplay *; encrypted-media *;" frameborder="0" height="150"
-	style="width:100%;max-width:660px;overflow:hidden;background:transparent;"
-	sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
-		<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/tw/song/deja-vu/1733097066"></iframe>
-	<p style="margin-top: 20px;">
-		🔗
-	<a href="https://music.apple.com/tw/artist/tomorrow-x-together/1454642552" target="_blank" style="color: #1DA1F2; font-weight: bold;">
-		查看 TXT 的 Apple Music 全部作品
-	</a>
-	</p>
-</div>
+	  <h2>TXT 在 Apple Music 上</h2>
+	  <iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+			  frameborder="0"
+			  height="175"
+			  style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;"
+			  sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+			  src="https://embed.music.apple.com/tw/song/deja-vu/1733097066"></iframe>
 
-    </main>
-  </div>
+	  <p style="margin-top: 20px;">
+		🔗
+		<a href="https://music.apple.com/tw/artist/tomorrow-x-together/1454642552"
+		   target="_blank"
+		   style="color: #1DA1F2; font-weight: bold;">
+		  查看 TXT 的 Apple Music 全部作品
+		</a>
+	  </p>
+	</div>
 
 </body>
 </html>
