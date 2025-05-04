@@ -385,7 +385,10 @@
       body {
         font-family: 'Roboto', sans-serif;
       }
-    }
+	 h2:hover {
+		animation-play-state: paused;
+	} 
+    
 }
 
   </style>
@@ -394,23 +397,29 @@
 
 <script src="https://unpkg.com/scrollreveal"></script>
 <script>
-  ScrollReveal().reveal('.group-photo-section, .video-section, .members-introduction, .group-features, .hit-songs, .members-section, .music-section', {
-    duration: 1200,
-    origin: 'bottom',
-    distance: '50px',
-    easing: 'ease-in-out',
-    reset: false,
-    interval: 100
-  });
-</script>
-<script>
-  // 點擊翻轉效果（for mobile）
-  document.querySelectorAll('.member').forEach(card => {
-    card.addEventListener('click', () => {
-      card.querySelector('.member-inner').classList.toggle('flipped');
+  document.addEventListener('DOMContentLoaded', () => {
+    // 成員卡片翻轉效果
+    document.querySelectorAll('.member').forEach(card => {
+      const inner = card.querySelector('.member-inner');
+      if (inner) {
+        card.addEventListener('click', () => {
+          inner.classList.toggle('flipped');
+        });
+      }
+    });
+
+    // ScrollReveal 初始化
+    ScrollReveal().reveal('.group-photo-section, .video-section, .members-introduction, .group-features, .hit-songs, .members-section, .music-section', {
+      duration: 1200,
+      origin: 'bottom',
+      distance: '50px',
+      easing: 'ease-in-out',
+      reset: false,
+      interval: 100
     });
   });
 </script>
+
 
 
 
@@ -451,86 +460,90 @@
 
 
 		<section class="members-section">
+
 		<div class="member">
-			<div class="member-inner">
+		<div class="member-inner">
 			<div class="member-front">
-				<img src="https://i.pinimg.com/736x/cc/35/76/cc3576b35f3cab29a75522e1972b2f44.jpg" alt="Yeonjun">
-				<h3>然竣 (Yeonjun)</h3>
-				<p>年齡：23歲（截至2025年）</p>
-				<p>擅長舞蹈與饒舌，團內的氛圍製造機。</p>
+			<img src="https://i.pinimg.com/736x/cc/35/76/cc3576b35f3cab29a75522e1972b2f44.jpg" alt="Yeonjun">
+			<div class="member-name">然竣 (Yeonjun)</div>
 			</div>
 			<div class="member-back">
-				<h3>關於然竣</h3>
-				<p>BigHit 傳奇練習生。</p>
-				<p>愛吃辣、愛打電動。</p>
+			<p>年齡：23歲（截至2025年）<br>擅長舞蹈與饒舌，團內的氛圍製造機。<br>BigHit 傳奇練習生。<br>愛吃辣、愛打電動。</p>
 			</div>
-			</div>
+		</div>
 		</div>
 		
 		<div class="member">
-			<div class="member-inner">
+		<div class="member-inner">
 			<div class="member-front">
-				<img src="https://im.marieclaire.com.tw/m800c533h100b0/assets/mc/202411/672C96213AC461730975265.jpeg" alt="Soobin">
-				<h3>秀彬 (Soobin)</h3>
-				<p>年齡：22歲（截至2025年）</p>
-				<p>隊長，溫柔的存在。</p>
+			<img src="https://im.marieclaire.com.tw/m800c533h100b0/assets/mc/202411/672C96213AC461730975265.jpeg" alt="Soobin">
+			<div class="member-name">秀彬 (Soobin)</div>
 			</div>
 			<div class="member-back">
-				<h3>關於秀彬</h3>
-				<p>喜歡養倉鼠和看書。</p>
-				<p>曾主持音樂節目《Music Bank》。</p>
+			<p>年齡：22歲（截至2025年）<br>隊長，溫柔的存在。<br>喜歡養倉鼠和看書。<br>曾主持《Music Bank》。</p>
 			</div>
-			</div>
+		</div>
 		</div>
 		
 		<div class="member">
-			<div class="member-inner">
+		<div class="member-inner">
 			<div class="member-front">
-				<img src="https://scontent.ftpe7-4.fna.fbcdn.net/v/t39.30808-6/480562531_650427614230297_3605095857789815515_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=127cfc&_nc_ohc=57LfbcX7vwoQ7kNvwH2yPwn&_nc_oc=AdmEVIuoFz8_FbHfC4F09Xk8MlAboZPkUa0N8J3Qzb5t5MrlYZaFQ5KEjnNVkRrHWeQ5c-OeejV4HdGqUHAUo4tI&_nc_zt=23&_nc_ht=scontent.ftpe7-4.fna&_nc_gid=gEAs2kwPw3Xrs2QKFpnqvw&oh=00_AfHj56NYF2psCWRxmuGTHJ0WaqQyU7shzkhGhUR4XLBI7g&oe=681B231C" alt="Beomgyu">
-				<h3>杋圭 (Beomgyu)</h3>
-				<p>年齡：22歲（截至2025年）</p>
-				<p>團內的氣氛擔當，有創作才能。</p>
+			<img src="https://scontent.ftpe7-4.fna.fbcdn.net/v/t39.30808-6/480562531_650427614230297_3605095857789815515_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=127cfc&_nc_ohc=57LfbcX7vwoQ7kNvwH2yPwn&_nc_oc=AdmEVIuoFz8_FbHfC4F09Xk8MlAboZPkUa0N8J3Qzb5t5MrlYZaFQ5KEjnNVkRrHWeQ5c-OeejV4HdGqUHAUo4tI&_nc_zt=23&_nc_ht=scontent.ftpe7-4.fna&_nc_gid=gEAs2kwPw3Xrs2QKFpnqvw&oh=00_AfHj56NYF2psCWRxmuGTHJ0WaqQyU7shzkhGhUR4XLBI7g&oe=681B231C" alt="Beomgyu">
+			<div class="member-name">杋圭 (Beomgyu)</div>
 			</div>
 			<div class="member-back">
-				<h3>關於杋圭</h3>
-				<p>喜歡彈吉他與寫歌。</p>
-				<p>粉絲說他像「搞笑擔當」+「小太陽」☀️</p>
+			<p>年齡：22歲（截至2025年）<br>團內氣氛擔當，有創作才能。<br>喜歡彈吉他與寫歌。<br>像「搞笑擔當」+「小太陽」☀️</p>
 			</div>
-			</div>
+		</div>
 		</div>
 		
 		<div class="member">
-			<div class="member-inner">
+		<div class="member-inner">
 			<div class="member-front">
-				<img src="https://i.pinimg.com/736x/22/07/f4/2207f44e50c54e8932f56e4c654e9d0c.jpg" alt="Taehyun">
-				<h3>太顯 (Taehyun)</h3>
-				<p>年齡：20歲（截至2025年）</p>
-				<p>主唱之一，聲音細膩有力。</p>
+			<img src="https://i.pinimg.com/736x/22/07/f4/2207f44e50c54e8932f56e4c654e9d0c.jpg" alt="Taehyun">
+			<div class="member-name">太顯 (Taehyun)</div>
 			</div>
 			<div class="member-back">
-				<h3>關於太顯</h3>
-				<p>從小就是童星出身。</p>
-				<p>擁有很強的語言學習能力（會英文）。</p>
+			<p>年齡：20歲（截至2025年）<br>主唱之一，聲音細膩有力。<br>從小是童星出身。<br>會英文，語言能力很強。</p>
 			</div>
-			</div>
+		</div>
 		</div>
 		
 		<div class="member">
-			<div class="member-inner">
+		<div class="member-inner">
 			<div class="member-front">
-				<img src="https://i.pinimg.com/736x/aa/45/1a/aa451af0791d3bfe2bef573c0c546ff4.jpg" alt="Huening Kai">
-				<h3>休寧凱 (Huening Kai)</h3>
-				<p>年齡：20歲（截至2025年）</p>
-				<p>最年幼成員，充滿可愛魅力。</p>
+			<img src="https://i.pinimg.com/736x/aa/45/1a/aa451af0791d3bfe2bef573c0c546ff4.jpg" alt="Huening Kai">
+			<div class="member-name">休寧凱 (Huening Kai)</div>
 			</div>
 			<div class="member-back">
-				<h3>關於休寧凱</h3>
-				<p>爸爸是美國人，擁有混血魅力。</p>
-				<p>擅長鋼琴、創作與表演。</p>
-			</div>
+			<p>年齡：20歲（截至2025年）<br>最年幼成員，充滿可愛魅力。<br>混血（爸爸是美國人）。<br>擅長鋼琴、創作與表演。</p>
 			</div>
 		</div>
-		</section>
+		</div>
+		
+		<section>
+
+		<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			ScrollReveal().reveal('.group-photo-section, .video-section, .members-introduction, .group-features, .hit-songs, .members-section, .music-section', {
+			duration: 1200,
+			origin: 'bottom',
+			distance: '50px',
+			easing: 'ease-in-out',
+			reset: false,
+			interval: 100
+			});
+		
+			document.querySelectorAll('.member').forEach(card => {
+			card.addEventListener('click', () => {
+				card.querySelector('.member-inner').classList.toggle('flipped');
+			});
+			});
+		});
+		</script>
+		
+
+
 	<!-- 團體特色介紹 -->
 	<section class="group-features">
 		<h2>團體特色</h2>
