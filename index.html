@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My KPOP Story</title>
+  <title>My KPOP Story - Taeyeon</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@400;600&display=swap');
 
@@ -14,117 +14,71 @@
     }
 
     body {
-      background-color: #1A1A1A;
-      font-family: 'Montserrat', sans-serif;
-      color: #fff;
-      overflow-x: hidden;
+      background-color: #f4f4f4;
+      font-family: 'Open Sans', sans-serif;
+      color: #333;
+      padding-top: 60px; /* 增加上邊距，確保內容不會被歌詞擋住 */
     }
 
-    /* Header */
     header {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 999;
+      background-color: #333;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
     }
 
     header h1 {
-      font-size: 1.6rem;
-      color: #f7c9f9;
-    }
-
-    nav {
-      display: flex;
-      gap: 20px;
-    }
-
-    nav a {
-      color: white;
-      text-decoration: none;
+      font-size: 2rem;
       font-weight: 600;
     }
 
-    nav a:hover {
+    header nav a {
+      text-decoration: none;
+      color: white;
+      margin: 0 15px;
+      font-weight: 600;
+    }
+
+    header nav a:hover {
       color: #f7c9f9;
     }
 
-    /* Hamburger menu */
-    .hamburger {
-      display: none;
-      flex-direction: column;
-      cursor: pointer;
-    }
-
-    .hamburger div {
-      width: 25px;
-      height: 3px;
-      background-color: #fff;
-      margin: 4px 0;
-    }
-
-    .mobile-nav {
-      display: none;
-      flex-direction: column;
-      background: rgba(0, 0, 0, 0.9);
-      position: absolute;
-      top: 60px;
-      right: 20px;
-      padding: 15px;
-      border-radius: 8px;
-    }
-
-    .mobile-nav a {
-      padding: 10px 0;
-      color: #fff;
-    }
-
-    /* Main Title */
     .main-title {
       text-align: center;
-      margin-top: 100px;
-      font-size: 3rem;
+      font-size: 2rem;
       font-weight: bold;
+      margin-top: 20px;
     }
 
-    /* Container */
     .container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      max-width: 1200px;
       margin: 40px auto;
-      padding: 20px;
-      background-color: rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
-      flex-wrap: wrap;
+      max-width: 800px;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 40px;
     }
 
     .container img {
-      max-width: 400px;
       width: 100%;
-      border-radius: 10px;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
-      transition: transform 0.3s ease-in-out;
+      border-radius: 8px;
+      margin-top: 20px;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
     }
 
-    .container img:hover {
-      transform: scale(1.05); /* 滑鼠懸停時放大 */
-    }
-
-    .text {
-      flex: 1;
-      padding: 20px;
-      font-size: 1.1rem;
+    .container .text {
+      margin-bottom: 20px;
       line-height: 1.8;
-      text-align: justify;
+      font-size: 1rem;
     }
 
-    /* MV section */
+    .container h2 {
+      margin-top: 20px;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
     .mv-grid {
       display: flex;
       flex-wrap: wrap;
@@ -134,26 +88,40 @@
     }
 
     .mv-grid iframe {
-      flex: 1;
-      min-width: 300px;
-      max-width: 500px;
+      width: 100%;
+      max-width: 380px;
       aspect-ratio: 16 / 9;
-      border: none;
+      border-radius: 8px;
     }
 
-    /* 歌詞輪播區樣式 */
-    .lyrics-marquee {
-      background-color: rgba(0, 0, 0, 0.9);
+    footer {
+      text-align: center;
+      padding: 20px;
+      background-color: #333;
       color: #fff;
-      font-size: 1.2rem;
+    }
+
+    footer a {
+      color: #f7c9f9;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+    
+    /* 歌詞輪播樣式 */
+    .lyrics-marquee {
+      background-color: #000;
+      color: white;
+      padding: 10px 0;
       text-align: center;
       white-space: nowrap;
       overflow: hidden;
-      padding: 10px 0;
-      z-index: 999;
       position: fixed;
-      top: 60px;
+      top: 0;
       width: 100%;
+      z-index: 1000;
     }
 
     .lyrics-marquee span {
@@ -167,169 +135,69 @@
       100% { transform: translateX(-100%); }
     }
 
-    footer {
-      text-align: center;
-      padding: 30px;
-      background-color: #000;
-      color: #ccc;
-      margin-top: 50px;
-    }
-
-    footer a {
-      color: #f7c9f9;
-    }
-
-    @media (max-width: 768px) {
-      .hamburger {
-        display: flex;
-      }
-
-      nav {
-        display: none;
-      }
-
-      .main-title {
-        font-size: 2rem;
-      }
-
-      .container {
-        flex-direction: column;
-      }
-
-      .container img {
-        margin-top: 20px;
-      }
-
-      .mobile-nav a {
-        color: #fff;
-      }
-
-      .lyrics-marquee {
-        top: 80px;
-      }
-
-      .lyrics-marquee span {
-        animation: scrollText 80s linear infinite;
-      }
-
-      .lyrics-spacing {
-        margin-right: 15px;
-      }
-    }
   </style>
-  <script>
-    function toggleMenu() {
-      const nav = document.getElementById("mobileNav");
-      nav.style.display = nav.style.display === "flex" ? "none" : "flex";
-    }
-  </script>
 </head>
 <body>
 
+  <!-- 歌詞輪播 -->
+  <div class="lyrics-marquee" id="lyrics">
+    <span>✨ 나의 삶은 아름다워 ✨ - I &nbsp;&nbsp;&nbsp; ✨ 너는 나의 우주, 나의 전부였던 너 ✨ - U R &nbsp;&nbsp;&nbsp; ✨ 왜 내게 이렇게 아픈지 ✨ - Why &nbsp;&nbsp;&nbsp; ✨ 비처럼 내리는 그리움 ✨ - Rain &nbsp;&nbsp;&nbsp;</span>
+  </div>
+
   <header>
-    <h1>My KPOP Story</h1>
-    <div class="hamburger" onclick="toggleMenu()">
-      <div></div>
-      <div></div>
-      <div></div>
-    </div>
+    <h1>My KPOP Story - Taeyeon</h1>
     <nav>
       <a href="#intro">Taeyeon</a>
       <a href="#debut">Solo Debut</a>
       <a href="#concerts">Concerts</a>
       <a href="#mvs">MV Recs</a>
-      <a href="#lyrics">Lyrics</a>
     </nav>
-    <div id="mobileNav" class="mobile-nav">
-      <a href="#intro">Taeyeon</a>
-      <a href="#debut">Solo Debut</a>
-      <a href="#concerts">Concerts</a>
-      <a href="#mvs">MV Recs</a>
-      <a href="#lyrics">Lyrics</a>
-    </div>
   </header>
-
-  <!-- 動態歌詞輪播區 -->
-  <div class="lyrics-marquee" id="lyrics">
-    <span>
-      ✨ 나의 삶은 아름다워 ✨ - I &nbsp;&nbsp;&nbsp;
-      ✨ 너는 나의 우주, 나의 전부였던 너 ✨ - U R &nbsp;&nbsp;&nbsp;
-      ✨ 왜 내게 이렇게 아픈지 ✨ - Why &nbsp;&nbsp;&nbsp;
-      ✨ 비처럼 내리는 그리움 ✨ - Rain &nbsp;&nbsp;&nbsp;
-      ✨ 그 순간이 자꾸 떠올라 잘 지내란 말이 전부였던 담담한 이별 ✨ - Fine &nbsp;&nbsp;&nbsp;
-      ✨ 11:11 소원을 빌어 ✨ - 11:11 &nbsp;&nbsp;&nbsp;
-      ✨ 너는 나를 사랑하게 만들어 ✨ - Make Me Love You &nbsp;&nbsp;&nbsp;
-      ✨ 난 사랑을 얻었어 ✨ - I Got Love &nbsp;&nbsp;&nbsp;
-      ✨ 내가 빛을 낼 순간 ✨ - Spark &nbsp;&nbsp;&nbsp;
-      ✨ 네가 있으면 사계절이 되어 ✨ - Four Seasons &nbsp;&nbsp;&nbsp;
-      ✨ 이 기분은 너무 좋아 ✨ - Feel So Fine &nbsp;&nbsp;&nbsp;
-      ✨ 주말에는 너와 함께 ✨ - Weekend &nbsp;&nbsp;&nbsp;
-      ✨ 내가 이 감정을 멈출 수 없어 ✨ - INVU &nbsp;&nbsp;&nbsp;
-      ✨ 나는 내가 너를 제어할 수 없어 ✨ - Can't Control Myself &nbsp;&nbsp;&nbsp;
-      ✨ 너와 함께한 모든 순간이 내 그림이야 ✨ - Draw My Moments
-    </span>
-  </div>
 
   <div class="main-title">Welcome to My KPOP Story</div>
 
-	<div class="container" id="intro">
-	<div class="text">
-		<p>🌟 我的KPOP追隨故事：太妍 (TAEYEON)<br><br>
-		太妍是我最喜歡的KPOP偶像，她於1989年3月9日出生在韓國全州。從少女時代到她的個人作品，太妍的音樂一直伴隨著我的成長。她的聲音獨特而有力量，無論是活力四射的快歌還是感人至深的抒情曲，都讓我無法自拔。<br><br>
-		太妍不僅是一位出色的歌手，還是我追求夢想的榜樣。她的音樂和故事深深影響了我，並成為我生活中的一部分。對我來說，太妍永遠是那個用心唱歌、觸動人心的偶像。
-		</p>
-	</div>
-	<img src="https://pbs.twimg.com/media/GlwdfQMbIAAgARA?format=jpg&name=4096x4096" alt="Taeyeon">
-	</div>
+  <div class="container" id="intro">
+    <div class="text">
+      <p>🌟 我的KPOP追隨故事：太妍 (TAEYEON)<br><br>
+      太妍是我最喜歡的KPOP偶像，她於1989年3月9日出生在韓國全州。從少女時代到她的個人作品，太妍的音樂一直伴隨著我的成長。她的聲音獨特而有力量，無論是活力四射的快歌還是感人至深的抒情曲，都讓我無法自拔。<br><br>
+      太妍不僅是一位出色的歌手，還是我追求夢想的榜樣。她的音樂和故事深深影響了我，並成為我生活中的一部分。對我來說，太妍永遠是那個用心唱歌、觸動人心的偶像。</p>
+    </div>
+    <img src="https://pbs.twimg.com/media/GlwdfQMbIAAgARA?format=jpg&name=4096x4096" alt="Taeyeon">
+  </div>
 
-	<div class="container" id="debut">
-	<div class="text">
-		<h2>🎶 《I》 (2015) – 太妍的個人出道專輯</h2><br/>
-		<p><strong>發行日期：</strong>2015年10月7日</p>
-		<p><strong>音樂類型：</strong>流行（Pop）、抒情（Ballad）</p><br/>
-	
-		<p><strong>專輯概述：</strong><br/>
-		《I》是太妍作為SOLO歌手的正式出道作品，標誌著她從少女時代主唱走向個人音樂旅程的嶄新起點。這張專輯充分展現了她深厚的歌唱實力與細膩的情感詮釋，讓聽眾感受到她音樂上的獨特魅力與成熟面貌。</p><br/>
-	
-		<p><strong>主打歌曲亮點：</strong></p>
-		<ul style="margin-left: 1em; padding-left: 1em;">
-		<li><strong>《I》：</strong>融合搖滾與流行元素，旋律激昂且富有層次，搭配太妍充滿爆發力的聲線，展現自我追尋與成長的主題，是一首極具代表性的個人作品。MV特地於紐西蘭拍攝，展現她自由奔放的一面。</li><br/>
-		<li><strong>《U R》：</strong>溫柔婉約的抒情歌曲，以鋼琴與弦樂為主軸，展現太妍細膩的情感表達，是歌迷心中的經典療癒系歌曲之一。</li>
-		</ul><br/>
-	
-		<p>這張專輯不僅獲得了商業上的成功，也為太妍日後多元化的音樂風格奠定了堅實的基礎，成為她個人音樂歷程中不可或缺的重要里程碑。</p>
-	</div>
-	<img src="https://pbs.twimg.com/media/GlqD8MtaYAA2s6m?format=jpg&name=large" alt="Debut">
-	</div>
-
-
+  <div class="container" id="debut">
+    <h2>🎶 《I》 (2015) – 太妍的個人出道專輯</h2>
+    <div class="text">
+      <p><strong>發行日期：</strong>2015年10月7日</p>
+      <p><strong>音樂類型：</strong>流行（Pop）、抒情（Ballad）</p>
+      <p><strong>專輯概述：</strong><br/>《I》是太妍作為SOLO歌手的正式出道作品，標誌著她從少女時代主唱走向個人音樂旅程的嶄新起點。這張專輯充分展現了她深厚的歌唱實力與細膩的情感詮釋，讓聽眾感受到她音樂上的獨特魅力與成熟面貌。</p>
+      <p><strong>主打歌曲亮點：</strong></p>
+      <ul>
+        <li><strong>《I》：</strong>融合搖滾與流行元素，旋律激昂且富有層次，搭配太妍充滿爆發力的聲線，展現自我追尋與成長的主題，是一首極具代表性的個人作品。</li>
+        <li><strong>《U R》：</strong>溫柔婉約的抒情歌曲，以鋼琴與弦樂為主軸，展現太妍細膩的情感表達，是歌迷心中的經典療癒系歌曲之一。</li>
+      </ul>
+    </div>
+    <img src="https://pbs.twimg.com/media/GlqD8MtaYAA2s6m?format=jpg&name=large" alt="Debut">
+  </div>
 
   <div class="container" id="concerts">
+    <h2>🌟 演唱會回憶</h2>
     <div class="text">
-      <h2><strong>演唱會回憶</strong></h2><br/>
-      <p>在喜歡太妍的第八年（2023年），我終於有機會參加她在台北小巨蛋的演唱會，這是一次難以忘懷的經歷。當時，整個場館充滿了她音樂的魔力，每一首歌的旋律都深深打動我的心，仿佛進入了一個充滿感動與回憶的世界。與成千上萬的歌迷一同歡呼，分享那一刻的快樂，真的讓我覺得自己是世界上最幸福的人。
-        <br/><br/>🌟 精彩時刻： <br/>‎‎‎‎‎時光飛逝，到了2025年，太妍成為了第一位在台北大巨蛋開唱的海外歌手。對我來說，這是一次無與倫比的歷史性演出。我有幸親身參與這場突破性的重要演出，見證了她的音樂旅程達到一個全新的巔峰。站在台下，看到她的光芒與舞台上的精彩表現，心中滿是感動，這不僅是她的成功，更是我們這些一直支持她的歌迷共同見證的歷史！
-        每一次的演唱會，都是太妍用心編織的音樂故事，而每一次的參與，都讓我對她的愛與敬佩更深一層。這些回憶，將會永遠銘刻在心中，成為我人生中最珍貴的記憶之一。</p>
+      <p>在喜歡太妍的第八年（2023年），我終於有機會參加她在台北小巨蛋的演唱會，這是一次難以忘懷的經歷。每一次的演唱會，都是太妍用心編織的音樂故事，讓我更加敬愛她。</p>
     </div>
     <img src="https://pbs.twimg.com/media/GqLjdvRaUAAn341?format=jpg&name=large" alt="Concert">
   </div>
 
-  <!-- MV 區塊 -->
   <div class="container" id="mvs">
-    <div class="text" style="width: 100%;">
-      <p><strong>MV推薦 – 必看太妍 MV</strong></p>
-      <h2>這裡是我最喜歡的太妍MV：</h2>
-      <div class="mv-grid">
-        <iframe src="https://www.youtube.com/embed/4OrCA1OInoo" allowfullscreen></iframe>
-        <iframe src="https://www.youtube.com/embed/AbZH7XWDW_k" allowfullscreen></iframe>
-      </div>
+    <h2>🎥 MV推薦 – 必看太妍 MV</h2>
+    <div class="mv-grid">
+      <iframe src="https://www.youtube.com/embed/4OrCA1OInoo" allowfullscreen></iframe>
+      <iframe src="https://www.youtube.com/embed/AbZH7XWDW_k" allowfullscreen></iframe>
     </div>
   </div>
 
-
-  <br/>
   <footer>
-    <h2>🎧 聆聽太妍的音樂</h2><br/>
+    <p>🎧 聆聽太妍的音樂</p>
     <iframe style="border-radius:12px" src="https://open.spotify.com/embed/artist/3qNVuliS40BLgXGxhdBdqu?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
     <p>© 2025 by BB. All rights reserved.</p>
     <p>Follow me on IG: <a href="https://instagram.com/bu.sec_01" target="_blank">bu.sec_01</a></p>
