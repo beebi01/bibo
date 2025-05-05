@@ -109,7 +109,7 @@
     footer a:hover {
       text-decoration: underline;
     }
-    
+
     /* 歌詞輪播樣式 */
     .lyrics-marquee {
       background-color: #000;
@@ -120,8 +120,10 @@
       overflow: hidden;
       position: fixed;
       top: 0;
+      left: 0;
       width: 100%;
       z-index: 1000;
+      font-size: 16px;
     }
 
     .lyrics-marquee span {
@@ -133,13 +135,123 @@
     @keyframes scrollText {
       0% { transform: translateX(0); }
       100% { transform: translateX(-100%); }
-    }
+    
+/* 我的KPOP追隨故事 */
+.container#intro {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
 
+.container#intro h2 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.container#intro .text p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #555;
+}
+
+.container#intro .intro-img {
+  width: 100%;
+  border-radius: 8px;
+  margin-top: 20px;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* MV 區塊 */
+.mv-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.mv-grid iframe {
+  width: 100%;
+  max-width: 380px;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+}
+
+/* 音樂成就 */
+.container#achievements ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.container#achievements li {
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.container#achievements span {
+  color: #ff69b4;
+}
+
+/* 音樂播放器區塊 */
+footer iframe {
+  border-radius: 12px;
+  width: 100%;
+  height: 352px;
+  frameBorder: 0;
+}
+
+footer p {
+  margin-top: 10px;
+}
+
+footer a {
+  color: #f7c9f9;
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+/* 歌詞滾動樣式 */
+.lyrics-marquee {
+  background-color: #000;
+  color: white;
+  padding: 10px 0;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  font-size: 16px;
+}
+
+.lyrics-marquee span {
+  display: inline-block;
+  padding-left: 100%;
+  animation: scrollText 60s linear infinite;
+}
+
+@keyframes scrollText {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+	
+	
   </style>
 </head>
 <body>
 
-  <!-- 歌詞輪播 -->
+  <!-- 歌詞滾動 -->
   <div class="lyrics-marquee" id="lyrics">
     <span>✨ 나의 삶은 아름다워 ✨ - I &nbsp;&nbsp;&nbsp; ✨ 너는 나의 우주, 나의 전부였던 너 ✨ - U R &nbsp;&nbsp;&nbsp; ✨ 왜 내게 이렇게 아픈지 ✨ - Why &nbsp;&nbsp;&nbsp; ✨ 비처럼 내리는 그리움 ✨ - Rain &nbsp;&nbsp;&nbsp;</span>
   </div>
@@ -156,48 +268,66 @@
 
   <div class="main-title">Welcome to My KPOP Story</div>
 
-  <div class="container" id="intro">
-    <div class="text">
-      <p>🌟 我的KPOP追隨故事：太妍 (TAEYEON)<br><br>
-      太妍是我最喜歡的KPOP偶像，她於1989年3月9日出生在韓國全州。從少女時代到她的個人作品，太妍的音樂一直伴隨著我的成長。她的聲音獨特而有力量，無論是活力四射的快歌還是感人至深的抒情曲，都讓我無法自拔。<br><br>
-      太妍不僅是一位出色的歌手，還是我追求夢想的榜樣。她的音樂和故事深深影響了我，並成為我生活中的一部分。對我來說，太妍永遠是那個用心唱歌、觸動人心的偶像。</p>
-    </div>
-    <img src="https://pbs.twimg.com/media/GlwdfQMbIAAgARA?format=jpg&name=4096x4096" alt="Taeyeon">
-  </div>
+	<!-- 我的KPOP追隨故事 -->
+	<div class="container" id="intro">
+	<h2>🌟 我的KPOP追隨故事：太妍 (TAEYEON)</h2><br/>
+	<div class="text">
+		<p>
+		太妍是我最喜歡的KPOP偶像，她於1989年3月9日出生在韓國全州。從少女時代到她的個人作品，太妍的音樂一直伴隨著我的成長。她的聲音獨特而有力量，無論是活力四射的快歌還是感人至深的抒情曲，都讓我無法自拔。
+		<br><br>
+		太妍不僅是一位出色的歌手，還是我追求夢想的榜樣。她的音樂和故事深深影響了我，並成為我生活中的一部分。對我來說，太妍永遠是那個用心唱歌、觸動人心的偶像。
+		</p>
+	</div>
+	<img src="https://pbs.twimg.com/media/GlwdfQMbIAAgARA?format=jpg&name=4096x4096" alt="Taeyeon" class="intro-img">
+	</div>
+	
+	<!-- 太妍的音樂成就 -->
+	<div class="container" id="achievements">
+	<h2>🏆 太妍的音樂成就</h2><br/>
+	<ul style="list-style-type: none; padding-left: 0;">
+		<li style="margin-bottom: 15px; font-size: 1.2rem; font-weight: bold;">
+		<span style="color: #ff69b4;">🎤 2020年</span> 獲得韓國音樂大獎最佳女歌手獎
+		</li>
+		<li style="margin-bottom: 15px; font-size: 1.2rem; font-weight: bold;">
+		<span style="color: #ff69b4;">🎶 2017年</span> Mnet亞洲音樂大獎最佳女歌手獎
+		</li>
+		<li style="margin-bottom: 15px; font-size: 1.2rem; font-weight: bold;">
+		<span style="color: #ff69b4;">📈</span> 多首歌曲登上Gaon Chart的Top 10
+		</li>
+		<li style="margin-bottom: 15px; font-size: 1.2rem; font-weight: bold;">
+		<span style="color: #ff69b4;">🏅</span> 成為第一位在台北大巨蛋開唱的海外女歌手
+		</li>
+		<li style="margin-bottom: 15px; font-size: 1.2rem; font-weight: bold;">
+		<span style="color: #ff69b4;">🏆</span> 多次榮獲金唱片獎、首爾歌謠大賞等重要音樂獎項
+		</li>
+	</ul>
+	</div>
 
-  <div class="container" id="debut">
-    <h2>🎶 《I》 (2015) – 太妍的個人出道專輯</h2>
-    <div class="text">
-      <p><strong>發行日期：</strong>2015年10月7日</p>
-      <p><strong>音樂類型：</strong>流行（Pop）、抒情（Ballad）</p>
-      <p><strong>專輯概述：</strong><br/>《I》是太妍作為SOLO歌手的正式出道作品，標誌著她從少女時代主唱走向個人音樂旅程的嶄新起點。這張專輯充分展現了她深厚的歌唱實力與細膩的情感詮釋，讓聽眾感受到她音樂上的獨特魅力與成熟面貌。</p>
-      <p><strong>主打歌曲亮點：</strong></p>
-      <ul>
-        <li><strong>《I》：</strong>融合搖滾與流行元素，旋律激昂且富有層次，搭配太妍充滿爆發力的聲線，展現自我追尋與成長的主題，是一首極具代表性的個人作品。</li>
-        <li><strong>《U R》：</strong>溫柔婉約的抒情歌曲，以鋼琴與弦樂為主軸，展現太妍細膩的情感表達，是歌迷心中的經典療癒系歌曲之一。</li>
-      </ul>
-    </div>
-    <img src="https://pbs.twimg.com/media/GlqD8MtaYAA2s6m?format=jpg&name=large" alt="Debut">
-  </div>
-
+  <!-- 這是你提供的 concert 部分 -->
   <div class="container" id="concerts">
-    <h2>🌟 演唱會回憶</h2>
     <div class="text">
-      <p>在喜歡太妍的第八年（2023年），我終於有機會參加她在台北小巨蛋的演唱會，這是一次難以忘懷的經歷。每一次的演唱會，都是太妍用心編織的音樂故事，讓我更加敬愛她。</p>
+      <h2><strong>演唱會回憶</strong></h2><br/>
+      <p>在喜歡太妍的第八年（2023年），我終於有機會參加她在台北小巨蛋的演唱會，這是一次難以忘懷的經歷。當時，整個場館充滿了她音樂的魔力，每一首歌的旋律都深深打動我的心，仿佛進入了一個充滿感動與回憶的世界。與成千上萬的歌迷一同歡呼，分享那一刻的快樂，真的讓我覺得自己是世界上最幸福的人。<br/><br/>🌟 精彩時刻： <br/>‎‎‎‎‎時光飛逝，到了2025年，太妍成為了第一位在台北大巨蛋開唱的海外歌手。對我來說，這是一次無與倫比的歷史性演出。我有幸親身參與這場突破性的重要演出，見證了她的音樂旅程達到一個全新的巔峰。站在台下，看到她的光芒與舞台上的精彩表現，心中滿是感動，這不僅是她的成功，更是我們這些一直支持她的歌迷共同見證的歷史！<br/><br/>
+        每一次的演唱會，都是太妍用心編織的音樂故事，而每一次的參與，都讓我對她的愛與敬佩更深一層。這些回憶，將會永遠銘刻在心中，成為我人生中最珍貴的記憶之一。</p>
     </div>
     <img src="https://pbs.twimg.com/media/GqLjdvRaUAAn341?format=jpg&name=large" alt="Concert">
   </div>
 
+  <!-- MV 區塊 -->
   <div class="container" id="mvs">
-    <h2>🎥 MV推薦 – 必看太妍 MV</h2>
-    <div class="mv-grid">
-      <iframe src="https://www.youtube.com/embed/4OrCA1OInoo" allowfullscreen></iframe>
-      <iframe src="https://www.youtube.com/embed/AbZH7XWDW_k" allowfullscreen></iframe>
+    <div class="text" style="width: 100%;">
+      <h1>MV推薦</h1>
+      <h2>這裡是我最喜歡的太妍MV：</h2>
+      <div class="mv-grid">
+        <iframe src="https://www.youtube.com/embed/4OrCA1OInoo" allowfullscreen></iframe>
+        <iframe src="https://www.youtube.com/embed/AbZH7XWDW_k" allowfullscreen></iframe>
+      </div>
     </div>
   </div>
 
+  <br/>
   <footer>
-    <p>🎧 聆聽太妍的音樂</p>
+    <h2>🎧 聆聽太妍的音樂</h2><br/>
     <iframe style="border-radius:12px" src="https://open.spotify.com/embed/artist/3qNVuliS40BLgXGxhdBdqu?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
     <p>© 2025 by BB. All rights reserved.</p>
     <p>Follow me on IG: <a href="https://instagram.com/bu.sec_01" target="_blank">bu.sec_01</a></p>
