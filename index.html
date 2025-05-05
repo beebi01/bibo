@@ -152,6 +152,7 @@ footer a:hover {
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* Media Queries for mobile responsiveness */
 @media (max-width: 768px) {
     header {
         flex-direction: column;
@@ -160,6 +161,7 @@ footer a:hover {
 
     .main-title {
         font-size: 2.5rem;
+        margin-top: 150px;
     }
 
     .container {
@@ -170,6 +172,44 @@ footer a:hover {
 
     .container img {
         margin-top: 20px;
+        max-width: 100%;
+    }
+
+    nav {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    nav a {
+        font-size: 1.1rem;
+    }
+
+    ul li {
+        margin-bottom: 15px;
+    }
+
+    iframe {
+        width: 100%;
+        max-width: 560px;
+        height: 315px;
+    }
+
+    footer {
+        padding: 20px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-title {
+        font-size: 2rem;
+    }
+
+    .text {
+        font-size: 1rem;
+    }
+
+    nav a {
+        font-size: 1rem;
     }
 }
     </style>
@@ -219,8 +259,6 @@ footer a:hover {
         </div>
     </div>
 
-
-
     <!-- 第四段：演唱會紀錄區 -->
     <div class="container" id="concerts">
         <div class="text">
@@ -239,9 +277,8 @@ footer a:hover {
             <p><strong>MV推薦 – 必看太妍 MV</strong></p>
             <p>這裡是我最喜歡的太妍MV，總是反覆觀看：</p>
             <ul>
-				<iframe src="https://www.youtube.com/watch?v=4OrCA1OInoo" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                <iframe src="https://www.youtube.com/watch?v=5iSlfF8kSUo" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-				<iframe src="https://www.youtube.com/watch?v=eHir_vB1RUI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <li>🎬 <iframe width="560" height="315" src="https://www.youtube.com/embed/4OrCA1OInoo?si=7Pghl1kjrQ8ZtuZg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></li>
+                <li>🎬 <iframe width="560" height="315" src="https://www.youtube.com/embed/AbZH7XWDW_k?si=J24PXM7B963Og3Ic" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></li>
             </ul>
         </div>
     </div>
