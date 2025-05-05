@@ -1,292 +1,287 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My KPOP Story</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@400;600&display=swap');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My KPOP Story</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@400;600&display=swap');
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-body {
-    background-color: #1A1A1A;
-    font-family: 'Montserrat', sans-serif;
-    color: #fff;
-    overflow-x: hidden;
-}
+    body {
+      background-color: #1A1A1A;
+      font-family: 'Montserrat', sans-serif;
+      color: #fff;
+      overflow-x: hidden;
+    }
 
-/* Header */
-header {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    padding: 20px 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 999;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
-    transition: all 0.3s ease;
-}
-
-header h1 {
-    font-size: 2rem;
-    font-weight: 600;
-    color: #f7c9f9;
-    padding-left: 20px;
-}
-
-nav {
-    display: flex;
-    gap: 25px;
-    padding-right: 20px;
-}
-
-nav a {
-    font-size: 1.2rem;
-    color: #fff;
-    text-decoration: none;
-    font-weight: 600;
-    transition: 0.3s;
-}
-
-nav a:hover {
-    color: #f7c9f9;
-    text-decoration: underline;
-}
-
-/* Main Section */
-.main-title {
-    text-align: center;
-    margin-top: 120px;
-    font-size: 3.5rem;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    opacity: 0;
-    animation: fadeIn 2s forwards;
-}
-
-/* Container for Sections */
-.container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 92%;
-    max-width: 1200px;
-    margin: 40px auto;
-    padding: 30px;
-    border-radius: 15px;
-    background-color: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(8px);
-    transition: all 0.3s ease;
-    opacity: 0;
-    animation: slideIn 1.2s forwards;
-}
-
-.container img {
-    width: 100%;
-    max-width: 400px;
-    border-radius: 12px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
-    transition: transform 0.3s ease;
-}
-
-.container img:hover {
-    transform: scale(1.05);
-}
-
-.text {
-    flex: 1;
-    color: #eaeaea;
-    font-size: 1.15rem;
-    line-height: 1.8;
-    letter-spacing: 1px;
-}
-
-ul {
-    list-style: none;
-    padding-left: 0;
-}
-
-ul li::before {
-    content: '🎶 ';
-    margin-right: 5px;
-}
-
-/* Footer */
-footer {
-    background-color: #000;
-    color: #eaeaea;
-    text-align: center;
-    padding: 30px 0;
-    font-size: 1rem;
-    margin-top: 60px;
-}
-
-footer a {
-    color: #f7c9f9;
-    text-decoration: none;
-}
-
-footer a:hover {
-    text-decoration: underline;
-}
-
-/* Animation */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideIn {
-    from { opacity: 0; transform: translateY(40px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Media Queries for mobile responsiveness */
-@media (max-width: 768px) {
+    /* Header */
     header {
-        flex-direction: column;
-        text-align: center;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 999;
     }
 
-    .main-title {
-        font-size: 2.5rem;
-        margin-top: 150px;
-    }
-
-    .container {
-        flex-direction: column;
-        text-align: center;
-        padding: 20px 10px;
-    }
-
-    .container img {
-        margin-top: 20px;
-        max-width: 100%;
+    header h1 {
+      font-size: 1.6rem;
+      color: #f7c9f9;
     }
 
     nav {
-        flex-direction: column;
-        gap: 15px;
+      display: flex;
+      gap: 20px;
     }
 
     nav a {
-        font-size: 1.1rem;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
     }
 
-    ul li {
-        margin-bottom: 15px;
+    nav a:hover {
+      color: #f7c9f9;
     }
 
-    iframe {
-        width: 100%;
-        max-width: 560px;
-        height: 315px;
+    /* Hamburger menu */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
     }
 
-    footer {
-        padding: 20px 0;
+    .hamburger div {
+      width: 25px;
+      height: 3px;
+      background-color: #fff;
+      margin: 4px 0;
     }
-}
 
-@media (max-width: 480px) {
+    .mobile-nav {
+      display: none;
+      flex-direction: column;
+      background: rgba(0, 0, 0, 0.9);
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    .mobile-nav a {
+      padding: 10px 0;
+      color: #fff; /* 設定為白色 */
+    }
+
     .main-title {
-        font-size: 2rem;
+      text-align: center;
+      margin-top: 100px;
+      font-size: 3rem;
+      font-weight: bold;
+    }
+
+    .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      flex-wrap: wrap;
+    }
+
+    .container img {
+      max-width: 400px;
+      width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.6);
     }
 
     .text {
-        font-size: 1rem;
+      flex: 1;
+      padding: 20px;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      text-align: left;
     }
 
-    nav a {
-        font-size: 1rem;
+    /* MV section */
+    .mv-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 20px;
     }
-}
-    </style>
+
+    .mv-grid iframe {
+      flex: 1;
+      min-width: 300px;
+      max-width: 500px;
+      aspect-ratio: 16 / 9;
+      border: none;
+    }
+
+    /* 歌詞輪播區樣式，現在位於 h1 下面 */
+    .lyrics-marquee {
+      background-color: rgba(0, 0, 0, 0.9);
+      color: #fff;
+      font-size: 1.2rem;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      padding: 10px 0;
+      z-index: 999;
+      position: fixed;
+      top: 60px; /* 在 header 下面顯示 */
+      width: 100%;
+    }
+
+    .lyrics-marquee span {
+      display: inline-block;
+      padding-left: 100%;
+      animation: scrollText 40s linear infinite;
+    }
+
+    @keyframes scrollText {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      background-color: #000;
+      color: #ccc;
+    }
+
+    footer a {
+      color: #f7c9f9;
+    }
+
+    @media (max-width: 768px) {
+      .hamburger {
+        display: flex;
+      }
+
+      nav {
+        display: none;
+      }
+
+      .main-title {
+        font-size: 2rem;
+      }
+
+      .container {
+        flex-direction: column;
+      }
+
+      .container img {
+        margin-top: 20px;
+      }
+
+      .mobile-nav a {
+        color: #fff; /* 設定為白色 */
+      }
+    }
+  </style>
+  <script>
+    function toggleMenu() {
+      const nav = document.getElementById("mobileNav");
+      nav.style.display = nav.style.display === "flex" ? "none" : "flex";
+    }
+  </script>
 </head>
 <body>
 
-    <header>
-        <h1>My KPOP Story</h1>
-        <nav>
-            <a href="#intro">Taeyeon</a>
-            <a href="#debut">Solo Debut</a>
-            <a href="#collection">My Collection</a>
-            <a href="#concerts">Concerts</a>
-            <a href="#mvs">MV Recs</a>
-        </nav>
-    </header>
-
-    <div class="main-title">Welcome to My KPOP Story</div>
-
-    <!-- 第一段 -->
-    <div class="container" id="intro">
-        <div class="text">
-            <p>這是我對KPOP的追隨故事，專注於我最喜歡的歌手：<br> <strong>少女時代的太妍 (TAEYEON)</strong></p>
-            <p>太妍於1989年3月9日出生在韓國全州，她是我終極的KPOP偶像！</p>
-        </div>
-        <div>
-            <img src="https://pbs.twimg.com/media/GlwdfQMbIAAgARA?format=jpg&name=4096x4096" alt="SNSD TAEYEON" />
-        </div>
+  <header>
+    <h1>My KPOP Story</h1>
+    <div class="hamburger" onclick="toggleMenu()">
+      <div></div>
+      <div></div>
+      <div></div>
     </div>
-
-    <!-- 第二段 -->
-    <div class="container" id="debut">
-        <div class="text">
-            <p><strong>"I" (2015) – 太妍的個人出道專輯</strong><br>
-            發行日期：2015年10月7日<br>
-            類型：流行、抒情</p>
-
-            <p><strong>概述：</strong><br>
-            "I"是太妍的個人出道專輯，展示了她強大的嗓音和情感深度。<br>
-            主打歌《I》是一首節奏感十足的流行歌曲，而《U R》則是一首充滿情感的抒情歌曲，突顯她的嗓音範圍與情感表達。</p>
-            
-            <p><strong>影響：</strong><br>
-            這張專輯取得商業成功，確立了太妍作為個人歌手的地位，並獲得了廣泛的好評。</p>
-        </div>
-        <div>
-            <img src="https://pbs.twimg.com/media/GlqD8MtaYAA2s6m?format=jpg&name=large" alt="SNSD TAEYEON" />
-        </div>
+    <nav>
+      <a href="#intro">Taeyeon</a>
+      <a href="#debut">Solo Debut</a>
+      <a href="#concerts">Concerts</a>
+      <a href="#mvs">MV Recs</a>
+      <a href="#lyrics">Lyrics</a>
+    </nav>
+    <div id="mobileNav" class="mobile-nav">
+      <a href="#intro">Taeyeon</a>
+      <a href="#debut">Solo Debut</a>
+      <a href="#concerts">Concerts</a>
+      <a href="#mvs">MV Recs</a>
+      <a href="#lyrics">Lyrics</a>
     </div>
+  </header>
 
-    <!-- 第四段：演唱會紀錄區 -->
-    <div class="container" id="concerts">
-        <div class="text">
-            <p><strong>演唱會回憶</strong></p>
-            <p>在飯太妍的第八年(2023年)第一次參加到了他在台北小巨蛋的演唱會，<br/>這是一定是我此生難忘的事情之一。</p>
-            <p>🌟 精彩時刻：在兩年後的2025太妍成為第一位海外歌手在大巨蛋開唱的紀錄，<br/>有榮幸參與到這個瞬間，到現在靈魂還在大巨蛋呢!~</p>
-        </div>
-        <div>
-            <img src="https://pbs.twimg.com/media/GqLjdvRaUAAn341?format=jpg&name=large" alt="Taeyeon Concert" />
-        </div>
+  <!-- 動態歌詞輪播區 -->
+  <div class="lyrics-marquee" id="lyrics">
+    <span>
+      ✨ 그대라는 시 - (그대라는 시) ✨ 시간을 되돌린다면 - (Time Lapse) ✨ 사계 - (Four Seasons) ✨ What Do I Call You - (What Do I Call You) ✨ I - (I) ✨ INVU - (INVU) ✨ Drawing Our Moments - (To. X) ✨ Weekend - (Weekend) ✨ Can't Control Myself - (Can't Control Myself) ✨
+    </span>
+  </div>
+
+  <div class="main-title">Welcome to My KPOP Story</div>
+
+  <div class="container" id="intro">
+    <div class="text">
+      <p>這是我對KPOP的追隨故事，專注於我最喜歡的歌手：<br><strong>少女時代的太妍 (TAEYEON)</strong></p>
+      <p>太妍於1989年3月9日出生在韓國全州，她是我終極的KPOP偶像！</p>
     </div>
+    <img src="https://pbs.twimg.com/media/GlwdfQMbIAAgARA?format=jpg&name=4096x4096" alt="Taeyeon">
+  </div>
 
-    <!-- 第五段：MV推薦區 -->
-    <div class="container" id="mvs">
-        <div class="text">
-            <p><strong>MV推薦 – 必看太妍 MV</strong></p>
-            <p>這裡是我最喜歡的太妍MV，總是反覆觀看：</p>
-            <ul>
-                <li>🎬 <iframe width="560" height="315" src="https://www.youtube.com/embed/4OrCA1OInoo?si=7Pghl1kjrQ8ZtuZg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></li>
-                <li>🎬 <iframe width="560" height="315" src="https://www.youtube.com/embed/AbZH7XWDW_k?si=J24PXM7B963Og3Ic" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></li>
-            </ul>
-        </div>
+  <div class="container" id="debut">
+    <div class="text">
+      <p><strong>"I" (2015) – 太妍的個人出道專輯</strong></p>
+      <p>發行日期：2015年10月7日<br>類型：流行、抒情</p>
+      <p>概述：<br>"I" 是太妍的個人出道專輯，展示她強大的嗓音與情感深度。<br>主打歌《I》節奏感十足，而《U R》是一首充滿情感的抒情曲。</p>
     </div>
+    <img src="https://pbs.twimg.com/media/GlqD8MtaYAA2s6m?format=jpg&name=large" alt="Debut">
+  </div>
 
-    <footer>
-        <p>© 2025 by 𝐁𝐁 . All rights reserved.</p>
-        <p>Follow me on IG: <a href="https://instagram.com/bu.sec_01" target="_blank">bu.sec_01</a></p>
-    </footer>
+  <div class="container" id="concerts">
+    <div class="text">
+      <p><strong>演唱會回憶</strong></p>
+      <p>在飯太妍的第八年(2023年)第一次參加她在台北小巨蛋的演唱會，令人難忘！<br>
+      🌟 精彩時刻：2025年太妍成為第一位在台北大巨蛋開唱的海外歌手，我有幸參與這歷史性的演出！</p>
+    </div>
+    <img src="https://pbs.twimg.com/media/GqLjdvRaUAAn341?format=jpg&name=large" alt="Concert">
+  </div>
+
+  <!-- MV 區塊 -->
+  <div class="container" id="mvs">
+    <div class="text" style="width: 100%;">
+      <p><strong>MV推薦 – 必看太妍 MV</strong></p>
+      <p>這裡是我最喜歡的太妍MV：</p>
+      <div class="mv-grid">
+        <iframe src="https://www.youtube.com/embed/4OrCA1OInoo" allowfullscreen></iframe>
+        <iframe src="https://www.youtube.com/embed/AbZH7XWDW_k" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <h2>🎧 聆聽太妍的音樂</h2>
+	<iframe style="border-radius:12px" src="https://open.spotify.com/embed/artist/3qNVuliS40BLgXGxhdBdqu?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+    <p>© 2025 by BB. All rights reserved.</p>
+    <p>Follow me on IG: <a href="https://instagram.com/bu.sec_01" target="_blank">bu.sec_01</a></p>
+  </footer>
 
 </body>
 </html>
