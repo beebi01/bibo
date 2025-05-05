@@ -1,616 +1,255 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zhen's Website</title>
-  <style>
-    /* 全局樣式 */
-    body {
-      font-family: 'Arial', sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #F4F6F9;
-      color: #333;
-      line-height: 1.6;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background-image: url('https://example.com/background-image.jpg');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My KPOP Story</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Open+Sans:wght@400;600&display=swap');
 
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #1A1A1A;
+    font-family: 'Montserrat', sans-serif;
+    color: #fff;
+    overflow-x: hidden;
+}
+
+/* Header */
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 999;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+    transition: all 0.3s ease;
+}
+
+header h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #f7c9f9;
+    padding-left: 20px;
+}
+
+nav {
+    display: flex;
+    gap: 25px;
+    padding-right: 20px;
+}
+
+nav a {
+    font-size: 1.2rem;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+nav a:hover {
+    color: #f7c9f9;
+    text-decoration: underline;
+}
+
+/* Main Section */
+.main-title {
+    text-align: center;
+    margin-top: 120px;
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeIn 2s forwards;
+}
+
+/* Container for Sections */
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 92%;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 30px;
+    border-radius: 15px;
+    background-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+    opacity: 0;
+    animation: slideIn 1.2s forwards;
+}
+
+.container img {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+    transition: transform 0.3s ease;
+}
+
+.container img:hover {
+    transform: scale(1.05);
+}
+
+.text {
+    flex: 1;
+    color: #eaeaea;
+    font-size: 1.15rem;
+    line-height: 1.8;
+    letter-spacing: 1px;
+}
+
+ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+ul li::before {
+    content: '🎶 ';
+    margin-right: 5px;
+}
+
+/* Footer */
+footer {
+    background-color: #000;
+    color: #eaeaea;
+    text-align: center;
+    padding: 30px 0;
+    font-size: 1rem;
+    margin-top: 60px;
+}
+
+footer a {
+    color: #f7c9f9;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
     header {
-      background-color: rgba(29, 161, 242, 0.9);
-      color: white;
-      width: 100%;
-      padding: 20px;
-      text-align: center;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        flex-direction: column;
+        text-align: center;
     }
 
-    header h1 {
-      font-size: 3rem;
-      margin: 0;
-      animation: fadeIn 2s ease-out;
-    }
-
-    header p {
-      font-size: 1.2rem;
-      margin-top: 10px;
-      opacity: 0.8;
-    }
-
-    @keyframes fadeIn {
-      0% { opacity: 0; }
-      100% { opacity: 1; }
+    .main-title {
+        font-size: 2.5rem;
     }
 
     .container {
-      width: 100%;
-      max-width: 1200px;
-      padding: 20px;
-      margin: 0 auto;
-    }
-
-    nav {
-      display: flex;
-      justify-content: center;
-      background-color: #333;
-      padding: 15px 0;
-      width: 100%;
-    }
-
-    nav a {
-      color: white;
-      text-decoration: none;
-      padding: 10px 20px;
-      margin: 0 10px;
-      font-size: 1.1rem;
-      transition: background-color 0.3s ease;
-    }
-
-    nav a:hover {
-      background-color: #1DA1F2;
-      border-radius: 5px;
-    }
-
-    main {
-      margin-top: 20px;
-      padding: 30px;
-      background-color: rgba(255, 255, 255, 0.9);
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      max-width: 1000px;
-      width: 90%;
-      margin-bottom: 40px;
-      animation: slideUp 1s ease-out;
-    }
-
-    .group-photo-section {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-
-    .group-photo-section img {
-      width: 100%;
-      height: auto;
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-
-    .members-introduction,
-    .group-features,
-    .hit-songs {
-      text-align: center;
-      margin-top: 40px;
-      padding: 20px;
-    }
-
-    .members-introduction h2,
-    .group-features h2,
-    .hit-songs h2 {
-      font-size: 2rem;
-      color: #1DA1F2;
-    }
-
-    .members-introduction p,
-    .group-features p,
-    .hit-songs p {
-      font-size: 1.2rem;
-      color: #555;
-      max-width: 800px;
-      margin: 20px auto;
-    }
-
-    .members-section {
-      text-align: center;
-      margin-top: 40px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      padding: 20px;
-    }
-
-    .member {
-      background-color: #f9f9f9;
-      width: 250px;
-      text-align: center;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
-      margin-bottom: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .member:hover {
-      transform: translateY(-10px);
-    }
-
-    .member img {
-      width: 100%;
-      height: 250px;
-      object-fit: cover;
-      border-radius: 10px;
-      margin-bottom: 15px;
-    }
-
-    .member h3 {
-      font-size: 1.4rem;
-      color: #1DA1F2;
-      margin-top: 10px;
-    }
-
-    .member p {
-      font-size: 1rem;
-      color: #555;
-      margin-top: 5px;
-    }
-
-    .music-section {
-      margin-top: 50px;
-      text-align: center;
-      width: 100%;
-    }
-
-    .music-section h2 {
-      font-size: 2rem;
-      color: #1DA1F2;
-    }
-
-    .video-section iframe {
-      width: 100%;
-      max-width: 900px;
-      height: 500px;
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-      margin: 0 auto;
-    }
-
-    @media (max-width: 768px) {
-      header h1 {
-        font-size: 2.5rem;
-      }
-
-      header p {
-        font-size: 1rem;
-      }
-
-      nav {
         flex-direction: column;
-      }
-
-      .member {
-        width: 45%;
-      }
-    }
-
-    @media (max-width: 480px) {
-      header h1 {
-        font-size: 2rem;
-      }
-
-      header p {
-        font-size: 0.9rem;
-      }
-
-      nav a {
-        font-size: 1rem;
-      }
-
-      .video-section iframe {
-        height: 300px;
-      }
-
-      .member {
-        width: 90%;
-      }
-	#lyrics-slider {
-		font-size: 1.5rem;
-		color: #1DA1F2;
-		margin: 40px auto;
-		max-width: 90%;
-		text-align: center;
-	}
-	.parallax {
-		background-image: url('your-image-url.jpg');
-		height: 100vh;
-		background-position: center;
-		background-attachment: fixed;
-		background-size: cover;
-	}
-	@keyframes textColorChange {
-		0% { color: #ff0000; }
-		50% { color: #00ff00; }
-		100% { color: #0000ff; }
-		}
-		
-	h2 {
-		animation: textColorChange 3s infinite;
-	}
-	
-	body {
-		font-family: 'Roboto', sans-serif;
-	}
-	.member {
-		perspective: 1000px;
-	}
-		
-	.member-inner {
-		position: relative;
-		width: 100%;
-		height: 100%;
-		transition: transform 0.8s;
-		transform-style: preserve-3d;
-	}
-		
-	.member:hover .member-inner {
-		transform: rotateY(180deg);
-	}
-		
-	.member-front, .member-back {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		backface-visibility: hidden;
-		border-radius: 10px;
-		overflow: hidden;
-	}
-		
-	.member-front {
-		background-color: #f9f9f9;
-	}
-		
-	.member-back {
-		background-color: #1DA1F2;
-		color: white;
-		transform: rotateY(180deg);
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		padding: 15px;
-	}
-	.member-inner.flipped {
-		transform: rotateY(180deg);
-	}
-	    .music-section h2 {
-      font-size: 2rem;
-      color: #1DA1F2;
-    }
-
-    .video-section iframe {
-      width: 100%;
-      max-width: 900px;
-      height: 500px;
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-      margin: 0 auto;
-    }
-
-    @media (max-width: 768px) {
-      header h1 {
-        font-size: 2.5rem;
-      }
-
-      header p {
-        font-size: 1rem;
-      }
-
-      nav {
-        flex-direction: column;
-      }
-
-      .member {
-        width: 45%;
-      }
-    }
-
-    @media (max-width: 480px) {
-      header h1 {
-        font-size: 2rem;
-      }
-
-      header p {
-        font-size: 0.9rem;
-      }
-
-      nav a {
-        font-size: 1rem;
-      }
-
-      .video-section iframe {
-        height: 300px;
-      }
-
-      .member {
-        width: 90%;
-      }
-
-      #lyrics-slider {
-        font-size: 1.5rem;
-        color: #1DA1F2;
-        margin: 40px auto;
-        max-width: 90%;
         text-align: center;
-      }
+        padding: 20px 10px;
+    }
 
-      .parallax {
-        background-image: url('your-image-url.jpg');
-        height: 100vh;
-        background-position: center;
-        background-attachment: fixed;
-        background-size: cover;
-      }
-
-      @keyframes textColorChange {
-        0% { color: #ff0000; }
-        50% { color: #00ff00; }
-        100% { color: #0000ff; }
-      }
-
-      h2 {
-        animation: textColorChange 3s infinite;
-      }
-
-      body {
-        font-family: 'Roboto', sans-serif;
-      }
-	 h2:hover {
-		animation-play-state: paused;
-	} 
-    
+    .container img {
+        margin-top: 20px;
+    }
 }
-
-  </style>
-  
+    </style>
 </head>
-
-<script src="https://unpkg.com/scrollreveal"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // 成員卡片翻轉效果
-    document.querySelectorAll('.member').forEach(card => {
-      const inner = card.querySelector('.member-inner');
-      if (inner) {
-        card.addEventListener('click', () => {
-          inner.classList.toggle('flipped');
-        });
-      }
-    });
-
-    // ScrollReveal 初始化
-    ScrollReveal().reveal('.group-photo-section, .video-section, .members-introduction, .group-features, .hit-songs, .members-section, .music-section', {
-      duration: 1200,
-      origin: 'bottom',
-      distance: '50px',
-      easing: 'ease-in-out',
-      reset: false,
-      interval: 100
-    });
-  });
-</script>
-
-
-
-
 <body>
-	<section class="parallax"></section>
 
-	
-	
-  <header>
-    <h1>Welcome to My Website</h1>
-    <p>Welcome to my homepage of TXT</p>
-  </header>
+    <header>
+        <h1>My KPOP Story</h1>
+        <nav>
+            <a href="#intro">Taeyeon</a>
+            <a href="#debut">Solo Debut</a>
+            <a href="#collection">My Collection</a>
+            <a href="#concerts">Concerts</a>
+            <a href="#mvs">MV Recs</a>
+        </nav>
+    </header>
 
-  <nav>
-    <a href="#">首頁</a>
-    <a href="#">成員介紹</a>
-    <a href="#">影片</a>
-    <a href="#">音樂</a>
-  </nav>
+    <div class="main-title">Welcome to My KPOP Story</div>
 
-  <div class="container">
-    <main>
-      <section class="group-photo-section">
-        <h2>TXT 團體照片</h2>
-        <img src="https://pbs.twimg.com/media/GpoVd_eawAAc7yV?format=jpg&name=large" alt="TXT Group Photo">
-      </section>
+    <!-- 第一段 -->
+    <div class="container" id="intro">
+        <div class="text">
+            <p>這是我對KPOP的追隨故事，專注於我最喜歡的歌手：<br> <strong>少女時代的太妍 (TAEYEON)</strong></p>
+            <p>太妍於1989年3月9日出生在韓國全州，她是我終極的KPOP偶像！</p>
+        </div>
+        <div>
+            <img src="https://pbs.twimg.com/media/GlwdfQMbIAAgARA?format=jpg&name=4096x4096" alt="SNSD TAEYEON" />
+        </div>
+    </div>
 
-      <section class="video-section">
-        <h2>最新影片</h2>
-        <iframe src="https://www.youtube.com/embed/W-LOSGElZ_M" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      </section>
+    <!-- 第二段 -->
+    <div class="container" id="debut">
+        <div class="text">
+            <p><strong>"I" (2015) – 太妍的個人出道專輯</strong><br>
+            發行日期：2015年10月7日<br>
+            類型：流行、抒情</p>
 
-      <section class="members-introduction">
-        <h2>TXT 成員介紹</h2>
-        <p>TXT（Tomorrow X Together） 是由韓國娛樂公司 BigHit Music（現為 HYBE LABELS 旗下）於 2019 年推出的男子音樂團體。團名「Tomorrow X Together」意指「你和我攜手一起創造明天」，展現出團體合作與成長的概念。</p>
-      </section>
-
-
-
-		<section class="members-section">
-
-		<div class="member">
-		<div class="member-inner">
-			<div class="member-front">
-			<img src="https://i.pinimg.com/736x/cc/35/76/cc3576b35f3cab29a75522e1972b2f44.jpg" alt="Yeonjun">
-			<div class="member-name">然竣 (Yeonjun)</div>
-			</div>
-			<div class="member-back">
-			<p>年齡：23歲（截至2025年）<br>擅長舞蹈與饒舌，團內的氛圍製造機。<br>BigHit 傳奇練習生。<br>愛吃辣、愛打電動。</p>
-			</div>
-		</div>
-		</div>
-		
-		<div class="member">
-		<div class="member-inner">
-			<div class="member-front">
-			<img src="https://im.marieclaire.com.tw/m800c533h100b0/assets/mc/202411/672C96213AC461730975265.jpeg" alt="Soobin">
-			<div class="member-name">秀彬 (Soobin)</div>
-			</div>
-			<div class="member-back">
-			<p>年齡：22歲（截至2025年）<br>隊長，溫柔的存在。<br>喜歡養倉鼠和看書。<br>曾主持《Music Bank》。</p>
-			</div>
-		</div>
-		</div>
-		
-		<div class="member">
-		<div class="member-inner">
-			<div class="member-front">
-			<img src="https://scontent.ftpe7-4.fna.fbcdn.net/v/t39.30808-6/480562531_650427614230297_3605095857789815515_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=127cfc&_nc_ohc=57LfbcX7vwoQ7kNvwH2yPwn&_nc_oc=AdmEVIuoFz8_FbHfC4F09Xk8MlAboZPkUa0N8J3Qzb5t5MrlYZaFQ5KEjnNVkRrHWeQ5c-OeejV4HdGqUHAUo4tI&_nc_zt=23&_nc_ht=scontent.ftpe7-4.fna&_nc_gid=gEAs2kwPw3Xrs2QKFpnqvw&oh=00_AfHj56NYF2psCWRxmuGTHJ0WaqQyU7shzkhGhUR4XLBI7g&oe=681B231C" alt="Beomgyu">
-			<div class="member-name">杋圭 (Beomgyu)</div>
-			</div>
-			<div class="member-back">
-			<p>年齡：22歲（截至2025年）<br>團內氣氛擔當，有創作才能。<br>喜歡彈吉他與寫歌。<br>像「搞笑擔當」+「小太陽」☀️</p>
-			</div>
-		</div>
-		</div>
-		
-		<div class="member">
-		<div class="member-inner">
-			<div class="member-front">
-			<img src="https://i.pinimg.com/736x/22/07/f4/2207f44e50c54e8932f56e4c654e9d0c.jpg" alt="Taehyun">
-			<div class="member-name">太顯 (Taehyun)</div>
-			</div>
-			<div class="member-back">
-			<p>年齡：20歲（截至2025年）<br>主唱之一，聲音細膩有力。<br>從小是童星出身。<br>會英文，語言能力很強。</p>
-			</div>
-		</div>
-		</div>
-		
-		<div class="member">
-		<div class="member-inner">
-			<div class="member-front">
-			<img src="https://i.pinimg.com/736x/aa/45/1a/aa451af0791d3bfe2bef573c0c546ff4.jpg" alt="Huening Kai">
-			<div class="member-name">休寧凱 (Huening Kai)</div>
-			</div>
-			<div class="member-back">
-			<p>年齡：20歲（截至2025年）<br>最年幼成員，充滿可愛魅力。<br>混血（爸爸是美國人）。<br>擅長鋼琴、創作與表演。</p>
-			</div>
-		</div>
-		</div>
-		
-		<section>
-
-		<script>
-		document.addEventListener('DOMContentLoaded', () => {
-			ScrollReveal().reveal('.group-photo-section, .video-section, .members-introduction, .group-features, .hit-songs, .members-section, .music-section', {
-			duration: 1200,
-			origin: 'bottom',
-			distance: '50px',
-			easing: 'ease-in-out',
-			reset: false,
-			interval: 100
-			});
-		
-			document.querySelectorAll('.member').forEach(card => {
-			card.addEventListener('click', () => {
-				card.querySelector('.member-inner').classList.toggle('flipped');
-			});
-			});
-		});
-		</script>
-		
+            <p><strong>概述：</strong><br>
+            "I"是太妍的個人出道專輯，展示了她強大的嗓音和情感深度。<br>
+            主打歌《I》是一首節奏感十足的流行歌曲，而《U R》則是一首充滿情感的抒情歌曲，突顯她的嗓音範圍與情感表達。</p>
+            
+            <p><strong>影響：</strong><br>
+            這張專輯取得商業成功，確立了太妍作為個人歌手的地位，並獲得了廣泛的好評。</p>
+        </div>
+        <div>
+            <img src="https://pbs.twimg.com/media/GlqD8MtaYAA2s6m?format=jpg&name=large" alt="SNSD TAEYEON" />
+        </div>
+    </div>
 
 
-	<!-- 團體特色介紹 -->
-	<section class="group-features">
-		<h2>團體特色</h2>
-		<p>TXT以強烈的概念敘事、青春成長主題以及融合多種曲風（如K-pop、搖滾、電子與Hyperpop）聞名。他們的音樂作品常圍繞青春期的困惑、夢想與情感波動，並透過精心設計的MV與專輯概念故事線展現「概念偶像」的形象。</p>
-      </section>
-	
-	<script>
-	const lyrics = [
-		'"I know I love you..."',
-		'"My life before you was a mess..."',
-		'"0X1=LOVESONG, I’m losing my way..."',
-		'"You make me a better me..."',
-		'"Even if I fall, I’ll stand up again with you..."'
-	];
-	let index = 0;
-  
-	setInterval(() => {
-		index = (index + 1) % lyrics.length;
-		const lyric = document.getElementById("lyric-line");
-		lyric.style.opacity = 0;
-		setTimeout(() => {
-		lyric.textContent = lyrics[index];
-		lyric.style.opacity = 1;
-		}, 500);
-		}, 4000);
-	</script>
-	<!-- 動態歌詞輪播區 -->
-	<div id="lyrics-slider" style="text-align: center; font-size: 1.5rem; font-style: italic; color: #1DA1F2; margin: 40px auto;">
-		<p id="lyric-line" style="transition: opacity 1s ease;">"I know I love you..."</p>
-	</div>
 
-      <!-- 主打歌介紹 -->
-      <section class="hit-songs">
-        <h2>代表作品</h2>
-        <p>自出道以來，TXT推出多首膾炙人口的歌曲，包括：</p>
-        <p>
-          <strong>〈CROWN〉</strong>（出道曲，展現青春蛻變主題）、<br>
-          <strong>〈Run Away〉</strong>（展現友情與逃離現實的想像）、<br>
-          <strong>〈Blue Hour〉</strong>（描繪5點53分天空下的浪漫瞬間）、<br>
-          <strong>〈0X1=LOVESONG〉</strong>（表現內心矛盾與愛的救贖）、<br>
-          <strong>〈Sugar Rush Ride〉</strong> 與 <strong>〈Chasing That Feeling〉</strong> 等，<br/>都展現出TXT在音樂風格與概念表達上的多樣性與深度。
-        </p>
-      </section>
+    <!-- 第四段：演唱會紀錄區 -->
+    <div class="container" id="concerts">
+        <div class="text">
+            <p><strong>演唱會回憶</strong></p>
+            <p>在飯太妍的第八年(2023年)第一次參加到了他在台北小巨蛋的演唱會，<br/>這是一定是我此生難忘的事情之一。</p>
+            <p>🌟 精彩時刻：在兩年後的2025太妍成為第一位海外歌手在大巨蛋開唱的紀錄，<br/>有榮幸參與到這個瞬間，到現在靈魂還在大巨蛋呢!~</p>
+        </div>
+        <div>
+            <img src="https://pbs.twimg.com/media/GqLjdvRaUAAn341?format=jpg&name=large" alt="Taeyeon Concert" />
+        </div>
+    </div>
 
-      <section class="music-section">
-        <h2>聽我們的最新歌曲</h2>
-        <iframe src="https://open.spotify.com/embed/track/3wBeIjb0vtiTwIQPce2stZ?si=A6-B0zj0Qu6jczyRXJwAdA&context=spotify%3Aalbum%3A5BeSpFkdJkSc9phzT3bJSs" width="100%" height="152" frameborder="0" allow="encrypted-media"></iframe>
-      </section>
-	<!-- Apple Music 區塊 -->
-	<div class="music-section">
-	  <h2>TXT 在 Apple Music 上</h2>
-	  <iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
-			  frameborder="0"
-			  height="175"
-			  style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;"
-			  sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
-			  src="https://embed.music.apple.com/tw/song/deja-vu/1733097066"></iframe>
+    <!-- 第五段：MV推薦區 -->
+    <div class="container" id="mvs">
+        <div class="text">
+            <p><strong>MV推薦 – 必看太妍 MV</strong></p>
+            <p>這裡是我最喜歡的太妍MV，總是反覆觀看：</p>
+            <ul>
+				<iframe src="https://www.youtube.com/watch?v=4OrCA1OInoo" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <iframe src="https://www.youtube.com/watch?v=5iSlfF8kSUo" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+				<iframe src="https://www.youtube.com/watch?v=eHir_vB1RUI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </ul>
+        </div>
+    </div>
 
-	  <p style="margin-top: 20px;">
-		🔗
-		<a href="https://music.apple.com/tw/artist/tomorrow-x-together/1454642552"
-		   target="_blank"
-		   style="color: #1DA1F2; font-weight: bold;">
-		  查看 TXT 的 Apple Music 全部作品
-		</a>
-	  </p>
-	</div>
+    <footer>
+        <p>© 2025 by 𝐁𝐁 . All rights reserved.</p>
+        <p>Follow me on IG: <a href="https://instagram.com/bu.sec_01" target="_blank">bu.sec_01</a></p>
+    </footer>
 
 </body>
 </html>
