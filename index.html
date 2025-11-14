@@ -3,63 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <title>照片分配網站</title>
-
 <style>
-body {
-  font-family: Arial;
-  background: #f4f4f4;
-  padding: 30px;
-  text-align: center;
-}
-
-button {
-  background: #2d70ff;
-  color: white;
-  padding: 15px 25px;
-  border: none;
-  border-radius: 6px;
-  font-size: 18px;
-  cursor: pointer;
-  margin-bottom: 30px;
-}
-
-button:hover {
-  background: #1c4ec9;
-}
-
-.grid {
-  width: 90%;
-  max-width: 900px;
-  margin: auto;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-.grid img {
-  width: 100%;
-  aspect-ratio: 1/1;
-  object-fit: cover;
-  border-radius: 6px;
-}
+body { font-family: Arial; background: #f4f4f4; padding: 30px; text-align: center; }
+button { background: #2d70ff; color: white; padding: 15px 25px; border: none; border-radius: 6px; font-size: 18px; cursor: pointer; margin-bottom: 30px; }
+button:hover { background: #1c4ec9; }
+.grid { width: 90%; max-width: 900px; margin: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.grid img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 6px; }
 </style>
-
 </head>
 <body>
 
 <h2>照片分配網站</h2>
 
-<!-- 你給的資料夾連結 -->
 <button onclick="window.open('https://drive.google.com/drive/folders/1xZsedrGQIL2zO1HncKOXMOKR1NSOwkYC', '_blank')">
   點此上傳照片（雲端硬碟）
 </button>
 
-<h3>已上傳的照片預覽（需要 Google Drive API 才能自動展示）</h3>
-<p style="opacity:0.7;">* 如果你希望主頁也自動抓照片，我可以幫你加</p>
+<h3>已上傳照片預覽（最多 30 張）</h3>
+<div class="grid" id="photoGrid"></div>
 
-<div class="grid" id="photoGrid">
-  <!-- 目前先空白，如果你要自動顯示，我可以幫你寫 -->
-</div>
+<script>
+const FOLDER_ID = "1xZsedrGQIL2zO1HncKOXMOKR1NSOwkYC";
+const API_KEY = "YOUR_GOOGLE_API_KEY"; // 你的 Google Drive API Key
+const photoGrid = document.getElementById("photoGrid");
+
+// 使用 Google Drive API 抓資料夾內檔案
+fetch(`https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents&key=${API_KEY}&fields=files(id,name,mimeType)&pageSize=30`)
+  .then(res => res.json())
+  .then(data => {
+    data.files.forEach(file => {
+      if(file.mimeType.startsWith("image/")) {
+        const img = document.createElement("img");
+        img.src = `https://drive.google.com/uc?export=view&id=${file.id}`;
+        photoGrid.appendChild(img);
+      }
+    });
+  })
+  .catch(err => console.error(err));
+</script>
 
 </body>
 </html>
