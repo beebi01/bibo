@@ -1,47 +1,65 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>照片儲存器</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
-  <style>
-    .grid-item {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: center;
-      background-color: #f9f9f9;
-      border-radius: 8px;
-    }
-    .grid-item img {
-      width: 100%;
-      height: auto;
-      border-radius: 8px;
-      margin-top: 10px;
-    }
-  </style>
-</head>
-<body class="bg-gray-100 py-10">
-  <div class="container mx-auto px-4">
-    <h1 class="text-2xl font-semibold mb-6 text-center">我的照片儲存器</h1>
+<meta charset="UTF-8">
+<title>照片分配網站</title>
 
-    <!-- 30格的照片顯示區域 -->
-    <div class="grid grid-cols-3 gap-6">
-      <!-- 每個格子的內容 -->
-      <div class="grid-item">
-        <p class="font-medium">標題1</p>
-        <img src="https://via.placeholder.com/150" alt="Photo 1">
-      </div>
-      <div class="grid-item">
-        <p class="font-medium">標題2</p>
-        <img src="https://via.placeholder.com/150" alt="Photo 2">
-      </div>
-      <div class="grid-item">
-        <p class="font-medium">標題3</p>
-        <img src="https://via.placeholder.com/150" alt="Photo 3">
-      </div>
-      <!-- 可以繼續增加格子，這裡展示3個 -->
-    </div>
-  </div>
+<style>
+body {
+  font-family: Arial;
+  background: #f4f4f4;
+  padding: 30px;
+  text-align: center;
+}
+
+button {
+  background: #2d70ff;
+  color: white;
+  padding: 15px 25px;
+  border: none;
+  border-radius: 6px;
+  font-size: 18px;
+  cursor: pointer;
+  margin-bottom: 30px;
+}
+
+button:hover {
+  background: #1c4ec9;
+}
+
+.grid {
+  width: 90%;
+  max-width: 900px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.grid img {
+  width: 100%;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  border-radius: 6px;
+}
+</style>
+
+</head>
+<body>
+
+<h2>照片分配網站</h2>
+
+<!-- 你給的資料夾連結 -->
+<button onclick="window.open('https://drive.google.com/drive/folders/1xZsedrGQIL2zO1HncKOXMOKR1NSOwkYC', '_blank')">
+  點此上傳照片（雲端硬碟）
+</button>
+
+<h3>已上傳的照片預覽（需要 Google Drive API 才能自動展示）</h3>
+<p style="opacity:0.7;">* 如果你希望主頁也自動抓照片，我可以幫你加</p>
+
+<div class="grid" id="photoGrid">
+  <!-- 目前先空白，如果你要自動顯示，我可以幫你寫 -->
+</div>
+
 </body>
 </html>
