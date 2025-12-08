@@ -272,6 +272,7 @@ let questions = [];
 let currentIndex = 0;
 let score = 0;
 let currentSelected = [];
+let wrongList = [];  // ★ 新增：紀錄錯題
 
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -283,8 +284,14 @@ function shuffle(array) {
 function init() {
   questions = [...rawQuestions];
   shuffle(questions);
+
+  // ★ 隨機抽 40 題，不足 40 題則取全部
+  questions = questions.slice(0, 40);
+
   currentIndex = 0;
   score = 0;
+  wrongList = [];  // ★ 清空錯題
+
   document.getElementById("quiz-screen").style.display = "block";
   document.getElementById("result-screen").style.display = "none";
   showQuestion();
@@ -292,22 +299,23 @@ function init() {
 
 function showQuestion() {
   const qData = questions[currentIndex];
-  document.getElementById("progress").innerText = `進度：${currentIndex + 1} / ${questions.length}`;
+  document.getElementById("progress").innerText =
+    `進度：${currentIndex + 1} / ${questions.length}`;
   document.getElementById("score-now").innerText = `目前得分：${score}`;
-  
+
   const isMulti = qData.a.length > 1;
   const typeLabel = isMulti ? '<span class="tag-multi">複選</span>' : '';
-  
+
   document.getElementById("question-area").innerHTML = typeLabel + qData.q;
-  
+
   const optsArea = document.getElementById("options-area");
   optsArea.innerHTML = "";
   currentSelected = [];
-  
+
   qData.o.forEach((optText, idx) => {
     const btn = document.createElement("div");
     btn.className = "option-btn";
-    btn.innerText = `(${String.fromCharCode(65+idx)}) ${optText}`;
+    btn.innerText = `(${String.fromCharCode(65 + idx)}) ${optText}`;
     btn.onclick = () => toggleSelect(idx, btn, isMulti);
     optsArea.appendChild(btn);
   });
@@ -317,7 +325,7 @@ function showQuestion() {
 }
 
 function toggleSelect(idx, btn, isMulti) {
-  if (document.getElementById("next-btn").style.display === "inline-block") return; 
+  if (document.getElementById("next-btn").style.display === "inline-block") return;
 
   if (isMulti) {
     if (currentSelected.includes(idx)) {
@@ -343,27 +351,36 @@ function checkAnswer() {
 
   const qData = questions[currentIndex];
   const correctAns = qData.a;
-  
+
   currentSelected.sort();
-  // 簡單的比對方式 (陣列轉字串)
-  const isCorrect = JSON.stringify(currentSelected) === JSON.stringify(correctAns.sort());
+  const isCorrect =
+    JSON.stringify(currentSelected) === JSON.stringify([...correctAns].sort());
 
   const allBtns = document.querySelectorAll(".option-btn");
-  
+
   allBtns.forEach((btn, idx) => {
     if (currentSelected.includes(idx)) {
-       if (correctAns.includes(idx)) {
-         btn.classList.add("correct"); 
-       } else {
-         btn.classList.add("wrong");
-       }
+      if (correctAns.includes(idx)) {
+        btn.classList.add("correct");
+      } else {
+        btn.classList.add("wrong");
+      }
     }
     if (correctAns.includes(idx) && !currentSelected.includes(idx)) {
       btn.classList.add("missed");
     }
   });
 
-  if (isCorrect) score++;
+  if (isCorrect) {
+    score++;
+  } else {
+    // ★ 記錄錯題
+    wrongList.push({
+      question: qData.q,
+      yourAns: [...currentSelected],
+      correctAns: [...correctAns]
+    });
+  }
 
   document.getElementById("submit-btn").style.display = "none";
   document.getElementById("next-btn").style.display = "inline-block";
@@ -381,8 +398,32 @@ function nextQuestion() {
 function showResult() {
   document.getElementById("quiz-screen").style.display = "none";
   document.getElementById("result-screen").style.display = "block";
+
   document.getElementById("final-score").innerText = score;
   document.getElementById("total-score").innerText = questions.length;
+
+  const listArea = document.getElementById("wrong-list");
+  listArea.innerHTML = "";
+
+  if (wrongList.length === 0) {
+    listArea.innerHTML = "<p>全部答對！太強了！</p>";
+    return;
+  }
+
+  wrongList.forEach((item, idx) => {
+    const box = document.createElement("div");
+    box.className = "wrong-item";
+    box.innerHTML = `
+      <h4>❌ 第 ${idx + 1} 題</h4>
+      <div class="q">${item.question}</div>
+      <div class="ans">
+        <b>你的答案：</b> ${item.yourAns.map(n => String.fromCharCode(65 + n)).join(", ")}<br>
+        <b>正確答案：</b> ${item.correctAns.map(n => String.fromCharCode(65 + n)).join(", ")}
+      </div>
+      <hr>
+    `;
+    listArea.appendChild(box);
+  });
 }
 
 init();
