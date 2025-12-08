@@ -1,0 +1,5 @@
+{
+  "name": "Exam Sprint Quiz",
+  "description": "A modern, responsive quiz application for exam preparation featuring randomization, multi-select support, and detailed result analysis.",
+  "requestFramePermissions": []
+}
