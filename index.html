@@ -1,534 +1,230 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>考前衝刺題庫 (文字+圖片整合版)</title>
-<style>
-/* --- Reset & Basic Layout --- */
-body {
-    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background: #f5f7fa;
-}
+import React, { useState, useEffect } from 'react';
+import { RAW_QUESTIONS } from './constants';
+import { QuestionData, WrongAnswerEntry } from './types';
+import OptionButton from './components/OptionButton';
+import ResultScreen from './components/ResultScreen';
 
-/* --- Main Container --- */
-.container {
-    max-width: 900px;
-    width: 95%;
-    margin: 30px auto;
-    background: #ffffff;
-    padding: 20px 30px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    border-radius: 12px;
-}
+function App() {
+  const [questions, setQuestions] = useState<QuestionData[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
+  const [wrongList, setWrongList] = useState<WrongAnswerEntry[]>([]);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isQuizEnded, setIsQuizEnded] = useState(false);
 
-/* --- Title --- */
-h1 {
-    color: #333;
-    border-bottom: 3px solid #4a90e2;
-    padding-bottom: 12px;
-    text-align: center;
-}
+  // Initialize Quiz
+  useEffect(() => {
+    startQuiz();
+  }, []);
 
-/* --- Navbar Buttons --- */
-.navbar {
-    text-align: center;
-    margin-bottom: 30px;
-}
+  const startQuiz = () => {
+    // Shuffle and pick 40
+    const shuffled = [...RAW_QUESTIONS].sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 40);
+    
+    setQuestions(selected);
+    setCurrentIndex(0);
+    setScore(0);
+    setWrongList([]);
+    setSelectedIndices([]);
+    setIsSubmitted(false);
+    setIsQuizEnded(false);
+    window.scrollTo(0, 0);
+  };
 
-.navbar button {
-    margin: 10px 6px;
-    padding: 10px 18px;
-    border: none;
-    background: #4a90e2;
-    color: #fff;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    transition: background 0.25s, transform 0.2s;
-}
-
-.navbar button:hover {
-    background: #357ab8;
-    transform: translateY(-2px);
-}
-
-/* --- Question Box --- */
-.question {
-    margin-top: 25px;
-    padding: 20px;
-    background: #fafafa;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    font-size: 20px;
-    line-height: 1.6;
-}
-
-.options {
-    margin-top: 20px;
-}
-
-.options label {
-    display: block;
-    padding: 12px;
-    margin: 10px 0;
-    background: #ffffff;
-    border: 1px solid #dcdcdc;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.25s;
-}
-
-.options label:hover {
-    background: #f0f6ff;
-    border-color: #4a90e2;
-}
-
-/* --- Buttons --- */
-#nextBtn, #submitBtn, #restartBtn {
-    margin-top: 30px;
-    padding: 12px 24px;
-    background: #4a90e2;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 17px;
-    display: block;
-    width: 100%;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    transition: background .2s, transform .2s;
-}
-
-#nextBtn:hover, #submitBtn:hover, #restartBtn:hover {
-    background: #357ab8;
-    transform: translateY(-2px);
-}
-
-#nextBtn:disabled, #submitBtn:disabled {
-    background: #b0b0b0;
-    cursor: not-allowed;
-}
-
-/* --- Results --- */
-.result-box {
-    padding: 25px;
-    background: #e9f4ff;
-    border: 1px solid #b7dafb;
-    border-radius: 12px;
-    margin-top: 30px;
-    font-size: 22px;
-    text-align: center;
-    color: #333;
-}
-
-/* --- Responsive --- */
-@media (max-width: 600px) {
-    .container {
-        padding: 20px;
-    }
-    .navbar button {
-        width: 100%;
-        margin: 10px 0;
-    }
-    .question {
-        font-size: 18px;
-    }
-}
-
-</style>
-</head>
-<body>
-
-<div class="quiz-container">
-  <div id="quiz-screen">
-    <div class="header">
-      <span id="progress"></span>
-      <span id="score-now">得分: 0</span>
-    </div>
-    <div id="question-area" class="question-text"></div>
-    <ul class="options" id="options-area"></ul>
-    <div class="controls">
-      <button id="submit-btn" class="action-btn" onclick="checkAnswer()">送出答案</button>
-      <button id="next-btn" class="action-btn" onclick="nextQuestion()">下一題</button>
-    </div>
-  </div>
-
-  <div id="result-screen">
-    <h2>測驗結束</h2>
-    <p>你的總分</p>
-    <div class="score-display"><span id="final-score">0</span> / <span id="total-score">0</span></div>
-    <button class="action-btn" style="background:#4CAF50" onclick="location.reload()">重新測驗 (題目重洗)</button>
-  </div>
-</div>
-
-<script>
-// --- 題目資料區 (包含你剛剛貼的所有題目) ---
-const rawQuestions = [
-// --- 第一類：網路基礎 (1-01 ~ 1-70) ---
-  {q:"1-01.網路基礎建設包含三類網路元件,下列敘述哪些正確?(複選)", o:["裝置","檔案","媒體","服務"], a:[0,2,3]},
-  {q:"1-02.關於網路基礎架構的類型,下列敘述哪些正確?(複選)", o:["人際網路","區域網路","無線網路","廣域網路"], a:[1,2,3]},
-  {q:"1-03.下列敘述哪⼀項是指統合網路?", o:["⼀項服務-⼀個網路","⼀項服務-多個網路","多項服務-⼀個網路","多項服務-多個網路"], a:[2]},
-  {q:"1-04.將資料從⼀個給定點傳送到另⼀給定點所⽤的時間,下列敘述哪⼀項正確?", o:["Dead Time","Hello Time","延遲時間","收斂時間"], a:[2]},
-  {q:"1-05.頻寬是媒體承載資料的能力,下列哪些是屬於頻寬的單位?(複選)", o:["Kbps","Mbps","Lbps","Gbps"], a:[0,1,3]},
-  {q:"1-06.下列哪些裝置是屬於終端裝置?(複選)", o:["網路線","筆型電腦","網路印表機","行動手持裝置"], a:[1,2,3]},
-  {q:"1-07.下列敘述哪⼀項裝置,是⽤來將不同型式的網路連接起來的連接器,連接有許多區段的複雜網路?", o:["主機","Web 伺服器","DSL 數據機","路由器"], a:[3]},
-  {q:"1-08.下列哪⼀項裝置,是指所有連線到網路並直接參與網路通訊的電腦?", o:["VoIP 電話","行動手持裝置","網路印表機","主機"], a:[3]},
-  {q:"1-09.下列哪⼀項不是階層式網路設計的網路層級?", o:["存取層","分佈層","網路層","核心層"], a:[0]},
-  {q:"1-10 關於階層式網路設計中分佈層的敘述,下列哪⼀項正確?", o:["提供基於政策管理的連通服務","提供作業群組或使⽤者的網路存取服務","提供分佈層交換設備間快速傳送服務","使⽤更快速而不是更多的設備來實現擴展"], a:[0]},
-  {q:"1-11.最簡單的對等式網路,是由兩台使⽤有線或無線連線方式直接相連的電腦組成,下列敘述哪⼀項是對等式網路的優點?", o:["成本較高","不可延伸","無法集中管理","易於安裝"], a:[3]},
-  {q:"1-12.最簡單的對等式網路,是由兩台使⽤有線或無線連線方式直接相連的電腦組成,下列敘述哪⼀項是對等式網路的缺點?", o:["易於安裝","複雜性較低","無法集中管理","成本較低"], a:[2]},
-  {q:"1-13.若要在 Windows 電腦中檢視 MAC 位址的指令及參數,下列哪⼀項正確?", o:["ipconfig/renew","ipconfig/release","ipconfig/all","ipconfig"], a:[2]},
-  {q:"1-14.會傳送「網際網路控制訊息通訊協定」(ICMP)回應封包給目的地,已確定到目的地所經的路徑,下列指令哪⼀項正確?", o:["Ping","Tracert","telnet","ssh"], a:[1]},
-  {q:"1-15.使⽤ ping 命令是測試連通性的有效方法,下列哪⼀項是 ping 指令所使⽤的協定?", o:["TCP","UDP","ARP","ICMP"], a:[3]},
-  {q:"1-16.若要進行網路監控和排除網路故障,下列哪⼀項是最有效的⼯具?", o:["建立網路基線","網路設計","IP 定址方案","標識網路"], a:[0]},
-  {q:"1-17.關於邏輯拓樸圖的內容,下列哪⼀項錯誤?", o:["標識裝置","標識連接埠和 IP 定址方案","標識中介裝置"," IP 定址方案"], a:[2]},
-  {q:"1-18.關於實體拓樸圖的內容,下列哪⼀項錯誤?", o:["標識中介裝置","連接埠設定"," IP 定址方案","纜線安裝的實體位置"], a:[2]},
-  {q:"1-19.關於實體拓樸和邏輯拓樸的敘述,下列哪些正確?(複選)", o:["實體拓樸顯示每個網路的 IP 定址方案","實體拓樸是電纜、電腦和其他週邊裝置的實體位置","邏輯拓樸始終與實體拓樸相同","邏輯拓樸紀錄資料透過網路的路徑以及網路功能(如路由)發生的位置"], a:[1,3]},
-  {q:"1-20.關於區域網路常⽤的實體拓樸,下列哪些正確?(複選)", o:["網狀","星形","環狀","匯流排"], a:[1,2,3]},
-  {q:"1-21.下列哪⼀項是銅纜所傳輸的訊號?", o:["光","火","水","電"], a:[3]},
-  {q:"1-22.下列哪⼀項是光纖所傳輸的訊號?", o:["光","火","水","電"], a:[0]},
-  {q:"1-23.光纖相比於銅纜的優勢,下列敘述哪⼀項正確?", o:["熔接和安裝比銅纜更容易","光纖可以在彎管附近安裝","光纖通常比銅纜成本低","光纖比銅纜傳送信號的速度快"], a:[3]},
-  {q:"1-24.若要提供 1.3GB/s 的資料速率並且與較舊的裝置向後相容,下列哪⼀項是可以使⽤的無線網路標準?", o:["IEEE 802a","IEEE 802ac","IEEE 802n","IEEE 802g"], a:[1]},
-  {q:"1-25.關於⼄太網路的標準,下列哪⼀項正確?", o:["IEEE 802.3","IEEE 802.11","IEEE 802.15","IEEE 802.16"], a:[0]},
-  {q:"1-26.關於 IEEE 10BASE5 的定義,下列敘述哪些正確?(複選)", o:["10 表示傳輸速度為 10Mbps","BASE 表示採⽤基頻信號來進行傳輸","5 表示每個網路節點之間最⻑可達 500 公尺","5 表示每個網路節點之間最⻑可達 5000 公尺"], a:[0,1,2]},
-  {q:"1-27.關於 IEEE 1000BASE-T 的定義,下列敘述哪⼀項錯誤?", o:["1000 表示傳輸速度為 1000Mbp","BASE 表示採⽤基頻信號來進行傳輸","T 表示每個網路節點之間最⻑可達 500 公尺","T 表示每個網路節點之間最⻑可達 100 公尺"], a:[2]},
-  {q:"1-28.關於 TIA/EIA-568A 的蕊線排列順序,下列哪⼀項正確?", o:["白綠、綠、白橘、藍、白藍、橘、白棕、棕","白橘、橘、白綠、藍、白藍、綠、白棕、棕","白綠、綠、白橘、橘、白藍、藍、白棕、棕","白橘、橘、白綠、綠、白藍、藍、白棕、棕"], a:[0]},
-  {q:"1-29.⼄太網路的直通線,通常⽤於「電腦到交換器」和「交換器到路由器」的互連,下列敘述哪⼀項是直通線的標準?", o:["2 端都是 568A 或 568B","1 端 568A,另⼀端是 1568B","兩端都不是 2568A 或 568B","1 端是 568A 或 568B,另 1 端排列完全對調"], a:[0]},
-  {q:"1-30.下列哪⼀項仍使⽤同軸電纜來佈線?", o:["無線網路安裝","有線電視服務","交換器到路由器的互連","主機到交換器的互連"], a:[1]},
-  {q:"1-31.下列哪⼀項不是最常⽤的網路光纖連接器?", o:["ST(Straight-Tip)","SC(Subscriber Connector)","LC(Lucent Connector)","RJ-45"], a:[3]},
-  {q:"1-32.關於單個光纖連接使⽤兩股光纖敘述,下列哪⼀項正確?", o:["兩股光纖可以使資料傳輸更⻑距離,並且不會影響性能","它們可以防止串音引起連接干擾","它們允許全雙⼯連接","它們可以提高資料傳輸速度"], a:[2]},
-  {q:"1-33.網路之間的廣域連接有多種形式,下列哪⼀項錯誤?", o:["RJ-45","EIA/TIA-232","EIA/TIA-449","EIA-530"], a:[0]},
-  {q:"1-34.關於 IEEE 802.11g 的敘述,下列哪些正確?(複選)", o:["⼯作頻率為 2.4GHz","速度理論值為 54Mbps","與 IEEE 802.11b 不相容","速度理論值與 IEEE 802.11a ⼀樣"], a:[0,1,3]},
-  {q:"1-35.若要增強 UTP 纜線中的磁場串音抵銷效果,下列敘述哪⼀項正確?", o:["減少⽤於傳輸資料的電線數","變化和增加每個線對中的絞合數量","增加銅線的厚度","增加包裹所有電線的 PVC 護套厚度"], a:[1]},
-  {q:"1-36.下列敘述哪⼀項不應該使⽤跳接來連接?", o:["路由器到路由器⼄太網連接埠","電腦到電腦","電腦到交換器","交換器到交換器"], a:[2]},
-  {q:"1-37.下列敘述哪⼀項是 Cat 5e 網路線可以支援的最大網路傳輸速度?", o:["10Gbps","1000Mbps","100Gbps","1Tbps"], a:[1]},
-  {q:"1-38.在 UTP 安裝中纜線總⻑度受線的⻑度,下列哪⼀項正確?", o:["100 公尺","1 公里","10 公里","100 公里"], a:[0]},
-  {q:"1-39.無遮罩式雙絞線,是由幾對帶彩⾊標的電線絞合在⼀起?", o:["8 對","6 對","2 對","4 對"], a:[3]},
-  {q:"1-40.下列敘述哪⼀項說明何謂專有協定?", o:["可供所有組織或供應商自由使⽤的協定","由私人組織所開發且能在所有供應商硬體上執行的協定","由控制協定定義和操作的組織所開發的協定","稱為 TCP/IP 協定套件的協定集合"], a:[2]},
-  {q:"1-41.關於使⽤開放標準協定的敘述,下列哪⼀項正確?", o:["執行不同作業系統的⽤戶端主機和伺服器可以成功交換資料","競爭和創新僅限於具體的產品類型","Internet 存取可以由每個市場中的單個 ISP 控制","網路通訊侷限於來自相同供應商的裝置之間的資料傳輸"], a:[0]},
-  {q:"1-42.下列敘述哪⼀項不是協定必須考慮的要求?", o:["標識出發送者和接收者","不通⽤的語言和語法","傳遞的速度和時間","證實或確認要求"], a:[1]},
-  {q:"1-43.下列哪⼀項協定,負責控制伺服器和⽤戶端之間交換 HTTP 訊息的大小和速率?", o:["TCP","UDP","ICMP","IP"], a:[0]},
-  {q:"1-44.關於 OSI 模型,下列哪⼀層可以讓封包在不同的網路之間成功地進行傳遞,並規定了網路的定址方式及不同網路間資料的傳遞方式?", o:["應⽤層","傳輸層","資料連結層","網路層"], a:[3]},
-  {q:"1-45.關於 OSI 模型第四層傳輸層的功能說明,下列敘述哪⼀項正確?", o:["規劃或選擇資料封包的最佳傳輸路徑","根據連接的媒體對資料封包套⽤組成訊框資訊","將訊息切割成區段,並加上編號,以便接收端收到資料後,依編號順序重組","向使⽤者顯示資料,包括編碼和對話控制"], a:[2]},
-  {q:"1-46.關於 TCP/IP 和 OSI 模型的敘述,下列哪⼀項正確?", o:["TCP/IP 模型的網路存取層,與 OSI 的第三層有類似的服務和功能","TCP/IP 模型的傳輸層,與 OSI 模型的第四層有類似的服務和功能","TCP/IP 模型的應⽤層,只與 OSI 模型的第七層有相同的服務和功能","TCP/IP 和 OSI 模型的層數⼀模⼀樣"], a:[1]},
-  {q:"1-47.下列哪⼀項是 OSI 模型的第⼀層?", o:["實體層","資料連結層","網路層","傳輸層"], a:[0]},
-  {q:"1-48.若要描述網路模型的任何層的資料片段,下列哪⼀項正確?", o:["訊框","協定資料單元","封包","位元"], a:[1]},
-  {q:"1-49.當電腦網路卡收到來自網路媒體的位元時,將使⽤下列哪⼀種 PDU 格式?", o:["封包","資料段","訊框","位元"], a:[2]},
-  {q:"1-50.邏輯位址會在下列 OSI 模型中的哪⼀層進行封裝?", o:["實體層","資料連結層","傳輸層","網路層"], a:[3]},
-  {q:"1-51.關於 MAC 位址的敘述,下列哪⼀項正確?", o:["MAC 位址由作業系統直接指派","MAC 位址是 OSI 第三層的位址","前三個位元組是⽤於廠商分配的 OUI","MAC 位址⻑度為 128 個位元"], a:[2]},
-  {q:"1-52.下列哪⼀項是關於 CSMA/CD 存取方法的缺點?", o:["具有追蹤媒體存取次序的機制","所有設備都確保可以存取媒體","競爭方法具有確定性","碰撞會降低網路性能"], a:[3]},
-  {q:"1-53.⼄太網路使⽤下列哪⼀種方法來檢測和處理碰撞,並管理通信的恢復?", o:["CSMA/CD","CSMA/CA","CSMA/CAMP","CSMA"], a:[0]},
-  {q:"1-54.負責路由與邏輯定址,是屬於下列 OSI 模型中的哪⼀層?", o:["傳輸層","網路層","資料連結層","實體層"], a:[1]},
-  {q:"1-55.IPv4 位址是由多少位元組成?", o:["128 位元","64 位元","32 位元","16 位元"], a:[2]},
-  {q:"1-56.子網路遮罩 255.255.255.240,下列敘述哪⼀項正確?", o:["/25","/26","/27","/28"], a:[3]},
-  {q:"1-57.分配給網路中終端設備的位址名稱,下列哪⼀項正確?", o:["主機位址","廣播位址","網路位址","連接埠位址"], a:[0]},
-  {q:"1-58.關於實體層標準管理的功能,下列哪⼀項錯誤?", o:["實體元件","路由","編碼","訊號"], a:[1]},
-  {q:"1-59.下列哪⼀項不是網路中使⽤銅纜的三種主要類型之⼀?", o:["非遮蔽雙絞線","遮蔽雙絞線","光纖","同軸電纜"], a:[2]},
-  {q:"1-60.下列哪⼀個是制定反轉線的組織?", o:["ISO","IEEE","ITU","Cisco"], a:[3]},
-  {q:"1-61.關於全雙⼯通訊的⼯作原理,下列敘述哪⼀項正確?", o:["兩個裝置均可同時透過媒體進行發送和接收","兩個裝置都可以透過媒體進行發送和接收,但不可同時進行","⼀個裝置只能透過媒體接收,另⼀個裝置只能透過媒體發送","兩個裝置隨機透過媒體進行發送和接收"], a:[0]},
-  {q:"1-62.可向網路中所有主機發送資料的特殊位址,下列哪⼀項正確?", o:["主機位址","廣播位址","網路位址","連接埠位址"], a:[1]},
-  {q:"1-63.關於廣播位址的定義,下列哪⼀項正確?", o:["網路部分的各位元全部為 1 的位址","主機部分的各位元全部為 0 的位址","網路部分的各位元全部為 0 的位址","主機部分的各位元全部為 1 的位址"], a:[3]},
-  {q:"1-64.關於 MAC 位址中的廣播位址數值,下列哪⼀項正確?", o:["FF:FF:FF:FF:FF:FF","127.0.0.1","Fe80::1","80"], a:[0]},
-  {q:"1-65.主機若要確保資料封包可以轉送到正確的目的網路,下列敘述哪⼀項正確?", o:["主機不須具有自己的本地路由表,只要路由器具有遠端預設路由即可","主機必須具有自己的本地路由表,其中包含迴路介面的路由、本地網路路由和遠端預設路由","主機必須具有自己的迴路介面的路由,但不需具有本地網路路由和遠端預設路由","主機只需設定 IP 位址即可,不須設定預設閘道"], a:[1]},
-  {q:"1-66.下列敘述哪⼀項不是在設定靜態 IP 時,所需要設定的 IP 參數?", o:[" IP 位址","子網路遮罩","MAC 位址","預設閘道位址"], a:[2]},
-  {q:"1-67.網路層將封包轉送到目的位址的程序名稱,下列哪⼀項正確?", o:["封裝","解封裝","定址","路由"], a:[3]},
-  {q:"1-68.在 IP 網路中,可使⽤下列哪⼀個位址將封包轉送到目的地?", o:["目的 IP 位址","目的 MAC 位","來源 IP 位址","來源 MAC 位址"], a:[0]},
-  {q:"1-69.在第二層交換器中,可使⽤下列哪⼀個位址將訊框轉送到目的地?", o:["目的 IP 位址","目的 MAC 位址","來源 IP 位址","來源 MAC 位址"], a:[1]},
-  {q:"1-70.下列敘述哪⼀項不是 LAN 的具體功能?", o:["LAN 在有線區域內互連終端裝置","LAN 通常由⼀個組織或個人管理","LAN 通常由多個服務供應商管理","LAN 為內部終端裝置和中介裝置提供高速頻寬"], a:[2]},
-
-  // --- 第二類：網路定址 (2-01 ~ 2-33) ---
-  {q:"2-01.在網際網路裡傳送每個封包中,均會包含下列哪些資訊?(複選)", o:["來源 IP 位址","目的主機名稱","目的 IP 位址","路由器 IP 位址"], a:[0,2]},
-  {q:"2-02.⼀般主機通常需要安裝下列哪⼀項介面卡,才能連接上網際網路?", o:["SCSI 介面卡","RAID 介面卡","VGA 介面卡","NIC 介面卡"], a:[3]},
-  {q:"2-03.IPv4 位址總共有多少個位元組?", o:["4","8","12","32"], a:[0]},
-  {q:"2-04.二進制的 IPv4 位址並不方便人們解讀,因此 IPv4 位址採⽤下列哪⼀種表示方式?", o:["冒號分隔十六進制","冒號分隔十進制","點分隔十六進制","點分隔十進制"], a:[3]},
-  {q:"2-05.IPv4 位址 11000000.10100010.01111110.01000101 的點分隔十進制表示法,下列哪⼀項正確?", o:["192.168.126.73","192.164.126.71","192.162.126.69","192.168.126.67"], a:[2]},
-  {q:"2-06.IPv4 位址 172.16.223.191,其中 223 的二進制內容哪⼀項正確?", o:["11110111","11101111","11011111","10111111"], a:[2]},
-  {q:"2-07.IPv4 位址格式為點分隔十進制,下列哪些 IP 位址是正確有效的位址?(複選)", o:["10.123.256.10","192.199.23.5","198.FF.131.224","16.168.16.67"], a:[1,3]},
-  {q:"2-08.IPv4 位址 61.111.128.32 的 32 位元二進制內容,下列哪⼀項正確?", o:["00111001.01101101.10000000.00100000","00111001.01101111.10000000.00100000","00111101.01101101.10000000.00100000","00111101.01101111.10000000.00100000"], a:[3]},
-  {q:"2-09.IPv4 位址 10001000.00101010.01111110.01010101 的點分隔十進制表示法,下列哪⼀項正確?", o:["136.42.126.85","138.42.124.85","136.42.124.85","138.42.126.85"], a:[0]},
-  {q:"2-10.32 位元的 IPv4 位址結構可以分成網路與主機兩個部分,可依下列哪⼀項資訊判別位元屬於網路部分或主機部分?", o:["安裝的作業系統","設定的網路遮罩","網路設備品牌","採⽤的路由協定"], a:[1]},
-  {q:"2-11.關於 IP 位址 192.168.10.248 與網路遮罩關係,下列敘述哪⼀項正確?", o:["網路遮罩為 255.255.255.224 時,該 IP 位址代表網路位址","網路遮罩為 255.255.255.240 時,該 IP 位址代表⼀般主機位址","網路遮罩為 255.255.255.248 時,該 IP 位址代表廣播位址","網路遮罩為 255.255.255.252 時,該 IP 位址代表⼀般主機位址"], a:[1]},
-  {q:"2-12.下列哪些可在電腦主機上設定的合法 IPv4 位址,並且可以連接上網際網路?(複選)", o:["89.134.252.249","223.254.18.19","127.0.1.12","255.155.122.71"], a:[0,1]},
-  {q:"2-13.電腦 A 的 IP 位址為 192.168.2.101,電腦 B 的 IP 位址為 192.198.2.224,當電腦 A 有資料要傳送給電腦 B 時,下列敘述哪⼀項正確?", o:["電腦 A 將資料透過網路卡直接傳送給電腦 B","電腦 A 需先檢查網路線的類型是否為直通電纜(Straigh-Trough)才能傳送","電腦 A 需要先透過網路遮罩判別電腦 B 是否與自己位在相同網段","電腦 A 需要透過路由器才能將資料傳送給電腦 B"], a:[2]},
-  {q:"2-14.電腦 A 的 IP 位址為 172.16.1.121,電腦 B 的 IP 位址為 172.16.2.0,兩部電腦採⽤相同的網路遮罩,則下列敘述哪⼀項正確?", o:["若網路遮罩為 255.255.255.0,則兩部電腦位於相同網路網段","若網路遮罩為 255.255.254.0,則兩部電腦位於相同網路網段","若網路遮罩為 255.255.252.0,則兩部電腦位於相同網路網段","兩部電腦不可能位於相同的網路網段,因為電腦 B 的位址是錯誤的"], a:[2]},
-  {q:"2-15.下列哪些 IP 位址屬於 172.16.10.0/23 網段範圍內?(複選)", o:["172.16.10.255","172.16.11.128","172.16.12.64","172.16.11.254"], a:[0,1,3]},
-  {q:"2-16.IP 位址 10.172.193.33 搭配網路遮罩為 255.255.254.0,則該 IP 位址所屬的網段網路位址,下列哪⼀項正確?", o:["10.172.191.0","10.172.192.0","10.172.193.0","10.172.194.0"], a:[1]},
-  {q:"2-17.IP 位址與網路遮罩間,透過下列哪⼀項運算可以得到網路位址資訊?", o:["NOT","AND","OR","XOR"], a:[1]},
-  {q:"2-18.下列哪⼀個位址是屬於 B 級別的有效 IP 位址?", o:["191.128.254.256","127.0.0.1","177.255.21.56","192.1.10.192"], a:[2]},
-  {q:"2-19. IP 位址 191.224.232.15 的預設網路遮罩,下列哪⼀項正確?", o:["255.0.0.0","255.255.0.0","255.255.255.0","255.255.255.255"], a:[1]},
-  {q:"2-20.IPv4 及 IPv6 位 址 的 最 上 層 分 配 管 理 單 位 為 IANA(Internet Assigned Numbers Authority),IANA 底下有五個位址註冊機構 RIR(Regional Internet Registry),下列哪⼀項不屬於 RIR 之⼀?", o:["ARIN(American Registry for Internet Numbers)","LACNIC(Latin America and Caribbean Network Information Centre)","RIPE NCC(Réseaux IP Européens Network Coordination Centre)","IETF(Internet Engineering Task Force)"], a:[3]},
-  {q:"2-21.IP 位址 224.0.0.10 屬於下列有級別位址的哪⼀類?", o:["A","B","C","D"], a:[3]},
-  {q:"2-22.有級別的 IPv4 網路位址中,扣除多點傳送(Multicast)及實驗(Experimental)保留不使⽤的部分,剩下的總共分為幾個級別?", o:["1","2","3","4"], a:[2]},
-  {q:"2-23.B 類的有級別網路位址,其預設網路遮罩下列哪⼀項正確?", o:["255.0.0.0","255.255.0.0","255.255.255.0","255.255.255.255"], a:[1]},
-  {q:"2-24.關於有級別網路位址的敘述,下列哪⼀項錯誤?", o:["A 級別的所有 IP 位址數量最多","B 級別的所有 IP 是 C 級別的 255 倍","C 級別的預設網路遮罩為 255.255.255.0","D 級別⽤於多點傳送(Multicast)"], a:[1]},
-  {q:"2-25.下列哪些 IP 位址屬於 RFC 1918 所規定的私有 IP 範圍?(複選)", o:["10.192.10.128","172.32.128.192","192.168.100.251","172.19.224.252"], a:[0,2,3]},
-  {q:"2-26.下列哪⼀個 IPv4 位址不屬於 RFC 1918 所規定的私有 IP 範圍?", o:["10.224.232.128","192.168.22.21","172.64.21.10","172.31.192.168"], a:[2]},
-  {q:"2-27.全球共有幾個 IPv4 及 IPv6 位址的分配管理單位的位址,註冊機構 RIR(Regional Internet Registry)?", o:["4","5","6","8"], a:[1]},
-  {q:"2-28.私有的 IPv4 位址無法直接在網際網路上繞送,必須先透過下列哪⼀個技術轉換成公⽤ IP 位址?", o:["RIP","NAT","DHCP","NTP"], a:[1]},
-  {q:"2-29.⼀般⽤於主從式(Client-Sever)或同儕式(Peer-to-Peer)主機對主機的傳送型態,下列哪⼀項正確?", o:["Multicast","Broadcast","Anycast","Unicast"], a:[3]},
-  {q:"2-30.下列哪⼀項 IPv4 位址,不會出現在封包的來源位址欄位中?", o:["10.10.1.1","255.255.255.255","192.168.10.1","0.0.0.0"], a:[1]},
-  {q:"2-31.路由協定 RIP 第二版⽤於交換路由資料的傳送方式,屬於下列哪⼀種傳送型態?", o:["Unicast","Broadcast","Multicast","Anycast"], a:[2]},
-  {q:"2-32.關於 IPv4 位址的敘述,下列哪些正確?(複選)", o:["私有 IP 是免費的,也節省了 IP 位址資源,適合在區域網路使⽤","所有 IPv4 的位址均可以使⽤,但是不同主機不能使⽤相同的 IP 位址","標準交換器可以⽤於隔離廣播,避免廣播流量影響太大範圍","有限廣播(Limited Broadcast)的位址為 255.255.255.255"], a:[0,3]},
-  {q:"2-33.關於廣播位址,下列敘述哪⼀項錯誤?", o:["預設遮罩環境下,IPv4 位址 192.168.100.255 為廣播位址","廣播可以區分為直接廣播(Directed)及有限(Limited)廣播兩種","當主機收到廣播封包時,其處理方式與單點傳送(Unicast)封包不同","直接廣播(Directed)是傳給特定網段的所有設備接收"], a:[2]},
-  // --- 圖片辨識補完部分 2-48 ~ 2-70 ---
-  {q:"2-48.如圖所示，為家用無線路由器或 IP 分享器的 DHCP 伺服器設定畫面，設定資料中的「Maximum number of Users:50」，下列敘述哪一項正確?<br><span class='note'>(請參考原題庫圖片：DHCP Settings畫面)</span>", o:["只能累計提供 50 位用戶端的 IP 租用服務","該無線路由器或 IP 分享器最多僅能連接 50 位使用者","使用者取得 IP 之後最多可以使用 50 分鐘","最多提供 50 個 IP 位址的租用服務"], a:[3]},
-  {q:"2-49.關於家用無線路由器或 IP 分享器的敘述，下列哪一項正確?", o:["無線路由器或 IP 分享器連接 ISP 的介面，必須手動靜態設定 IP 位址","無線路由器或 IP 分享器所連接的內部無線網路，與有線網路為不同的 IP 網段","內部網段可以透過無線路由器或 IP 分享器的 DHCP 伺服器功能配置 IP 位址","無線網路服務不需要透過 NAT 轉換位址，但內部有線網路則需要 NAT 轉換位址"], a:[2]},
-  {q:"2-50.如附圖所示，為家用無線路由器或 IP 分享器的 DHCP 伺服器設定畫面，當用戶端透過此 DHCP 伺服器取得 IP 位址資訊時，預設閘道的位址設定，下列哪一項正確?<br><span class='note'>(請參考原題庫圖片：Router IP 設定為 192.168.1.1)</span>", o:["192.168.1.1","192.168.1.20","192.168.1.69","192.168.1.100"], a:[0]},
-  {q:"2-51.設定家用無線路由器或 IP 分享器的 DHCP 伺服器服務時，下列敘述哪一項正確?", o:["一般的無線路由器或 IP 分享器只能擔任 DHCP 伺服器，不能擔任用戶端","DHCP 內部使用的 IP 範圍均為 192.168.1.0/24 網段，無法變更","DHCP 伺服器提供了 IP 位址、網路遮罩外，並糗提供伺服器自己的 IP 位址擔任預設閘道工作","DHCP 伺服器之 IP 租用期限固定為 24 小時"], a:[2]},
-  {q:"2-52.當封包由無線路由器或 IP 分享器傳往網際網路時，NAT 會更改該封包的哪一個欄位資料?", o:["來源 IP","目的 IP","通訊協定","標頭版本"], a:[0]},
-  {q:"2-53.如附圖所示，在網路連線資料中，若電腦 A 與電腦 B 能彼此正常通訊，則設備 C 為下列哪一種裝置?<br><span class='note'>(請參考原題庫圖片：連接兩個不同網段 192.168.75.x 和 192.168.75.120 的設備)</span>", o:["防火牆(Firewall)","交換器(Switch)","路由器(Router)","集線器(HUB)"], a:[2]},
-  {q:"2-54.關於預設閘道的敘述，下列哪一項是錯誤?", o:["路由器單一介面下所連接的電腦設備，通常使用相同的預設閘道位址","家用無線路由器或 IP 分享器，亦提供預設閘道服務給所連接的 ISP","路由器介面與其所連接的電腦設備介面，通常使用相同的網路遮罩","家用無線路由器或 IP 分享器可以透過 DHCP 服務指定用戶端的預設閘道位址"], a:[1]},
-  {q:"2-55.下列哪一項是 IPv6 位址表示法?", o:["2001.0db8.acad.0001.2302.0000.0000.0001","2001:0db8:acad:0001:2302:0000:0000:0001","2001-0db8-acad-0001-2302-0000-0000-0001","2001,0db8,acad,0001,2302,0000,0000,0001"], a:[1]},
-  {q:"2-56.共用單一公用位址的無線路由器或 IP 分享器，若收到來自網際網路的封包，需要哪一個欄位資訊才能判別該轉換成哪一個內部 IP 位址?", o:["傳輸層 Port 編號","交換器介面 Port 編號","封包傳輸時間","封包 ID 編號"], a:[0]},
-  {q:"2-57.IPv6 位址表示方式中，用冒號區隔的每一個欄位共有多少位元?", o:["8","16","24","32"], a:[1]},
-  {q:"2-58.關於位址轉換 NAT 技術的敘述，下列哪一項正確?", o:["NAT 設備內部使用私有 IP 位址的主機，仍須透過 NAT 轉換才能互通","多少部主機連接在 NAT 設備內部，就至少需要準備多少個合法的公用 IP 位址，才足夠轉換","NAT 設備內部使用的私有 IP 位址不能在網際網路上繞送，因此需要透過 NAT 轉換位址","IPv4 位址不需要 NAT 技術，只有 IPv6 才需要"], a:[2]},
-  {q:"2-59.IPv4 及 IPv6 位址分別有多少個位元組?", o:["4 及 16","4 及 32","32 及 64","32 及 128"], a:[0]},
-  {q:"2-60. IPv4 及 IPv6 標準，是由下列哪一個單位所制訂的?", o:["電機電子工程師學會(IEEE)","網際網路研究專門工作組(IRTF)","網際網路工程任務小組(IETF)","網際網路號碼分配權威機構(IANA)"], a:[2]},
-  {q:"2-61.有了 IPv6 位址，為何人們仍然繼續使用 IPv4 位址，下列敘述哪一項正確?", o:["IPv4 位址多達 42 億個，離配置用盡還需要非常久的時間","IPv6 位址太長了，轉成點分隔十進制很難記憶與使用","透過 RFC1918 私有 IP 及 NAT 技術，IPv4 位址消耗獲得減緩","IPv6 目前還只是研發階段，尚未有產品支援 IPv6"], a:[2]},
-  {q:"2-62.隨著上網設備急速增加，IPv4 位址逐漸耗盡，因此 IETF 推出了下列哪一個新的 IP 位址技術?", o:["IPv5","IPv6","IPv7","IPv8"], a:[1]},
-  {q:"2-63.如附圖所示，為無線路由器或 IP 分享器設定，當電腦通過 DHCP 取得的 IP 位址為 192.168.0.121 並傳輸封包進入網際網路時，網際網路裡看到的來源 IP 位址，下列哪一個正確?<br><span class='note'>(請參考原題庫圖片：WAN 端 IP 設定為 199.6.13.121)</span>", o:["192.168.0.1","192.168.0.121","199.6.13.121","199.6.13.1"], a:[2]},
-  {q:"2-64.關於 IPv6 表示法的雙冒號「::」用法，下列敘述哪些正確?(複選)", o:["雙冒號只能使用一次","雙冒號用來取代多個連續為 0 的位址區塊","雙冒號不能出現在位址最前面","雙冒號不能出現在位址最後面"], a:[0,1]},
-  {q:"2-65.關於 IPv4 與 IPv6 位址的敘述，下列哪一項錯誤?", o:["IPv4 位址與 IPv6 位址不能並存，因此目前全球仍繼續使用 IPv4 位址","IPv6 位址因為位址足夠，可以免除網路位址轉換 NAT 的需求","利用自動設定 IP 位址技術，IPv6 可以簡化管理工作","IPv6 位址數量達 340 澗(10 的 36 次方)"], a:[0]},
-  {q:"2-66.IPv6 具有多種自動取得位址的選項，該採用下列哪一種選項是根據網路設備發出的哪個訊息內容決定?", o:["鄰居請求(Neighbor Solicitation)","鄰居通告(Neighbor Advertisement)","路由器請求(Router Solicitation)","路由器通告(Router Advertisement)"], a:[3]},
-  {q:"2-67.IPv6 位址除了將位元數由 IPv4 的 32 位元增加到 128 位元外，還具有下列哪些特性?(複選)", o:["位址表示方法改為冒號區隔十六進位寫法","封包標頭長度增加四倍","更有效率(Efficiency)，並且能夠支援移動性(Mobility)","僅位址位元數增加，標頭內容及欄位不變以便能與 IPv4 相容"], a:[0,2]},
-  {q:"2-68.IPv6 位址表示法中，單一 IPv6 位址最多會有多少個 16 進位的字元?", o:["16","24","32","64"], a:[2]},
-  {q:"2-69.IPv6 位址 2001:0DB8:0000:0000:00FF:0000:0000:00D1 可以改寫為下列哪一些位址寫法?(複選)", o:["2001:DB8::FF:0:0:D1","2001:DB8:FF::D1","2001:DB8::FF::D1","2001:DB8:0:0:FF::D1"], a:[0,3]},
-  {q:"2-70.IPv6 支援的位址，自動取得機制包含下列哪些?(複選)", o:["SLAAC","DHCP6","SLAAC+DHCP6","ICMPv6"], a:[0,1,2]},
-
-  // --- 文字貼上部分 3-01 ~ 3-66 ---
-  {q:"3-01.若要向網站請求網⾴內容，下列哪⼀項協定正確?", o:["DHCP","HTTP","VoIP","SMIP"], a:[1]},
-  {q:"3-02.當管理者想登入遠⽅主機進行命令列操控，如同登入本地主機⼀般時，會採用下列哪⼀項服務?", o:["SNMP","HTML","SSH","SMTP"], a:[2]},
-  {q:"3-03.下列哪⼀項協定的伺服器，可以分發 IP 位址、遮罩、預設閘道及其他上網參數給客戶端電腦?", o:["DHCP","POP","FTP","SMTP"], a:[0]},
-  {q:"3-04.郵件主機和郵件主機之間傳遞信件時使用的協定，下列哪⼀項正確?", o:["POP","HTTP","SMTP","IMAP"], a:[2]},
-  {q:"3-05.用於擷取伺服器電子郵件到客戶端主機的協定，下列哪些正確?(複選)", o:["SMTP","IMAP","HTML","POP"], a:[1,3]},
-  {q:"3-06.到線上購物網站，會用到下列哪些網際網路服務?(複選)", o:["SSH","HTTP","FTP","DNS"], a:[1,3]},
-  {q:"3-07.網際網路常⾒的網路層協定，下列哪⼀項正確?", o:["TCP","UDP","IP","HTTP"], a:[2]},
-  {q:"3-08.關於 TCP 協定的敘述，下列哪些錯誤?(複選)", o:["使用回覆封包確認傳達","不再重送丟失的封包","適用於網⾴內容之傳輸","適用於語言串流之傳輸"], a:[1,3]},
-  {q:"3-09.瀏覽器請求網⾴的過程，會用到下列哪些協定?(複選)", o:["HTTP","TCP","UDP","IP"], a:[0,1,3]},
-  {q:"3-10.DNS 查詢主機 IP 的過程採用 UDP 協定的主因，下列哪⼀項正確?", o:["查詢過程封包丟失也沒關係","查詢過程封包可走不同路徑","查詢內容用⼀個封包就裝得下","查詢內容不需講究可靠傳輸"], a:[2]},
-  {q:"3-11.關於傳輸層的資料傳輸單位，下列哪⼀項正確?", o:["對話(Session)","分段(Segment)","封包(Packet)","訊框(Frame)"], a:[1]},
-  {q:"3-12.關於傳輸層公認連接埠(well-known port)的號碼範圍，下列哪⼀項正確?", o:["0~1023","1~1024","1~1023","0~1024"], a:[0]},
-  {q:"3-13.關於註冊連接埠(Registered Port)的敘述，下列哪些正確?(複選)", o:["號碼範圍介於 1024~49151","號碼範圍介於 1~1023","可當成來源埠使用","使用在⼀般常⾒的 Service 功能，如 HTTP、FTP"], a:[0,2]},
-  {q:"3-14.關於私有連接埠(Private Port)的敘述，下列哪些正確?(複選)", o:["號碼範圍介於 1024~65535","號碼範圍介於 49152~65535","常當成來源埠使用","常當成目的地埠使用"], a:[1,2]},
-  {q:"3-15.若要查詢網站的 IP 位址或網域名稱供主機連線之用，下列哪⼀項服務正確?", o:["DHCP","DNS","SSH","SMTP"], a:[1]},
-  {q:"3-16.下列哪⼀項是 DNS 服務的公認連接埠號?", o:["21","22","53","110"], a:[2]},
-  {q:"3-17.關於 DNS 服務的敘述，下列哪⼀項錯誤?", o:["DNS 名稱有分階層","常⾒的高層網域名稱有.com、.edu、.net","DNS 利用網域名稱代替 IP 住址⽅便憶","⼀個 IP 只能有⼀個 DNS 名稱"], a:[3]},
-  {q:"3-18.若要讓用戶不 IP，只需要填寫 www.tqc.org.tw 即可連上電腦技能基金會網站，下列哪⼀種協定正確?", o:["ARP","DNS","HTTP","HTML"], a:[1]},
-  {q:"3-19.關於 DNS 伺服器如何答覆⼀般 IP 詢問的敘述，下列哪⼀項錯誤?", o:["伺服器內部有網域名稱及其 IP 的對照表供查詢之用","伺服器若內建對照表查詢不到可代向網域其他伺服器查詢","伺服器使用 TCP 傳輸層的 53 號連接埠接受請求","伺服器使用 UDP 傳輸層的 53 號連接埠接受請求"], a:[2]},
-  {q:"3-20.請求網⾴會用到的應用層協定，下列哪⼀項正確?", o:["HTTP","HTML","TCP","IP"], a:[0]},
-  {q:"3-21.安全的 HTTP 連線採用的公認連接埠號碼，下列哪⼀項正確?", o:["25","80","110","443"], a:[3]},
-  {q:"3-22.若瀏覽器同時對⼀個網站開啟兩個網⾴，下列敘述哪⼀項錯誤?", o:["瀏覽器將開啟兩條 HTTP 連線，連向同⼀個網站","兩條 HTTP 連線的來源 IP 及目的地 IP 相同","兩條 HTTP 連線的來源埠相同","兩條 HTTP 連線的目的地埠相同"], a:[2]},
-  {q:"3-23.關於 HTTP 及 HTML 的敘述，下列哪⼀項錯誤?", o:["瀏覽網⾴同時會用到 HTTP 及 HTML","HTTP 為傳輸層協定，負責網⾴如何傳送","HTML 為網⾴內容標準，負責網⾴如何呈現","HTTP 以明文傳送，必須使用 HTTPS 才會以密文傳送"], a:[1]},
-  {q:"3-24.除了 HTTP 之外，常用的檔案傳輸協定還有下列哪⼀項?", o:["TCP","FTP","DNS","SSH"], a:[1]},
-  {q:"3-25.關於 FTP 的敘述，下列哪⼀項錯誤?", o:["FTP 伺服器利用連接埠 21 號進行檔案管理及傳輸","FTP 伺服器允許檔案的上傳、下載、刪除、更名操作","FTP 客戶端功能常內建於作業系統及瀏覽器","獨立 FTP 客戶端軟體常用圖形界面⽅便檔案拖拉操作"], a:[0]},
-  {q:"3-26.下列哪些是 FTP 伺服器使用公認的連接埠號碼?(複選)", o:["20","21","23","25"], a:[0,1]},
-  {q:"3-27.關於 FTP 連線過程，下列哪⼀項錯誤?", o:["FTP 客戶端和伺服器端之間利用控制連線傳送檔案操錯指令","FTP 客戶端和伺服器端之間利用資料連線傳送檔案內容","控制連線用到伺服主機的 21 號埠","資料連線用到伺服主機的 22 號埠"], a:[3]},
-  {q:"3-28.下列哪⼀項是 TELNET 使用公認的 TCP 埠號?", o:["23","22","21","20"], a:[0]},
-  {q:"3-29.下列哪⼀項是 SSH 連線使用公認的 TCP 埠號?", o:["23","22","21","20"], a:[1]},
-  {q:"3-30.支援虛擬終端機連線並允許使用遠⽅主機命令列介面的協定，下列哪些正確?(複選)", o:["HTTP","RDP","SSH","TELNET"], a:[2,3]},
-  {q:"3-31.下列哪⼀項不是虛擬終端機(VTY)連線的好處?", o:["對遠⽅主機下命令列指令就像在本地主機⼀般","若取得授權可以啟動或關閉遠⽅服務","若取得授權可以修改遠⽅主機組態，甚至關閉遠⽅主機","除了使用文字模式也可以使用圖形模式存取遠⽅主機"], a:[3]},
-  {q:"3-32.現在 TELNET 逐漸由 SSH 取代的原因，下列哪些正確?(複選)", o:["TELNET 只能傳輸文字，SSH 可以傳輸圖形","TELNET 採用明文傳輸，SSH 採用密文傳輸","SSH 的帳密驗證能力強於 TELNET","SSH 的傳輸速度優於 TELNET"], a:[1,2]},
-  {q:"3-33.電子郵件寄送採用 SMTP 協定，其公認的 TCP 連接埠下列哪⼀項正確?", o:["22","25","110","143"], a:[1]},
-  {q:"3-34.關於 POP 及 IMAP 兩項服務的敘述，下列哪⼀項錯誤?", o:["兩者皆用於擷取伺服器電子郵件到客戶端主機","POP 預設伺服器郵件遭下載後，原郵件就不再保留","IMAP ⼀直保留伺服器郵件，除非用戶想刪除","同⼀台伺服器不能同時提供 POP 及 IMAP 兩種服務"], a:[3]},
-  {q:"3-35.關於網路電話的敘述，下列哪⼀項錯誤?", o:["使用 VoIP 技術將聲音轉成數位資料放在網路傳輸","網路電話和即時訊息服務⼀樣接採用同儕對同儕技術","網路電話撥到普通電話須要經由閘道器連到公共交換電話網(PSTH)","所有網路電話軟體接使用同⼀套協定及目的地埠號互通"], a:[3]},
-  {q:"3-36.關於 Wi-Fi 無線區網標準 IEEE 802.11 用到的電波頻帶，下列哪些正確?(複選)", o:["840MHz","930MHz","2.4GHz","5GHz"], a:[2,3]},
-  {q:"3-37.提供辨識不同無線路由器的參數設定，下列哪⼀項正確?", o:["網路模式","網路名稱(SSID)","標準頻道","SSID 廣播"], a:[1]},
-  {q:"3-38.為了讓更多的新舊設備可以⼀起上網，無線路由器的網路模式宜選用下列哪⼀種模式?", o:["802.11b","802.11g","802.11n","混用模式"], a:[3]},
-  {q:"3-39.關閉 SSID 廣播的效果，下列哪⼀項錯誤?", o:["節省能源","讓裝置較難找到無線網路","能稍微預防未授權裝置連上無線網路","手動輸入 SSID 仍能連上無線網路"], a:[0]},
-  {q:"3-40.某無線網路路由器的網路模式只選用 802.11n 的主因，下列哪⼀項正確?", o:["只使用⼀種無線標準傳輸速度最快","不讓使用其他無線標準的裝置連上無線網路","可讓最多種裝置連上無線網路","有利於較舊的裝置連上無線網路"], a:[0]},
-  {q:"3-41.關於網路名稱(SSID)的敘述，下列哪⼀項錯誤?", o:["字串不分大小寫","允許英數字混合","最多 32 字元","用來區別自己所屬及可互通的無線網路(WLAN)"], a:[0]},
-  {q:"3-42.無線網路(WLAN)使用的媒介存取技術下列哪⼀項正確?", o:["CSMA/CA","CSMA/CB","CSMA/CD","CSMA/CE"], a:[0]},
-  {q:"3-43.無線主機(STA)需要使用網路時，會向存取點(AP)發出下列哪⼀種訊息?", o:["RTS","CTS","ACK","REQ"], a:[0]},
-  {q:"3-44.存取點(AP)同意無線主機(STA)使用網路時，會回覆下列哪⼀種訊息?", o:["RTS","CTS","ACK","READY"], a:[1]},
-  {q:"3-45.無線主機(STA)結束資料傳送後，會送出下列哪⼀種訊息表示釋放頻道?", o:["RTS","CTS","ACK","FREE"], a:[2]},
-  {q:"3-46. 關於 無 線 網 路 (WLAN) 的 CSMA/CA 技 術 和 ⼄ 太 網 路 (Ethernet) 的 CSMA/CD 技術，下列敘述哪⼀項錯誤?", o:["兩種技術皆適用於媒介共享，傳輸容易產生碰撞的環境","無線網路利用預約頻道機制避免碰撞","⼄太網路利用遇到碰撞停⽌傳輸⼀段時間的偵測機制減少碰撞","無線網路和⼄太網路皆有清楚定義的傳輸邊界範圍"], a:[3]},
-  {q:"3-47.關於 CSMA/CA 技術的資料傳輸過程，下列哪⼀項錯誤?", o:["無線主機(STA)發出 RTS 訊息給存取點(AP)，請其轉發訊息通知所有主機頻道淨空以便傳送資料","存取點確認頻道淨空後發出 CTS 訊息給所有主機同意傳送資料","請求主機收到 CTS 訊息後開始傳送資料","請求主機傳完資料後發出 ACK 訊息給存取點，請其轉發訊息通知所有主機頻道已釋放"], a:[0]},
-  {q:"3-48.無線路由器連接區域網路主機的接孔，下列哪⼀項正確?", o:["標 INTERNET 的 RJ-45 接孔","標 LAN 的 RJ-45 接孔","標 DSL 的 RJ-11 接孔","標 CABLE 的 BNC 接孔"], a:[1]},
-  {q:"3-49.經由數據機(Modem)過來的纜線，要連接到下列無線路由器的哪⼀個接孔?", o:["標 INTERNET 的 RJ-45 接孔","標 LAN 的 RJ-45 接孔","標 DSL 的 RJ-11 接孔","標 CABLE 的 BNC 接孔"], a:[0]},
-  {q:"3-50.關於無線路由器 MAC 過濾功能的敘述，下列哪⼀項錯誤?", o:["提升無線網路安全又具備容易快速設定之彈性，⽅便所有人上網","只有設定在 MAC 白名單中的無線主機才能順利連線","有新主機想連線，必須由管理者手動加入 MAC 白名單中","大部分的無線路由器都有支援 MAC 過濾功能"], a:[0]},
-  {q:"3-51.關於無線路由器的賓客模式(Guest Mode)，下列敘述哪⼀項錯誤?", o:["不是每⼀台無線路由器都有支援賓客模式","賓客模式⼀般採用開放式連線不須密碼驗證","賓客模式允許連線主機和內部區域網路相連","賓客模式允許連線主機和外部網際網路相連"], a:[2]},
-  {q:"3-52.下列哪⼀項不是手機常⾒的無線連線⽅式?", o:["Wi-Fi","WiMax","行動數據","藍牙"], a:[1]},
-  {q:"3-53.在公共圖書館最省錢又⽅便的手機上網⽅式，下列哪⼀項正確?", o:["Wi-Fi","藍牙","行動數據","連接網路插座"], a:[0]},
-  {q:"3-54.關於行動裝置預先設定好的上網⽅式，下列敘述哪⼀項錯誤?", o:["如果裝置有開啟 Wi-Fi，則自動優先使用 Wi-Fi 網路","如果沒有 Wi-Fi 網路，但有設定⽅案則自動使用行動數據","行動數據從 4G 自動轉換到 3G 的過程原有連線會中斷","行動數據有頻寬限制及收費關係只在找不到 Wi-Fi 時才使用"], a:[2]},
-  {q:"3-55.關於無線裝置採用藍牙連線的優點，下列哪⼀項錯誤?", o:["擺脫纜線之糾纏","距離躍近，傳輸速率越快","省電功能可延⻑電池壽命","可直接對連不需基地台之建置"], a:[1]},
-  {q:"3-56.藍牙適用下列哪些場合?(複選)", o:["車用喇叭麥克風可供撥打或接收電話","上網連線之分享","無線鍵盤、滑鼠","導遊廣播給全遊客之講解器"], a:[0,1,2]},
-  {q:"3-57.關於藍牙配對的敘述，下列哪⼀項錯誤?", o:["任何時間最多八部裝置可以連線在⼀起","裝置只要⼀開啟藍牙功能，就可以讓其他裝置找到","掃描周邊藍牙裝置過程，可詢問其名稱及提供之服務等訊息","第⼀次點選新藍牙裝置時，需要輸入個人識別碼(PIN)才能連線成功"], a:[1]},
-  {q:"3-58.想租用有專人維護的網站空間放自己公司的網⾴，可使用下列 ISP 的哪⼀項服務?", o:["網⾴架站(Web Hosting)","FTP 架站(FTP Hosting)","設備管(Equipment Colocation)","應用及媒體架站(Applications and Media Hosting)"], a:[0]},
-  {q:"3-59.想將公司主機放在 ISP 機房充分利用其頻寬，可使用下列 ISP 的哪⼀項服務?", o:["網⾴架站(Web Hosting)","FTP 架站(FTP Hosting)","設備管(Equipment Colocation)","應用及媒體架站(Applications and Media Hosting)"], a:[2]},
-  {q:"3-60.關於 ISP 的敘述，下列哪⼀項錯誤?", o:["ISP 讓家用網路連上網際網路","許多 ISP 還提供電子郵件帳號等附加服務給契約用戶","每家 ISP 須連向其他 ISP 形成⼀個連結網路供各地用戶互連","ISP 之間採平層(Flat)架構互連，以確保來源到目的地量走最短路徑"], a:[3]},
-  {q:"3-61.關於網際網路骨幹的敘述，下列哪⼀項錯誤?", o:["猶如資訊高速公路提供快速資料傳輸","以平層(Flat)架構連結世界各服務供應商的網路","主要傳輸媒介採用光纖纜線","連結各城市或大陸的光纖纜線常走地底或海底"], a:[1]},
-  {q:"3-62.下列哪⼀種 ISP 沒有獨立自己埋線或架基地台?", o:["本地有線電視供應商","有線電話服務供應商","智慧手機的蜂巢網路服務供應商","租用別家公司實體網路頻寬的獨立供應商"], a:[3]},
-  {q:"3-63.家裡網路欲連上 ISP，下列哪⼀項是安全必須的設備?", o:["數據機","路由器","交換器","集線器"], a:[1]},
-  {q:"3-64.家裡電腦欲想連上 ISP，下列哪⼀項是最基本的設備?", o:["數據機","路由器","交換器","集線器"], a:[0]},
-  {q:"3-65.如家裡同時須要桌機及行動裝置上網，採購下列哪⼀項單⼀設備最划算?", o:["交換器","無線整合型路由器","無線訊號延伸器","集線器"], a:[1]},
-  {q:"3-66.如果數據機或路由器提供的有線埠數不夠，則利用下列哪些設備能簡單增加有線埠數?(複選)", o:["IP 分享器","路由器","交換器","集線器"], a:[2,3]}
-];
-
-// --- 程式邏輯區 ---
-let questions = [];
-let currentIndex = 0;
-let score = 0;
-let currentSelected = [];
-let wrongList = [];  // ★ 新增：紀錄錯題
-
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}
-
-function init() {
-  questions = [...rawQuestions];
-  shuffle(questions);
-
-  // ★ 隨機抽 40 題，不足 40 題則取全部
-  questions = questions.slice(0, 40);
-
-  currentIndex = 0;
-  score = 0;
-  wrongList = [];  // ★ 清空錯題
-
-  document.getElementById("quiz-screen").style.display = "block";
-  document.getElementById("result-screen").style.display = "none";
-  showQuestion();
-}
-
-function showQuestion() {
-  const qData = questions[currentIndex];
-  document.getElementById("progress").innerText =
-    `進度：${currentIndex + 1} / ${questions.length}`;
-  document.getElementById("score-now").innerText = `目前得分：${score}`;
-
-  const isMulti = qData.a.length > 1;
-  const typeLabel = isMulti ? '<span class="tag-multi">複選</span>' : '';
-
-  document.getElementById("question-area").innerHTML = typeLabel + qData.q;
-
-  const optsArea = document.getElementById("options-area");
-  optsArea.innerHTML = "";
-  currentSelected = [];
-
-  qData.o.forEach((optText, idx) => {
-    const btn = document.createElement("div");
-    btn.className = "option-btn";
-    btn.innerText = `(${String.fromCharCode(65 + idx)}) ${optText}`;
-    btn.onclick = () => toggleSelect(idx, btn, isMulti);
-    optsArea.appendChild(btn);
-  });
-
-  document.getElementById("submit-btn").style.display = "inline-block";
-  document.getElementById("next-btn").style.display = "none";
-}
-
-function toggleSelect(idx, btn, isMulti) {
-  if (document.getElementById("next-btn").style.display === "inline-block") return;
-
-  if (isMulti) {
-    if (currentSelected.includes(idx)) {
-      currentSelected = currentSelected.filter(i => i !== idx);
-      btn.classList.remove("selected");
-    } else {
-      currentSelected.push(idx);
-      btn.classList.add("selected");
-    }
-  } else {
-    const allBtns = document.querySelectorAll(".option-btn");
-    allBtns.forEach(b => b.classList.remove("selected"));
-    currentSelected = [idx];
-    btn.classList.add("selected");
-  }
-}
-
-function checkAnswer() {
-  if (currentSelected.length === 0) {
-    alert("請先選擇答案！");
-    return;
+  const currentQuestion = questions[currentIndex];
+  
+  if (!currentQuestion) {
+     return (
+       <div className="min-h-screen flex items-center justify-center bg-slate-100">
+         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+       </div>
+     );
   }
 
-  const qData = questions[currentIndex];
-  const correctAns = qData.a;
+  const isMulti = currentQuestion.a.length > 1;
 
-  currentSelected.sort();
-  const isCorrect =
-    JSON.stringify(currentSelected) === JSON.stringify([...correctAns].sort());
+  const handleOptionClick = (index: number) => {
+    if (isSubmitted) return;
 
-  const allBtns = document.querySelectorAll(".option-btn");
-
-  allBtns.forEach((btn, idx) => {
-    if (currentSelected.includes(idx)) {
-      if (correctAns.includes(idx)) {
-        btn.classList.add("correct");
+    if (isMulti) {
+      if (selectedIndices.includes(index)) {
+        setSelectedIndices(selectedIndices.filter(i => i !== index));
       } else {
-        btn.classList.add("wrong");
+        setSelectedIndices([...selectedIndices, index]);
       }
+    } else {
+      setSelectedIndices([index]);
     }
-    if (correctAns.includes(idx) && !currentSelected.includes(idx)) {
-      btn.classList.add("missed");
+  };
+
+  const handleSubmit = () => {
+    if (selectedIndices.length === 0) {
+      alert("請至少選擇一個答案！");
+      return;
     }
-  });
 
-  if (isCorrect) {
-    score++;
-  } else {
-    // ★ 記錄錯題
-    wrongList.push({
-      question: qData.q,
-      yourAns: [...currentSelected],
-      correctAns: [...correctAns]
-    });
-  }
+    setIsSubmitted(true);
 
-  document.getElementById("submit-btn").style.display = "none";
-  document.getElementById("next-btn").style.display = "inline-block";
-}
+    // Sort to compare arrays
+    const sortedSelected = [...selectedIndices].sort((a, b) => a - b);
+    const sortedCorrect = [...currentQuestion.a].sort((a, b) => a - b);
+    const isCorrect = JSON.stringify(sortedSelected) === JSON.stringify(sortedCorrect);
 
-function nextQuestion() {
-  currentIndex++;
-  if (currentIndex < questions.length) {
-    showQuestion();
-  } else {
-    showResult();
-  }
-}
+    if (isCorrect) {
+      setScore(prev => prev + 1);
+    } else {
+      // Record wrong answer
+      setWrongList(prev => [
+        ...prev, 
+        {
+          question: currentQuestion,
+          userSelected: selectedIndices,
+          index: currentIndex
+        }
+      ]);
+    }
+  };
 
-function showResult() {
-  document.getElementById("quiz-screen").style.display = "none";
-  document.getElementById("result-screen").style.display = "block";
+  const handleNext = () => {
+    if (currentIndex < questions.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+      setSelectedIndices([]);
+      setIsSubmitted(false);
+      window.scrollTo(0, 0);
+    } else {
+      setIsQuizEnded(true);
+      window.scrollTo(0, 0);
+    }
+  };
 
-  document.getElementById("final-score").innerText = score;
-  document.getElementById("total-score").innerText = questions.length;
-
-  const listArea = document.getElementById("wrong-list");
-  listArea.innerHTML = "";
-
-  if (wrongList.length === 0) {
-    listArea.innerHTML = "<p>全部答對！太強了！</p>";
-    return;
-  }
-
-  wrongList.forEach((item, idx) => {
-    const box = document.createElement("div");
-    box.className = "wrong-item";
-    box.innerHTML = `
-      <h4>❌ 第 ${idx + 1} 題</h4>
-      <div class="q">${item.question}</div>
-      <div class="ans">
-        <b>你的答案：</b> ${item.yourAns.map(n => String.fromCharCode(65 + n)).join(", ")}<br>
-        <b>正確答案：</b> ${item.correctAns.map(n => String.fromCharCode(65 + n)).join(", ")}
+  if (isQuizEnded) {
+    return (
+      <div className="min-h-screen bg-slate-100 py-8 px-4 flex justify-center">
+        <ResultScreen 
+          score={score} 
+          total={questions.length} 
+          wrongList={wrongList} 
+          onRestart={startQuiz} 
+        />
       </div>
-      <hr>
-    `;
-    listArea.appendChild(box);
-  });
+    );
+  }
+
+  const progress = ((currentIndex + 1) / questions.length) * 100;
+
+  return (
+    <div className="min-h-screen bg-slate-100 py-8 px-4 flex flex-col items-center">
+      {/* Header / Brand */}
+      <div className="mb-6 text-center">
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">考前衝刺題庫</h1>
+        <p className="text-slate-500 text-sm mt-1">Practice makes perfect</p>
+      </div>
+
+      {/* Main Card */}
+      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden flex flex-col">
+        {/* Progress Bar */}
+        <div className="w-full bg-slate-100 h-2">
+          <div 
+            className="bg-blue-600 h-2 transition-all duration-500 ease-out" 
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
+
+        {/* Top Info Bar */}
+        <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+          <div className="flex items-center gap-2">
+             <span className="bg-slate-200 text-slate-600 text-xs font-bold px-2 py-1 rounded-md">
+               Q{currentIndex + 1}
+             </span>
+             <span className="text-slate-400 text-sm font-medium">/ {questions.length}</span>
+          </div>
+          <div className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+            得分: {score}
+          </div>
+        </div>
+
+        {/* Question Content */}
+        <div className="p-6 md:p-8">
+           <div className="mb-6">
+             {isMulti && (
+               <span className="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded mb-2 align-middle mr-2 border border-amber-200">
+                 複選
+               </span>
+             )}
+             <h2 
+               className="text-lg md:text-xl font-bold text-slate-800 leading-relaxed inline align-middle"
+               dangerouslySetInnerHTML={{ __html: currentQuestion.q }}
+             />
+           </div>
+
+           {/* Options List */}
+           <div className="mb-8">
+             {currentQuestion.o.map((opt, idx) => {
+               const isCorrect = currentQuestion.a.includes(idx);
+               const isSelected = selectedIndices.includes(idx);
+               // Logic for coloring:
+               // If submitted:
+               // - Highlight Correct (Green)
+               // - Highlight Wrong Selection (Red)
+               // - Highlight Missed Correct (Dashed Green)
+               
+               let displayCorrect = false;
+               let displayWrong = false;
+               let displayMissed = false;
+
+               if (isSubmitted) {
+                 if (isCorrect && isSelected) displayCorrect = true;
+                 else if (!isCorrect && isSelected) displayWrong = true;
+                 else if (isCorrect && !isSelected) displayMissed = true;
+               }
+
+               return (
+                 <OptionButton
+                    key={idx}
+                    index={idx}
+                    text={opt}
+                    isSelected={isSelected}
+                    isSubmitted={isSubmitted}
+                    isCorrect={displayCorrect}
+                    isWrong={displayWrong}
+                    isMissed={displayMissed}
+                    onClick={() => handleOptionClick(idx)}
+                 />
+               );
+             })}
+           </div>
+
+           {/* Actions */}
+           <div className="flex flex-col sm:flex-row gap-3">
+             {!isSubmitted ? (
+               <button 
+                 onClick={handleSubmit}
+                 className="w-full py-3.5 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold shadow-lg shadow-blue-500/30 transition-all duration-200 transform active:scale-[0.98]"
+               >
+                 送出答案
+               </button>
+             ) : (
+               <button 
+                 onClick={handleNext}
+                 className="w-full py-3.5 px-6 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold shadow-lg transition-all duration-200 transform active:scale-[0.98] flex items-center justify-center gap-2"
+               >
+                 {currentIndex === questions.length - 1 ? '查看結果' : '下一題'}
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+               </button>
+             )}
+           </div>
+        </div>
+      </div>
+      
+      <div className="mt-8 text-center text-slate-400 text-xs">
+        <p>&copy; 2023 Exam Prep System. All rights reserved.</p>
+      </div>
+    </div>
+  );
 }
 
-init();
-</script>
-
-</body>
-</html>
+export default App;
