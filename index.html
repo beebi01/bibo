@@ -2666,22 +2666,44 @@
 
       const stopTimer = () => { if (timerRef.current) clearInterval(timerRef.current); };
 
+  const QuizGame = ({ bank, onExit }) => {
+    const [questions, setQuestions] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [score, setScore] = useState(0);
+    const [selectedIndices, setSelectedIndices] = useState([]);
+    const [wrongList, setWrongList] = useState([]);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isQuizEnded, setIsQuizEnded] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [timeSpent, setTimeSpent] = useState(0);
+    const timerRef = useRef(null);
+    const theme = bank.icon === 'ship' ? THEMES.ship : THEMES.computer;
+
+    useEffect(() => { startQuiz(); return () => stopTimer(); }, [bank]);
+
+    const startTimer = () => {
+      stopTimer();
+      timerRef.current = setInterval(() => setTimeSpent(prev => prev + 1), 1000);
+    };
+
+    const stopTimer = () => { if (timerRef.current) clearInterval(timerRef.current); };
+
+    // --- 這裡就是修正後的 startQuiz ---
     const startQuiz = useCallback(() => {
       setIsLoading(true);
       
-      // --- 修正開始：處理海運題庫答案索引問題 ---
+      // 1. 複製題目以防修改到原始資料
       let processedQuestions = JSON.parse(JSON.stringify(bank.questions));
 
-      // 如果是「海運期中考 (bank-2)」，答案是 1,2,3,4，需減 1 轉為 0,1,2,3
+      // 2. 如果是海運 (bank-2)，把答案 1,2,3,4 改成 0,1,2,3
       if (bank.id === 'bank-2') {
         processedQuestions = processedQuestions.map(q => ({
           ...q,
-          a: q.a.map(ans => ans - 1) 
+          a: q.a.map(ans => Number(ans) - 1)
         }));
       }
-      // --- 修正結束 ---
 
-      // 使用處理過的 processedQuestions 來進行抽題
+      // 3. 正常抽題
       const safeLimit = Math.min(bank.limit, processedQuestions.length);
       const shuffled = [...processedQuestions].sort(() => 0.5 - Math.random());
       const selected = shuffled.slice(0, safeLimit);
@@ -2698,6 +2720,8 @@
       setIsLoading(false);
       startTimer();
     }, [bank]);
+    // --- startQuiz 結束 ---
+
 
 
       const currentQuestion = questions[currentIndex];
