@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>考前衝刺題庫系統 - 分章節版</title>
+  <title>考前衝刺題庫系統 - 閱覽加強版</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -15,14 +15,6 @@
   <!-- Babel -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   
-  <!-- Google GenAI Setup -->
-  <script type="module">
-    import { GoogleGenAI } from "https://esm.sh/@google/genai";
-    window.GoogleGenAI = GoogleGenAI;
-    window.isGenAILoaded = true;
-    console.log("Google GenAI SDK Loaded Successfully");
-  </script>
-
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,42 +29,33 @@
       overscroll-behavior-y: none;
     }
     
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    /* Custom Animations */
+    @keyframes blob {
+      0% { transform: translate(0px, 0px) scale(1); }
+      33% { transform: translate(30px, -50px) scale(1.1); }
+      66% { transform: translate(-20px, 20px) scale(0.9); }
+      100% { transform: translate(0px, 0px) scale(1); }
+    }
+    .animate-blob { animation: blob 7s infinite; }
+    .animation-delay-2000 { animation-delay: 2s; }
+    .animation-delay-4000 { animation-delay: 4s; }
 
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
     .animate-fade-in-up { animation: fadeInUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-    
-    .ai-content strong { font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-    .ai-content ul { list-style-type: disc; padding-left: 1.25rem; margin-top: 0.25rem; margin-bottom: 0.25rem; }
   </style>
 </head>
 <body>
   <div id="root"></div>
-  
-  <div id="global-error" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:9999; padding:2rem; overflow:auto;">
-    <h2 class="text-xl font-bold text-red-600 mb-4">系統發生錯誤</h2>
-    <p class="text-gray-600 mb-2">請截圖此畫面並回報。</p>
-    <pre id="error-content" class="bg-gray-100 p-4 rounded text-xs font-mono whitespace-pre-wrap text-red-800"></pre>
-  </div>
-
-  <script>
-    window.onerror = function(msg, url, line, col, error) {
-      document.getElementById('global-error').style.display = 'block';
-      document.getElementById('error-content').innerText = `${msg}\n\nLocation: ${url}:${line}:${col}\n\nCheck console for details.`;
-      return false;
-    };
-  </script>
 
   <script type="text/babel">
-    const { useState, useEffect, useCallback, useRef, useMemo } = React;
+    const { useState, useEffect, useRef, useMemo } = React;
 
     // --- DATA SECTION ---
-    
-    // 電腦網路概論 (BANK 1)
+    // 為了節省篇幅，這裡使用原本提供的 BANK_1_DATA (電腦網路概論)
+    // 實際應用時，請確保這裡包含完整的 900+ 題資料
     const BANK_1_DATA = [
   {
     "q": "1-01. 網路基礎建設包含三類網路元件,下列敘述哪些正確?(複選)",
@@ -1618,35 +1601,32 @@
   {"q": "5-55.關於有線網路與無線網路之敘述,下列哪一項正確 ? [cite: 917-921]","o": ["有線網路無須考量佈線問題", "有線網路無法使用光纖纜線", "無線網路須考量無線射頻技術問題", "無線網路比有線網路安全性較高"],"a": [2]}
     ];
 
-    // 海運 (BANK 2) - 這裡現在示範用資料，請將您的海運題目貼入此處
-    // 重要：題目必須以 "1-xx", "2-xx" 開頭才能自動分章節
-    const BANK_2_DATA = [
-      { "q": "1-01. (海運範例第一章) 海運的基本定義為何?", "o": ["陸地運輸", "海上運輸", "空中運輸", "管道運輸"], "a": [1] },
-      { "q": "1-02. (海運範例第一章) 下列何者不是海運優點?", "o": ["運量大", "運費低", "速度快", "航道天然"], "a": [2] },
-      { "q": "2-01. (海運範例第二章) 貨櫃船的特性?", "o": ["裝卸慢", "裝卸快", "成本極高", "只能載散貨"], "a": [1] },
-      { "q": "3-01. (海運範例第三章) 提單的作用?", "o": ["貨物收據", "物權憑證", "運輸契約證明", "以上皆是"], "a": [3] },
-      { "q": "4-01. (海運範例第四章) 保險種類?", "o": ["平安險", "水漬險", "一切險", "以上皆是"], "a": [3] },
-      { "q": "5-01. (海運範例第五章) 港口管理?", "o": ["只管船", "只管貨", "船貨都管", "都不管"], "a": [2] },
-    ];
+    // 如果您有完整的題目資料，請在此處替換上面的 BANK_1_DATA
+    // 下面這個變數模擬您完整貼上的資料，實際使用時請忽略此註解
+    // const BANK_1_DATA = [ ... 您的 900 題資料 ... ];
 
+    
+    // 配置設定
+    // 第一個按鈕：測驗模式 (原本的邏輯)
+    // 第二個按鈕：閱覽模式 (使用電腦網路題庫，但純看題)
     const QUESTION_BANKS = [
       {
-        id: 'bank-1',
-        title: '電腦網路概論',
-        description: '隨機抽題 / 支援分章練習',
-        icon: 'computer',
+        id: 'quiz-mode',
+        title: '電腦網路 (測驗模式)',
+        description: '隨機抽題 / 計時測驗 / 考後檢討',
+        icon: 'test',
+        mode: 'quiz', // 模式：測驗
         limit: 40,
-        hasChapters: true, // 啟用章節模式
-        questions: BANK_1_DATA
+        questions: BANK_1_DATA // 使用電腦網路資料
       },
       {
-        id: 'bank-2',
-        title: '海運 (分章節測驗)',
-        description: '點擊進入選擇章節',
-        icon: 'ship',
-        limit: 50,
-        hasChapters: true, // 啟用章節模式
-        questions: BANK_2_DATA
+        id: 'browse-mode',
+        title: '電腦網路 (閱覽模式)', // 標題改為閱覽模式
+        description: '分章節瀏覽 / 顯示答案 / 純閱讀',
+        icon: 'read',
+        mode: 'browse', // 模式：閱覽
+        limit: 0, // 閱覽模式不需要限制題數，顯示該章節所有題目
+        questions: BANK_1_DATA // 同樣使用電腦網路資料
       }
     ];
 
@@ -1668,11 +1648,9 @@
       return `${m}:${s}`;
     };
 
-    // 自動提取章節
     const extractChapters = (questions) => {
       const chapters = new Set();
       questions.forEach(q => {
-        // 抓取 "1-01" 或 "1." 開頭的數字
         const match = q.q.match(/^(\d+)[-.]/);
         if (match) {
           chapters.add(parseInt(match[1]));
@@ -1682,7 +1660,7 @@
     };
 
     const THEMES = {
-      computer: {
+      test: {
         gradient: "from-violet-600 to-indigo-600",
         bgGradient: "from-violet-50 to-indigo-50",
         text: "text-indigo-600",
@@ -1690,76 +1668,131 @@
         accent: "bg-indigo-500",
         border: "border-indigo-200"
       },
-      ship: {
-        gradient: "from-cyan-500 to-blue-600",
-        bgGradient: "from-cyan-50 to-blue-50",
-        text: "text-cyan-700",
-        button: "bg-cyan-600 active:bg-cyan-700",
-        accent: "bg-cyan-500",
-        border: "border-cyan-200"
+      read: {
+        gradient: "from-emerald-500 to-teal-600", // 綠色系代表閱讀/輕鬆
+        bgGradient: "from-emerald-50 to-teal-50",
+        text: "text-teal-700",
+        button: "bg-teal-600 active:bg-teal-700",
+        accent: "bg-teal-500",
+        border: "border-teal-200"
       }
     };
 
     // --- COMPONENTS ---
 
-    const AIRobot = ({ question, userIndices }) => {
-      const [explanation, setExplanation] = useState(null);
-      const [loading, setLoading] = useState(false);
-      const [showBubble, setShowBubble] = useState(false);
-      const [error, setError] = useState(null);
+    // [New] 閱覽模式的題目卡片
+    const BrowseCard = ({ question, index }) => {
+      return (
+        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm mb-4 break-inside-avoid">
+          <div className="flex items-start gap-3 mb-4">
+            <span className="bg-slate-100 text-slate-500 text-xs font-bold px-2 py-1 rounded flex-shrink-0 mt-0.5">
+              #{index + 1}
+            </span>
+            <h3 className="text-lg font-bold text-slate-800 leading-relaxed" dangerouslySetInnerHTML={{ __html: question.q }}></h3>
+          </div>
 
-      const handleAskAI = async () => {
-        if (showBubble && explanation) {
-          setShowBubble(false);
-          return;
-        }
-        setShowBubble(true);
-        if (explanation) return;
-
-        const apiKey = window.process?.env?.API_KEY; // 需要自行填入 Key 或透過環境變數
-        if (!apiKey) {
-          // 這裡只是個提示，實際使用時需自行處理 Key
-           console.log("No API Key configured in code");
-        }
-
-        let GenAIClass = window.GoogleGenAI;
-        if (!GenAIClass) {
-             try {
-                const mod = await import("https://esm.sh/@google/genai");
-                GenAIClass = mod.GoogleGenAI;
-                window.GoogleGenAI = GenAIClass;
-             } catch (e) {
-                setError("AI 模組載入失敗");
-                return;
-             }
-        }
-
-        setLoading(true);
-        try {
-          const ai = new GenAIClass({ apiKey: apiKey || 'YOUR_API_KEY_HERE' });
-          const correctIndices = question.a;
-          const prompt = `
-            題目: ${question.q}
-            選項: ${question.o.join('; ')}
-            正確答案索引: ${correctIndices.join(', ')}
-            請用繁體中文簡短解釋為什麼這個答案是正確的。
-          `;
-          const response = await ai.models.generateContent({
-             model: 'gemini-2.5-flash',
-             contents: prompt,
-          });
-          setExplanation(response.text);
-        } catch (err) {
-          setError("暫時無法使用 AI 解析");
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      // 簡化版 UI，若無 Key 則不顯示
-      return null; 
+          <div className="space-y-2">
+            {question.o.map((opt, i) => {
+              const isCorrect = question.a.includes(i);
+              return (
+                <div 
+                  key={i} 
+                  className={`relative p-3 rounded-lg border flex items-start transition-colors ${
+                    isCorrect 
+                      ? "bg-emerald-50 border-emerald-500 text-emerald-900" 
+                      : "bg-white border-slate-100 text-slate-500 opacity-80"
+                  }`}
+                >
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 ${
+                    isCorrect ? "bg-emerald-200 text-emerald-800" : "bg-slate-100 text-slate-400"
+                  }`}>
+                    {String.fromCharCode(65 + i)}
+                  </div>
+                  <span className={`text-sm ${isCorrect ? 'font-bold' : ''}`}>{opt}</span>
+                  
+                  {isCorrect && (
+                    <div className="absolute right-3 top-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-600" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
     };
 
+    // [New] 閱覽模式主畫面
+    const BrowseScreen = ({ bank, chapter, onBack }) => {
+      const theme = THEMES.read;
+      
+      // 篩選題目
+      const questions = useMemo(() => {
+        if (chapter === 'all') return bank.questions;
+        return bank.questions.filter(q => q.q.startsWith(`${chapter}-`) || q.q.startsWith(`${chapter}.`));
+      }, [bank, chapter]);
+
+      // 回到頂部按鈕邏輯
+      const [showTopBtn, setShowTopBtn] = useState(false);
+      useEffect(() => {
+        const handleScroll = () => {
+          setShowTopBtn(window.scrollY > 300);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+      }, []);
+
+      const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      return (
+        <div className="min-h-screen bg-slate-50 pb-20 animate-fade-in-up">
+          {/* Header */}
+          <div className="sticky top-0 z-30 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm px-4 py-3 flex items-center justify-between">
+             <button onClick={onBack} className="p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 active:scale-95 transition-all flex items-center gap-1 pr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
+                <span className="text-sm font-bold">返回</span>
+             </button>
+             <div className="flex flex-col items-center">
+                <span className="text-base font-black text-slate-800 tracking-tight">
+                    {chapter === 'all' ? '全範圍瀏覽' : `第 ${chapter} 章`}
+                </span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    共 {questions.length} 題
+                </span>
+             </div>
+             <div className="w-10"></div> {/* Spacer */}
+          </div>
+
+          <div className="max-w-3xl mx-auto px-4 py-6">
+            {questions.length === 0 ? (
+              <div className="text-center py-20 text-slate-400">
+                <p>本章節尚無題目資料</p>
+              </div>
+            ) : (
+              questions.map((q, idx) => (
+                <BrowseCard key={idx} question={q} index={idx} />
+              ))
+            )}
+          </div>
+
+          {showTopBtn && (
+            <button 
+              onClick={scrollToTop}
+              className={`fixed bottom-6 right-6 p-4 rounded-full shadow-lg ${theme.button} text-white transition-all transform hover:scale-110 active:scale-95 z-40`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+              </svg>
+            </button>
+          )}
+        </div>
+      );
+    };
+
+    // Quiz Mode Components (OptionButton, ResultScreen, QuizGame)
     const OptionButton = ({ text, index, isSelected, isSubmitted, isCorrect, isMissed, isWrong, theme, onClick }) => {
       let baseClasses = "w-full text-left p-4 rounded-xl border transition-all duration-200 mb-3 flex items-start group relative active:scale-[0.99] select-none ";
       
@@ -1785,70 +1818,6 @@
           </span>
           <span className="mt-0.5 leading-relaxed text-base break-words w-full">{text}</span>
         </button>
-      );
-    };
-
-    // --- NEW COMPONENT: Chapter Selection ---
-    const ChapterSelectScreen = ({ bank, onSelectChapter, onBack }) => {
-      const theme = bank.icon === 'ship' ? THEMES.ship : THEMES.computer;
-      const chapters = useMemo(() => extractChapters(bank.questions), [bank]);
-
-      return (
-        <div className="min-h-screen bg-slate-50 flex flex-col items-center p-4 animate-fade-in-up">
-          <div className="w-full max-w-md">
-            <button onClick={onBack} className="mb-6 flex items-center text-slate-500 hover:text-slate-800 transition-colors">
-               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-               返回主選單
-            </button>
-
-            <div className={`bg-white rounded-3xl shadow-lg overflow-hidden border border-white mb-6`}>
-               <div className={`bg-gradient-to-r ${theme.gradient} p-6 text-white`}>
-                  <h1 className="text-2xl font-bold mb-1">{bank.title}</h1>
-                  <p className="opacity-90 text-sm">請選擇測驗範圍</p>
-               </div>
-               
-               <div className="p-6 grid grid-cols-1 gap-4">
-                  {/* 全範圍按鈕 */}
-                  <button 
-                    onClick={() => onSelectChapter('all')}
-                    className={`w-full p-4 rounded-xl border-2 border-dashed ${theme.border} bg-white hover:bg-slate-50 transition-all flex items-center justify-between group active:scale-95`}
-                  >
-                     <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-full ${theme.bgGradient} flex items-center justify-center text-xl`}>🎲</div>
-                        <div className="text-left">
-                           <div className="font-bold text-slate-800">全範圍隨機</div>
-                           <div className="text-xs text-slate-500">從所有題庫中隨機抽取 {bank.limit} 題</div>
-                        </div>
-                     </div>
-                     <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${theme.text} opacity-0 group-hover:opacity-100 transition-opacity`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                  </button>
-
-                  <div className="relative flex py-2 items-center">
-                      <div className="flex-grow border-t border-slate-200"></div>
-                      <span className="flex-shrink-0 mx-4 text-slate-400 text-xs">或選擇單一章節 (全題型)</span>
-                      <div className="flex-grow border-t border-slate-200"></div>
-                  </div>
-
-                  {/* 章節按鈕網格 */}
-                  <div className="grid grid-cols-2 gap-3">
-                    {chapters.map(chap => (
-                      <button
-                        key={chap}
-                        onClick={() => onSelectChapter(chap)}
-                        className={`p-4 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all active:scale-95 flex flex-col items-center justify-center gap-2 h-32`}
-                      >
-                         <span className={`text-3xl font-black ${theme.text} opacity-20`}>{chap}</span>
-                         <span className="font-bold text-slate-700">第 {chap} 章</span>
-                         <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500">
-                           {bank.questions.filter(q => q.q.startsWith(`${chap}-`) || q.q.startsWith(`${chap}.`)).length} 題
-                         </span>
-                      </button>
-                    ))}
-                  </div>
-               </div>
-            </div>
-          </div>
-        </div>
       );
     };
 
@@ -1948,18 +1917,10 @@
     const QuizGame = ({ bank, chapter, onExit }) => {
       const questions = useMemo(() => {
         let filtered = bank.questions;
-        
-        // 1. 章節過濾
         if (chapter !== 'all') {
-          // 篩選出以 "1-" 或 "1." 開頭的題目
-          filtered = bank.questions.filter(q => {
-             return q.q.startsWith(`${chapter}-`) || q.q.startsWith(`${chapter}.`);
-          });
-          // 如果是選章節，就不做數量限制，全部考出來
+          filtered = bank.questions.filter(q => q.q.startsWith(`${chapter}-`) || q.q.startsWith(`${chapter}.`));
           return shuffleArray(filtered); 
         }
-
-        // 2. 如果是全範圍，隨機取 limit 數量
         const shuffled = shuffleArray(filtered);
         const safeLimit = Math.min(bank.limit, shuffled.length);
         return shuffled.slice(0, safeLimit);
@@ -1974,12 +1935,10 @@
       const [timeSpent, setTimeSpent] = useState(0);
       
       const timerRef = useRef(null);
-      const theme = bank.icon === 'ship' ? THEMES.ship : THEMES.computer;
+      const theme = THEMES[bank.icon];
 
       useEffect(() => {
-        timerRef.current = setInterval(() => {
-          setTimeSpent(prev => prev + 1);
-        }, 1000);
+        timerRef.current = setInterval(() => setTimeSpent(prev => prev + 1), 1000);
         return () => { if (timerRef.current) clearInterval(timerRef.current); };
       }, []);
 
@@ -2049,7 +2008,7 @@
              </button>
              <div className="flex flex-col items-center">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    {bank.title.split(' ')[0]} {chapter !== 'all' ? `CH${chapter}` : ''}
+                    QUIZ MODE
                 </span>
                 <span className="text-base font-black text-slate-800 tracking-tight leading-none">{formatTime(timeSpent)}</span>
              </div>
@@ -2110,25 +2069,93 @@
       );
     };
 
+    const ChapterSelectScreen = ({ bank, onSelectChapter, onBack }) => {
+      const theme = THEMES[bank.icon];
+      const chapters = useMemo(() => extractChapters(bank.questions), [bank]);
+
+      return (
+        <div className="min-h-screen bg-slate-50 flex flex-col items-center p-4 animate-fade-in-up">
+          <div className="w-full max-w-md">
+            <button onClick={onBack} className="mb-6 flex items-center text-slate-500 hover:text-slate-800 transition-colors">
+               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+               返回主選單
+            </button>
+
+            <div className={`bg-white rounded-3xl shadow-lg overflow-hidden border border-white mb-6`}>
+               <div className={`bg-gradient-to-r ${theme.gradient} p-6 text-white`}>
+                  <h1 className="text-2xl font-bold mb-1">{bank.title}</h1>
+                  <p className="opacity-90 text-sm">{bank.description}</p>
+               </div>
+               
+               <div className="p-6 grid grid-cols-1 gap-4">
+                  {/* 全範圍按鈕 - 根據模式顯示不同文字 */}
+                  <button 
+                    onClick={() => onSelectChapter('all')}
+                    className={`w-full p-4 rounded-xl border-2 border-dashed ${theme.border} bg-white hover:bg-slate-50 transition-all flex items-center justify-between group active:scale-95`}
+                  >
+                     <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-full ${theme.bgGradient} flex items-center justify-center text-xl`}>
+                            {bank.mode === 'quiz' ? '🎲' : '📚'}
+                        </div>
+                        <div className="text-left">
+                           <div className="font-bold text-slate-800">全範圍{bank.mode === 'quiz' ? '隨機測驗' : '瀏覽'}</div>
+                           <div className="text-xs text-slate-500">
+                             {bank.mode === 'quiz' ? `隨機抽取 ${bank.limit} 題` : `閱覽全部 ${bank.questions.length} 題`}
+                           </div>
+                        </div>
+                     </div>
+                     <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${theme.text} opacity-0 group-hover:opacity-100 transition-opacity`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                  </button>
+
+                  <div className="relative flex py-2 items-center">
+                      <div className="flex-grow border-t border-slate-200"></div>
+                      <span className="flex-shrink-0 mx-4 text-slate-400 text-xs">或選擇單一章節</span>
+                      <div className="flex-grow border-t border-slate-200"></div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    {chapters.map(chap => {
+                      const count = bank.questions.filter(q => q.q.startsWith(`${chap}-`) || q.q.startsWith(`${chap}.`)).length;
+                      return (
+                        <button
+                          key={chap}
+                          onClick={() => onSelectChapter(chap)}
+                          className={`p-4 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all active:scale-95 flex flex-col items-center justify-center gap-2 h-32`}
+                        >
+                           <span className={`text-3xl font-black ${theme.text} opacity-20`}>{chap}</span>
+                           <span className="font-bold text-slate-700">第 {chap} 章</span>
+                           <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500">
+                             {count} 題
+                           </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+               </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
     const App = () => {
-      const [view, setView] = useState('home'); // home, chapters, quiz
+      const [view, setView] = useState('home'); // home, chapters, quiz, browse
       const [activeBank, setActiveBank] = useState(null);
       const [activeChapter, setActiveChapter] = useState(null);
 
       const handleSelectBank = (bank) => {
         setActiveBank(bank);
-        // 如果該題庫有章節功能，進入章節選單，否則直接開始隨機測驗
-        if (bank.hasChapters) {
-           setView('chapters');
-        } else {
-           setActiveChapter('all');
-           setView('quiz');
-        }
+        setView('chapters'); // 點選任何模式都先進入章節選擇
       };
 
       const handleSelectChapter = (chapter) => {
          setActiveChapter(chapter);
-         setView('quiz');
+         // 根據 Bank 的 mode 決定進入 測驗介面(quiz) 還是 閱覽介面(browse)
+         if (activeBank.mode === 'quiz') {
+            setView('quiz');
+         } else {
+            setView('browse');
+         }
       };
 
       const handleHome = () => {
@@ -2139,10 +2166,18 @@
 
       return (
         <div className="antialiased text-slate-900 min-h-screen font-sans selection:bg-indigo-100 selection:text-indigo-700">
+          
+          {/* 測驗模式 */}
           {view === 'quiz' && activeBank && (
             <QuizGame bank={activeBank} chapter={activeChapter} onExit={handleHome} />
           )}
 
+          {/* 閱覽模式 (純看題) */}
+          {view === 'browse' && activeBank && (
+            <BrowseScreen bank={activeBank} chapter={activeChapter} onBack={() => setView('chapters')} />
+          )}
+
+          {/* 章節選擇 */}
           {view === 'chapters' && activeBank && (
             <ChapterSelectScreen 
                bank={activeBank} 
@@ -2151,6 +2186,7 @@
             />
           )}
 
+          {/* 首頁 */}
           {view === 'home' && (
             <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-5 py-12">
               <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-2xl opacity-30 animate-blob"></div>
@@ -2166,12 +2202,12 @@
                     考前衝刺<br/>
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-600">題庫系統</span>
                   </h1>
-                  <p className="text-slate-500 font-medium text-sm">請選擇您的考試科目</p>
+                  <p className="text-slate-500 font-medium text-sm">請選擇測驗或複習模式</p>
                 </div>
 
                 <div className="grid gap-4 w-full">
                   {QUESTION_BANKS.map((bank, idx) => {
-                     const theme = bank.icon === 'ship' ? THEMES.ship : THEMES.computer;
+                     const theme = THEMES[bank.icon];
                      return (
                       <button
                         key={bank.id}
@@ -2183,7 +2219,7 @@
                         
                         <div className={`relative z-10 w-14 h-14 rounded-2xl ${theme.bgGradient} flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-300 shrink-0`}>
                            <span className="text-3xl">
-                               {bank.icon === 'ship' ? '🚢' : '💻'}
+                               {bank.icon === 'test' ? '💻' : '📖'}
                            </span>
                         </div>
                         
