@@ -1,2255 +1,505 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>考前衝刺題庫系統</title>
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- React & ReactDOM -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  
-  <!-- Babel -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  
-  <style>
-    body {
-      font-family: 'Inter', 'Noto Sans TC', sans-serif;
-      background-color: #f8fafc;
-      -webkit-font-smoothing: antialiased;
-      -webkit-tap-highlight-color: transparent;
-      overscroll-behavior-y: none;
-    }
-    
-    /* Custom Animations */
-    @keyframes blob {
-      0% { transform: translate(0px, 0px) scale(1); }
-      33% { transform: translate(30px, -50px) scale(1.1); }
-      66% { transform: translate(-20px, 20px) scale(0.9); }
-      100% { transform: translate(0px, 0px) scale(1); }
-    }
-    .animate-blob { animation: blob 7s infinite; }
-    .animation-delay-2000 { animation-delay: 2s; }
-    .animation-delay-4000 { animation-delay: 4s; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>專案管理題庫</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232635;
+    --border: #2e3248;
+    --accent: #6c8eff;
+    --accent2: #a78bfa;
+    --correct: #34d399;
+    --wrong: #f87171;
+    --text: #e8eaf6;
+    --muted: #8892b0;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
 
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in-up { animation: fadeInUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-  </style>
+  /* HOME */
+  #home { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+  .home-title { font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 800; letter-spacing: -0.02em; text-align: center; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.5rem; }
+  .home-sub { color: var(--muted); margin-bottom: 3rem; font-size: 1.05rem; text-align: center; }
+  .chapters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; width: 100%; max-width: 900px; }
+  .ch-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+  .ch-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(108,142,255,0.05), rgba(167,139,250,0.05)); opacity: 0; transition: opacity 0.2s; }
+  .ch-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(108,142,255,0.15); }
+  .ch-card:hover::before { opacity: 1; }
+  .ch-num { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; margin-bottom: 0.5rem; }
+  .ch-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .ch-count { font-size: 0.85rem; color: var(--muted); }
+  .ch-badge { display: inline-block; margin-top: 0.75rem; background: rgba(108,142,255,0.15); color: var(--accent); border-radius: 20px; padding: 0.2rem 0.7rem; font-size: 0.78rem; font-weight: 600; }
+
+  /* QUIZ */
+  #quiz { display: none; min-height: 100vh; padding: 1.5rem; max-width: 820px; margin: 0 auto; }
+  .quiz-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .back-btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 0.5rem 1rem; cursor: pointer; font-size: 0.9rem; transition: all 0.15s; }
+  .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .quiz-title { font-size: 1.2rem; font-weight: 700; flex: 1; }
+  .progress-wrap { width: 100%; background: var(--surface2); border-radius: 99px; height: 6px; margin-bottom: 2rem; }
+  .progress-bar { height: 6px; border-radius: 99px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.4s ease; }
+  .q-counter { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.5rem; }
+  .question-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.75rem; margin-bottom: 1.5rem; }
+  .question-text { font-size: 1.05rem; line-height: 1.7; font-weight: 500; }
+  .multi-badge { display: inline-block; background: rgba(167,139,250,0.2); color: var(--accent2); border-radius: 4px; padding: 0.1rem 0.5rem; font-size: 0.75rem; font-weight: 700; margin-left: 0.5rem; vertical-align: middle; }
+  .options { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
+  .opt-btn { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; cursor: pointer; text-align: left; font-size: 0.95rem; color: var(--text); transition: all 0.15s; display: flex; align-items: flex-start; gap: 0.75rem; line-height: 1.5; }
+  .opt-btn:hover:not(:disabled) { border-color: var(--accent); background: var(--surface2); }
+  .opt-btn.selected { border-color: var(--accent); background: rgba(108,142,255,0.12); }
+  .opt-btn.correct { border-color: var(--correct); background: rgba(52,211,153,0.12); color: var(--correct); }
+  .opt-btn.wrong { border-color: var(--wrong); background: rgba(248,113,113,0.1); color: var(--wrong); }
+  .opt-btn.show-correct { border-color: var(--correct); background: rgba(52,211,153,0.08); }
+  .opt-label { font-weight: 700; flex-shrink: 0; font-size: 1rem; }
+  .action-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .btn { border-radius: var(--radius); padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-ghost { background: var(--surface); border: 1.5px solid var(--border); color: var(--text); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .feedback { border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1rem; font-size: 0.95rem; line-height: 1.6; }
+  .feedback.correct { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3); color: var(--correct); }
+  .feedback.wrong { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.3); color: var(--wrong); }
+
+  /* RESULT */
+  #result { display: none; min-height: 100vh; padding: 1.5rem; max-width: 820px; margin: 0 auto; }
+  .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2.5rem; text-align: center; margin-bottom: 2rem; }
+  .score-circle { width: 140px; height: 140px; border-radius: 50%; background: conic-gradient(var(--accent) 0%, var(--accent) var(--pct, 0%), var(--surface2) var(--pct, 0%)); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; position: relative; }
+  .score-inner { width: 110px; height: 110px; border-radius: 50%; background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .score-num { font-size: 2rem; font-weight: 800; color: var(--text); }
+  .score-label { font-size: 0.75rem; color: var(--muted); }
+  .result-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .result-sub { color: var(--muted); margin-bottom: 2rem; }
+  .stat-row { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .stat { text-align: center; }
+  .stat-val { font-size: 1.5rem; font-weight: 800; }
+  .stat-key { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+  .review-list { display: flex; flex-direction: column; gap: 0.75rem; }
+  .review-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; text-align: left; }
+  .review-item.r-wrong { border-color: rgba(248,113,113,0.4); }
+  .review-q { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; line-height: 1.5; }
+  .review-ans { font-size: 0.85rem; color: var(--muted); }
+  .review-ans .ok { color: var(--correct); font-weight: 600; }
+  .review-ans .bad { color: var(--wrong); font-weight: 600; }
+
+  /* BROWSE */
+  .b-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 0.75rem; }
+  .b-qnum { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 0.4rem; }
+  .b-question { font-size: 0.95rem; font-weight: 600; line-height: 1.6; margin-bottom: 0.85rem; }
+  .b-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem 1rem; }
+  .b-opt { font-size: 0.87rem; color: var(--muted); line-height: 1.5; display: flex; gap: 0.4rem; }
+  .b-opt.b-correct { color: var(--correct); font-weight: 700; }
+  .b-opt-label { flex-shrink: 0; font-weight: 700; }
+  .ch-tab { padding: 0.4rem 0.9rem; border-radius: 20px; border: 1.5px solid var(--border); background: var(--surface); color: var(--muted); font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .ch-tab:hover { border-color: var(--accent); color: var(--accent); }
+  .ch-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .b-ans-badge { display: inline-block; background: rgba(52,211,153,0.15); color: var(--correct); border-radius: 4px; padding: 0.1rem 0.5rem; font-size: 0.75rem; font-weight: 700; margin-left: 0.5rem; }
+
+    .mode-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; width: 100%; max-width: 860px; }
+  .mode-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 2rem 1.5rem; cursor: pointer; transition: all 0.2s; text-align: center; position: relative; overflow: hidden; }
+  .mode-card::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.2s; }
+  .mode-exam::before { background: linear-gradient(135deg, rgba(108,142,255,0.08), rgba(167,139,250,0.08)); }
+  .mode-chapter::before { background: linear-gradient(135deg, rgba(52,211,153,0.08), rgba(56,189,248,0.08)); }
+  .mode-card:hover { transform: translateY(-3px); box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+  .mode-exam:hover { border-color: var(--accent); }
+  .mode-chapter:hover { border-color: var(--correct); }
+  .mode-browse::before { background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(249,115,22,0.08)); }
+  .mode-browse:hover { border-color: #fbbf24; }
+  .mode-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  .mode-name { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .mode-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+
+  /* ── Mobile-first responsive ── */
+  @media (max-width: 600px) {
+    :root { --radius: 10px; }
+
+    /* HOME */
+    #home { padding: 1.25rem 1rem; justify-content: flex-start; padding-top: 2.5rem; }
+    .home-title { font-size: 1.75rem; }
+    .home-sub { font-size: 0.9rem; margin-bottom: 1.75rem; }
+    .mode-cards { grid-template-columns: 1fr; max-width: 100%; gap: 0.85rem; }
+    .mode-card { padding: 1.4rem 1.25rem; }
+    .mode-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .mode-name { font-size: 1.05rem; }
+    .mode-desc { font-size: 0.82rem; }
+
+    /* CHAPTER SELECT */
+    #chapter-select { padding: 1.25rem 1rem; padding-top: 2rem; }
+    .chapters-grid { grid-template-columns: 1fr; }
+    .ch-card { padding: 1.1rem 1.25rem; }
+
+    /* QUIZ */
+    #quiz { padding: 1rem; }
+    .quiz-header { margin-bottom: 1.25rem; gap: 0.6rem; }
+    .quiz-title { font-size: 1rem; }
+    .q-counter { font-size: 0.8rem; margin-bottom: 1rem; }
+    .question-box { padding: 1.1rem 1rem; margin-bottom: 1rem; }
+    .question-text { font-size: 0.95rem; line-height: 1.65; }
+    .options { gap: 0.6rem; margin-bottom: 1rem; }
+    .opt-btn { padding: 0.8rem 0.9rem; font-size: 0.9rem; gap: 0.6rem; }
+    .opt-label { font-size: 0.95rem; }
+    .feedback { padding: 0.85rem 1rem; font-size: 0.88rem; }
+    .action-row { gap: 0.6rem; }
+    .btn { padding: 0.7rem 1.2rem; font-size: 0.9rem; border-radius: 9px; }
+
+    /* RESULT */
+    #result { padding: 1rem; }
+    .result-card { padding: 1.75rem 1.25rem; }
+    .score-circle { width: 120px; height: 120px; }
+    .score-inner { width: 92px; height: 92px; }
+    .score-num { font-size: 1.6rem; }
+    .result-title { font-size: 1.25rem; }
+    .stat-row { gap: 1.25rem; }
+    .stat-val { font-size: 1.25rem; }
+    .review-item { padding: 1rem; }
+    .review-q { font-size: 0.85rem; }
+    .review-ans { font-size: 0.8rem; }
+
+    /* BROWSE */
+    #browse { padding: 1rem; }
+    .ch-tab { font-size: 0.78rem; padding: 0.35rem 0.7rem; }
+    #browse-ch-tabs { gap: 0.4rem; margin-bottom: 1.1rem; }
+    .b-item { padding: 1rem; margin-bottom: 0.6rem; }
+    .b-question { font-size: 0.88rem; }
+    .b-opts { grid-template-columns: 1fr; gap: 0.3rem; }
+    .b-opt { font-size: 0.83rem; }
+    .b-qnum { font-size: 0.7rem; }
+  }
+</style>
 </head>
 <body>
-  <div id="root"></div>
 
-  <script type="text/babel">
-    const { useState, useEffect, useRef, useMemo } = React;
+<!-- HOME -->
+<div id="home">
+  <div class="home-title">專案管理題庫</div>
+  <div class="home-sub">共 420 題，選擇練習模式</div>
+  <div class="mode-cards">
+    <div class="mode-card mode-exam" onclick="startExam()">
+      <div class="mode-icon">🏆</div>
+      <div class="mode-name">正式考照測驗</div>
+      <div class="mode-desc">全題庫隨機抽 50 題<br>模擬正式考試情境</div>
+    </div>
+    <div class="mode-card mode-chapter" onclick="showChapters()">
+      <div class="mode-icon">📚</div>
+      <div class="mode-name">分章節練習</div>
+      <div class="mode-desc">依章節練習，每次 30 題<br>六章共 420 題</div>
+    </div>
+    <div class="mode-card mode-browse" onclick="showBrowse()">
+      <div class="mode-icon">🔍</div>
+      <div class="mode-name">題庫瀏覽</div>
+      <div class="mode-desc">依章節閱覽全部題目<br>含選項與正確答案</div>
+    </div>
+  </div>
+</div>
 
-    // --- DATA SECTION ---
-    // 為了節省篇幅，這裡使用原本提供的 BANK_1_DATA (電腦網路概論)
-    // 實際應用時，請確保這裡包含完整的 900+ 題資料
-    const BANK_1_DATA = [
-  {
-    "q": "1-01. 網路基礎建設包含三類網路元件,下列敘述哪些正確?(複選)",
-    "o": ["裝置", "檔案 ", "媒體", "服務"],
-    "a": [0, 2, 3]
-  },
-  {
-    "q": "1-02. 關於網路基礎架構的類型,下列敘述哪些正確?(複選)",
-    "o": ["人際網路", "區域網路", "無線網路", "廣域網路"],
-    "a": [1, 2, 3]
-  },
-  {
-    "q": "1-03. 下列敘述哪一項是指統合網路?",
-    "o": ["一項服務-一個網路", "一項服務-多個網路", "多項服務-一個網路", "多項服務-多個網路"],
-    "a": [2]
-  },
-  {
-    "q": "1-04. 將資料從一個給定點傳送到另一給定點所用的時間,下列敘述哪一項正確?",
-    "o": ["Dead Time", "Hello Time", "延遲時間", "收斂時間"],
-    "a": [2]
-  },
-  {
-    "q": "1-05. 頻寬是媒體承載資料的能力,下列哪些是屬於頻寬的單位?(複選)",
-    "o": ["Kbps", "Mbps", "Lbps", "Gbps"],
-    "a": [0, 1, 3]
-  },
-  {
-    "q": "1-06. 下列哪些裝置是屬於終端裝置?(複選)",
-    "o": ["網路線", "筆型電腦", "網路印表機", "行動手持裝置"],
-    "a": [1, 2, 3]
-  },
-  {
-    "q": "1-07. 下列敘述哪一項裝置,是用來將不同型式的網路連接起來的連接器,連接有許多區段的複雜網路?",
-    "o": ["主機", "Web 伺服器", "DSL 數據機", "路由器"],
-    "a": [3]
-  },
-  {
-    "q": "1-08. 下列哪一項裝置,是指所有連線到網路並直接參與網路通訊的電腦?",
-    "o": ["VoIP 電話", "行動手持裝置", "網路印表機", "主機"],
-    "a": [3]
-  },
-  {
-    "q": "1-09. 下列哪一項不是階層式網路設計的網路層級?",
-    "o": ["存取層", "分佈層", "網路層", "核心層"],
-    "a": [0]
-  },
-  {
-    "q": "1-10. 關於階層式網路設計中分佈層的敘述,下列哪一項正確?",
-    "o": ["提供基於政策管理的連通服務", "提供作業群組或使用者的網路存取服務", "提供分佈層交換設備間快速傳送服務", "使用更快速而不是更多的設備來實現擴展"],
-    "a": [0]
-  },
-  {
-    "q": "1-11. 最簡單的對等式網路,是由兩台使用有線或無線連線方式直接相連的電腦組成,下列敘述哪一項是對等式網路的優點?",
-    "o": ["成本較高", "不可延伸", "無法集中管理", "易於安裝"],
-    "a": [3]
-  },
-  {
-    "q": "1-12. 最簡單的對等式網路,是由兩台使用有線或無線連線方式直接相連的電腦組成,下列敘述哪一項是對等式網路的缺點?",
-    "o": ["易於安裝", "複雜性較低", "無法集中管理", "成本較低"],
-    "a": [2]
-  },
-  {
-    "q": "1-13. 若要在 Windows 電腦中檢視 MAC 位址的指令及參數,下列哪一項正確?",
-    "o": ["ipconfig/renew", "ipconfig/release", "ipconfig/all", "ipconfig"],
-    "a": [2]
-  },
-  {
-    "q": "1-14. 會傳送「網際網路控制訊息通訊協定」(ICMP)回應封包給目的地,已確定到目的地所經的路徑,下列指令哪一項正確?",
-    "o": ["Ping", "Tracert", "telnet", "ssh"],
-    "a": [1]
-  },
-  {
-    "q": "1-15. 使用 ping 命令是測試連通性的有效方法,下列哪一項是 ping 指令所使用的協定?",
-    "o": ["TCP", "UDP", "ARP", "ICMP"],
-    "a": [3]
-  },
-  {
-    "q": "1-16. 若要進行網路監控和排除網路故障,下列哪一項是最有效的工具?",
-    "o": ["建立網路基線", "網路設計", "IP 定址方案", "標識網路"],
-    "a": [0]
-  },
-  {
-    "q": "1-17. 關於邏輯拓樸圖的內容,下列哪一項錯誤?",
-    "o": ["標識裝置", "標識連接埠和 IP 定址方案", "標識中介裝置", "IP 定址方案"],
-    "a": [2]
-  },
-  {
-    "q": "1-18. 關於實體拓樸圖的內容,下列哪一項錯誤?",
-    "o": ["標識中介裝置", "連接埠設定", "IP 定址方案", "纜線安裝的實體位置"],
-    "a": [2]
-  },
-  {
-    "q": "1-19. 關於實體拓樸和邏輯拓樸的敘述,下列哪些正確?(複選)",
-    "o": ["實體拓樸顯示每個網路的 IP 定址方案", "實體拓樸是電纜、電腦和其他週邊裝置的實體位置", "邏輯拓樸始終與實體拓樸相同", "邏輯拓樸紀錄資料透過網路的路徑以及網路功能(如路由)發生的位置"],
-    "a": [1, 3]
-  },
-  {
-    "q": "1-20. 關於區域網路常用的實體拓樸,下列哪些正確?(複選)",
-    "o": ["網狀", "星形", "環狀", "匯流排"],
-    "a": [1, 2, 3]
-  },
-  {
-    "q": "1-21. 下列哪一項是銅纜所傳輸的訊號?",
-    "o": ["光", "火", "水", "電"],
-    "a": [3]
-  },
-  {
-    "q": "1-22. 下列哪一項是光纖所傳輸的訊號?",
-    "o": ["光", "火", "水", "電"],
-    "a": [0]
-  },
-  {
-    "q": "1-23. 光纖相比於銅纜的優勢,下列敘述哪一項正確?",
-    "o": ["熔接和安裝比銅纜更容易", "光纖可以在彎管附近安裝", "光纖通常比銅纜成本低", "光纖比銅纜傳送信號的速度快"],
-    "a": [3]
-  },
-  {
-    "q": "1-24. 若要提供 1.3GB/s 的資料速率並且與較舊的裝置向後相容,下列哪一項是可以使用的無線網路標準?",
-    "o": ["IEEE 802a", "IEEE 802ac", "IEEE 802n", "IEEE 802g"],
-    "a": [1]
-  },
-  {
-    "q": "1-25. 關於乙太網路的標準,下列哪一項正確?",
-    "o": ["IEEE 802.3", "IEEE 802.11", "IEEE 802.15", "IEEE 802.16"],
-    "a": [0]
-  },
-  {
-    "q": "1-26. 關於 IEEE 10BASE5 的定義,下列敘述哪些正確?(複選)",
-    "o": ["10 表示傳輸速度為 10Mbps", "BASE 表示採用基頻信號來進行傳輸", "5 表示每個網路節點之間最長可達 500 公尺", "5 表示每個網路節點之間最長可達 5000 公尺"],
-    "a": [0, 1, 2]
-  },
-  {
-    "q": "1-27. 關於 IEEE 1000BASE-T 的定義,下列敘述哪一項錯誤?",
-    "o": ["1000 表示傳輸速度為 1000Mbp", "BASE 表示採用基頻信號來進行傳輸", "T 表示每個網路節點之間最長可達 500 公尺", "T 表示每個網路節點之間最長可達 100 公尺"],
-    "a": [2]
-  },
-  {
-    "q": "1-28. 關於 TIA/EIA-568A 的蕊線排列順序,下列哪一項正確?",
-    "o": ["白綠、綠、白橘、藍、白藍、橘、白棕、棕", "白橘、橘、白綠、藍、白藍、綠、白棕、棕", "白綠、綠、白橘、橘、白藍、藍、白棕、棕", "白橘、橘、白綠、綠、白藍、藍、白棕、棕"],
-    "a": [0]
-  },
-  {
-    "q": "1-29. 乙太網路的直通線,通常用於「電腦到交換器」和「交換器到路由器」的互連,下列敘述哪一項是直通線的標準?",
-    "o": ["2 端都是 568A 或 568B", "1 端 568A,另一端是 1568B", "兩端都不是 2568A 或 568B", "1 端是 568A 或 568B,另 1 端排列完全對調"],
-    "a": [0]
-  },
-  {
-    "q": "1-30. 下列哪一項仍使用同軸電纜來佈線?",
-    "o": ["無線網路安裝", "有線電視服務", "交換器到路由器的互連", "主機到交換器的互連"],
-    "a": [1]
-  },
-  {
-    "q": "1-31. 下列哪一項不是最常用的網路光纖連接器?",
-    "o": ["ST(Straight-Tip)", "SC(Subscriber Connector)", "LC(Lucent Connector)", "RJ-45"],
-    "a": [3]
-  },
-  {
-    "q": "1-32. 關於單個光纖連接使用兩股光纖敘述,下列哪一項正確?",
-    "o": ["兩股光纖可以使資料傳輸更長距離,並且不會影響性能", "它們可以防止串音引起連接干擾", "它們允許全雙工連接", "它們可以提高資料傳輸速度"],
-    "a": [2]
-  },
-  {
-    "q": "1-33. 網路之間的廣域連接有多種形式,下列哪一項錯誤?",
-    "o": ["RJ-45", "EIA/TIA-232", "EIA/TIA-449", "EIA-530"],
-    "a": [0]
-  },
-  {
-    "q": "1-34. 關於 IEEE 802.11g 的敘述,下列哪些正確?(複選)",
-    "o": ["工作頻率為 2.4GHz", "速度理論值為 54Mbps", "與 IEEE 802.11b 不相容", "速度理論值與 IEEE 802.11a 一樣"],
-    "a": [0, 1, 3]
-  },
-  {
-    "q": "1-35. 若要增強 UTP 纜線中的磁場串音抵銷效果,下列敘述哪一項正確?",
-    "o": ["減少用於傳輸資料的電線數", "變化和增加每個線對中的絞合數量", "增加銅線的厚度", "增加包裹所有電線的 PVC 護套厚度"],
-    "a": [1]
-  },
-  {
-    "q": "1-36. 下列敘述哪一項不應該使用跳接來連接?",
-    "o": ["路由器到路由器乙太網連接埠", "電腦到電腦", "電腦到交換器", "交換器到交換器"],
-    "a": [2]
-  },
-  {
-    "q": "1-37. 下列敘述哪一項是 Cat 5e 網路線可以支援的最大網路傳輸速度?",
-    "o": ["10Gbps", "1000Mbps", "100Gbps", "1Tbps"],
-    "a": [1]
-  },
-  {
-    "q": "1-38. 在 UTP 安裝中纜線總長度受線的長度,下列哪一項正確?",
-    "o": ["100 公尺", "1 公里", "10 公里", "100 公里"],
-    "a": [0]
-  },
-  {
-    "q": "1-39. 無遮罩式雙絞線,是由幾對帶彩色標的電線絞合在一起?",
-    "o": ["8 對", "6 對", "2 對", "4 對"],
-    "a": [3]
-  },
-  {
-    "q": "1-40. 下列敘述哪一項說明何謂專有協定?",
-    "o": ["可供所有組織或供應商自由使用的協定", "由私人組織所開發且能在所有供應商硬體上執行的協定", "由控制協定定義和操作的組織所開發的協定", "稱為 TCP/IP 協定套件的協定集合"],
-    "a": [2]
-  },
-  {
-    "q": "1-41. 關於使用開放標準協定的敘述,下列哪一項正確?",
-    "o": ["執行不同作業系統的用戶端主機和伺服器可以成功交換資料", "競爭和創新僅限於具體的產品類型", "Internet 存取可以由每個市場中的單個 ISP 控制", "網路通訊侷限於來自相同供應商的裝置之間的資料傳輸"],
-    "a": [0]
-  },
-  {
-    "q": "1-42. 下列敘述哪一項不是協定必須考慮的要求?",
-    "o": ["標識出發送者和接收者", "不通用的語言和語法", "傳遞的速度和時間", "證實或確認要求"],
-    "a": [1]
-  },
-  {
-    "q": "1-43. 下列哪一項協定,負責控制伺服器和用戶端之間交換 HTTP 訊息的大小和速率?",
-    "o": ["TCP", "UDP", "ICMP", "IP"],
-    "a": [0]
-  },
-  {
-    "q": "1-44. 關於 OSI 模型,下列哪一層可以讓封包在不同的網路之間成功地進行傳遞,並規定了網路的定址方式及不同網路間資料的傳遞方式?",
-    "o": ["應用層", "傳輸層", "資料連結層", "網路層"],
-    "a": [3]
-  },
-  {
-    "q": "1-45. 關於 OSI 模型第四層傳輸層的功能說明,下列敘述哪一項正確?",
-    "o": ["規劃或選擇資料封包的最佳傳輸路徑", "根據連接的媒體對資料封包套用組成訊框資訊", "將訊息切割成區段,並加上編號,以便接收端收到資料後,依編號順序重組", "向使用者顯示資料,包括編碼和對話控制"],
-    "a": [2]
-  },
-  {
-    "q": "1-46. 關於 TCP/IP 和 OSI 模型的敘述,下列哪一項正確?",
-    "o": ["TCP/IP 模型的網路存取層,與 OSI 的第三層有類似的服務和功能", "TCP/IP 模型的傳輸層,與 OSI 模型的第四層有類似的服務和功能", "TCP/IP 模型的應用層,只與 OSI 模型的第七層有相同的服務和功能", "TCP/IP 和 OSI 模型的層數一模一樣"],
-    "a": [1]
-  },
-  {
-    "q": "1-47. 下列哪一項是 OSI 模型的第一層?",
-    "o": ["實體層", "資料連結層", "網路層", "傳輸層"],
-    "a": [0]
-  },
-  {
-    "q": "1-48. 若要描述網路模型的任何層的資料片段,下列哪一項正確?",
-    "o": ["訊框", "協定資料單元", "封包", "位元"],
-    "a": [1]
-  },
-  {
-    "q": "1-49. 當電腦網路卡收到來自網路媒體的位元時,將使用下列哪一種 PDU 格式?",
-    "o": ["封包", "資料段", "訊框", "位元"],
-    "a": [2]
-  },
-  {
-    "q": "1-50. 邏輯位址會在下列 OSI 模型中的哪一層進行封裝?",
-    "o": ["實體層", "資料連結層", "傳輸層", "網路層"],
-    "a": [3]
-  },
-  {
-    "q": "1-51. 關於 MAC 位址的敘述,下列哪一項正確?",
-    "o": ["MAC 位址由作業系統直接指派", "MAC 位址是 OSI 第三層的位址", "前三個位元組是用於廠商分配的 OUI", "MAC 位址長度為 128 個位元"],
-    "a": [2]
-  },
-  {
-    "q": "1-52. 下列哪一項是關於 CSMA/CD 存取方法的缺點?",
-    "o": ["具有追蹤媒體存取次序的機制", "所有設備都確保可以存取媒體", "競爭方法具有確定性", "碰撞會降低網路性能"],
-    "a": [3]
-  },
-  {
-    "q": "1-53. 乙太網路使用下列哪一種方法來檢測和處理碰撞,並管理通信的恢復?",
-    "o": ["CSMA/CD", "CSMA/CA", "CSMA/CAMP", "CSMA"],
-    "a": [0]
-  },
-  {
-    "q": "1-54. 負責路由與邏輯定址,是屬於下列 OSI 模型中的哪一層?",
-    "o": ["傳輸層", "網路層", "資料連結層", "實體層"],
-    "a": [1]
-  },
-  {
-    "q": "1-55. IPv4 位址是由多少位元組成?",
-    "o": ["128 位元", "64 位元", "32 位元", "16 位元"],
-    "a": [2]
-  },
-  {
-    "q": "1-56. 子網路遮罩 255.255.255.240,下列敘述哪一項正確?",
-    "o": ["/25", "/26", "/27", "/28"],
-    "a": [3]
-  },
-  {
-    "q": "1-57. 分配給網路中終端設備的位址名稱,下列哪一項正確?",
-    "o": ["主機位址", "廣播位址", "網路位址", "連接埠位址"],
-    "a": [0]
-  },
-  {
-    "q": "1-58. 關於實體層標準管理的功能,下列哪一項錯誤?",
-    "o": ["實體元件", "路由", "編碼", "訊號"],
-    "a": [1]
-  },
-  {
-    "q": "1-59. 下列哪一項不是網路中使用銅纜的三種主要類型之一?",
-    "o": ["非遮蔽雙絞線", "遮蔽雙絞線", "光纖", "同軸電纜"],
-    "a": [2]
-  },
-  {
-    "q": "1-60. 下列哪一個是制定反轉線的組織?",
-    "o": ["ISO", "IEEE", "ITU", "Cisco"],
-    "a": [3]
-  },
-  {
-    "q": "1-61. 關於全雙工通訊的工作原理,下列敘述哪一項正確?",
-    "o": ["兩個裝置均可同時透過媒體進行發送和接收", "兩個裝置都可以透過媒體進行發送和接收,但不可同時進行", "一個裝置只能透過媒體接收,另一個裝置只能透過媒體發送", "兩個裝置隨機透過媒體進行發送和接收"],
-    "a": [0]
-  },
-  {
-    "q": "1-62. 可向網路中所有主機發送資料的特殊位址,下列哪一項正確?",
-    "o": ["主機位址", "廣播位址", "網路位址", "連接埠位址"],
-    "a": [1]
-  },
-  {
-    "q": "1-63. 關於廣播位址的定義,下列哪一項正確?",
-    "o": ["網路部分的各位元全部為 1 的位址", "主機部分的各位元全部為 0 的位址", "網路部分的各位元全部為 0 的位址", "主機部分的各位元全部為 1 的位址"],
-    "a": [3]
-  },
-  {
-    "q": "1-64. 關於 MAC 位址中的廣播位址數值,下列哪一項正確?",
-    "o": ["FF:FF:FF:FF:FF:FF", "127.0.0.1", "Fe80::1", "80"],
-    "a": [0]
-  },
-  {
-    "q": "1-65. 主機若要確保資料封包可以轉送到正確的目的網路,下列敘述哪一項正確?",
-    "o": ["主機不須具有自己的本地路由表,只要路由器具有遠端預設路由即可", "主機必須具有自己的本地路由表,其中包含迴路介面的路由、本地網路路由和遠端預設路由", "主機必須具有自己的迴路介面的路由,但不需具有本地網路路由和遠端預設路由", "主機只需設定 IP 位址即可,不須設定預設閘道"],
-    "a": [1]
-  },
-  {
-    "q": "1-66. 下列敘述哪一項不是在設定靜態 IP 時,所需要設定的 IP 參數?",
-    "o": ["IP 位址", "子網路遮罩", "MAC 位址", "預設閘道位址"],
-    "a": [2]
-  },
-  {
-    "q": "1-67. 網路層將封包轉送到目的位址的程序名稱,下列哪一項正確?",
-    "o": ["封裝", "解封裝", "定址", "路由"],
-    "a": [3]
-  },
-  {
-    "q": "1-68. 在 IP 網路中,可使用下列哪一個位址將封包轉送到目的地?",
-    "o": ["目的 IP 位址", "目的 MAC 位", "來源 IP 位址", "來源 MAC 位址"],
-    "a": [0]
-  },
-  {
-    "q": "1-69. 在第二層交換器中,可使用下列哪一個位址將訊框轉送到目的地?",
-    "o": ["目的 IP 位址", "目的 MAC 位址", "來源 IP 位址", "來源 MAC 位址"],
-    "a": [1]
-  },
-  {
-    "q": "1-70. 下列敘述哪一項不是 LAN 的具體功能?",
-    "o": ["LAN 在有線區域內互連終端裝置", "LAN 通常由一個組織或個人管理", "LAN 通常由多個服務供應商管理", "LAN 為內部終端裝置和中介裝置提供高速頻寬"],
-    "a": [2]
-  },
-  {
-    "q": "2-01. 在網際網路裡傳送每個封包中,均會包含下列哪些資訊?(複選)",
-    "o": ["來源 IP 位址", "目的主機名稱", "目的 IP 位址", "路由器 IP 位址"],
-    "a": [0, 2]
-  },
-  {
-    "q": "2-02. 一般主機通常需要安裝下列哪一項介面卡,才能連接上網際網路?",
-    "o": ["SCSI 介面卡", "RAID 介面卡", "VGA 介面卡", "NIC 介面卡"],
-    "a": [3]
-  },
-  {
-    "q": "2-03. IPv4 位址總共有多少個位元組?",
-    "o": ["4", "8", "12", "32"],
-    "a": [0]
-  },
-  {
-    "q": "2-04. 二進制的 IPv4 位址並不方便人們解讀,因此 IPv4 位址採用下列哪一種表示方式?",
-    "o": ["冒號分隔十六進制", "冒號分隔十進制", "點分隔十六進制", "點分隔十進制"],
-    "a": [3]
-  },
-  {
-    "q": "2-05. IPv4 位址 11000000.10100010.01111110.01000101 的點分隔十進制表示法,下列哪一項正確?",
-    "o": ["192.168.126.73", "192.164.126.71", "192.162.126.69", "192.168.126.67"],
-    "a": [2]
-  },
-  {
-    "q": "2-06. IPv4 位址 172.16.223.191,其中 223 的二進制內容哪一項正確?",
-    "o": ["11110111", "11101111", "11011111", "10111111"],
-    "a": [2]
-  },
-  {
-    "q": "2-07. IPv4 位址格式為點分隔十進制,下列哪些 IP 位址是正確有效的位址?(複選)",
-    "o": ["10.123.256.10", "192.199.23.5", "198.FF.131.224", "16.168.16.67"],
-    "a": [1, 3]
-  },
-  {
-    "q": "2-08. IPv4 位址 61.111.128.32 的 32 位元二進制內容,下列哪一項正確?",
-    "o": ["00111001.01101101.10000000.00100000", "00111001.01101111.10000000.00100000", "00111101.01101101.10000000.00100000", "00111101.01101111.10000000.00100000"],
-    "a": [3]
-  },
-  {
-    "q": "2-09. IPv4 位址 10001000.00101010.01111110.01010101 的點分隔十進制表示法,下列哪一項正確?",
-    "o": ["136.42.126.85", "138.42.124.85", "136.42.124.85", "138.42.126.85"],
-    "a": [0]
-  },
-  {
-    "q": "2-10. 32 位元的 IPv4 位址結構可以分成網路與主機兩個部分,可依下列哪一項資訊判別位元屬於網路部分或主機部分?",
-    "o": ["安裝的作業系統", "設定的網路遮罩", "網路設備品牌", "採用的路由協定"],
-    "a": [1]
-  },
-  {
-    "q": "2-11. 關於 IP 位址 192.168.10.248 與網路遮罩關係,下列敘述哪一項正確?",
-    "o": ["網路遮罩為 255.255.255.224 時,該 IP 位址代表網路位址", "網路遮罩為 255.255.255.240 時,該 IP 位址代表一般主機位址", "網路遮罩為 255.255.255.248 時,該 IP 位址代表廣播位址", "網路遮罩為 255.255.255.252 時,該 IP 位址代表一般主機位址"],
-    "a": [1]
-  },
-  {
-    "q": "2-12. 下列哪些可在電腦主機上設定的合法 IPv4 位址,並且可以連接上網際網路?(複選)",
-    "o": ["89.134.252.249", "223.254.18.19", "127.0.1.12", "255.155.122.71"],
-    "a": [0, 1]
-  },
-  {
-    "q": "2-13. 電腦 A 的 IP 位址為 192.168.2.101,電腦 B 的 IP 位址為 192.198.2.224,當電腦 A 有資料要傳送給電腦 B 時,下列敘述哪一項正確?",
-    "o": ["電腦 A 將資料透過網路卡直接傳送給電腦 B", "電腦 A 需先檢查網路線的類型是否為直通電纜(Straigh-Trough)才能傳送", "電腦 A 需要先透過網路遮罩判別電腦 B 是否與自己位在相同網段", "電腦 A 需要透過路由器才能將資料傳送給電腦 B"],
-    "a": [2]
-  },
-  {
-    "q": "2-14. 電腦 A 的 IP 位址為 172.16.1.121,電腦 B 的 IP 位址為 172.16.2.0,兩部電腦採用相同的網路遮罩,則下列敘述哪一項正確?",
-    "o": ["若網路遮罩為 255.255.255.0,則兩部電腦位於相同網路網段", "若網路遮罩為 255.255.254.0,則兩部電腦位於相同網路網段", "若網路遮罩為 255.255.252.0,則兩部電腦位於相同網路網段", "兩部電腦不可能位於相同的網路網段,因為電腦 B 的位址是錯誤的"],
-    "a": [2]
-  },
-  {
-    "q": "2-15. 下列哪些 IP 位址屬於 172.16.10.0/23 網段範圍內?(複選)",
-    "o": ["172.16.10.255", "172.16.11.128", "172.16.12.64", "172.16.11.254"],
-    "a": [0, 1, 3]
-  },
-  {
-    "q": "2-16. IP 位址 10.172.193.33 搭配網路遮罩為 255.255.254.0,則該 IP 位址所屬的網段網路位址,下列哪一項正確?",
-    "o": ["10.172.191.0", "10.172.192.0", "10.172.193.0", "10.172.194.0"],
-    "a": [1]
-  },
-  {
-    "q": "2-17. IP 位址與網路遮罩間,透過下列哪一項運算可以得到網路位址資訊?",
-    "o": ["NOT", "AND", "OR", "XOR"],
-    "a": [1]
-  },
-  {
-    "q": "2-18. 下列哪一個位址是屬於 B 級別的有效 IP 位址?",
-    "o": ["191.128.254.256", "127.0.0.1", "177.255.21.56", "192.1.10.192"],
-    "a": [2]
-  },
-  {
-    "q": "2-19. IP 位址 191.224.232.15 的預設網路遮罩,下列哪一項正確?",
-    "o": ["255.0.0.0", "255.255.0.0", "255.255.255.0", "255.255.255.255"],
-    "a": [1]
-  },
-  {
-    "q": "2-20. IPv4 及 IPv6 位址的最上層分配管理單位為 IANA(Internet Assigned Numbers Authority),IANA 底下有五個位址註冊機構 RIR(Regional Internet Registry),下列哪一項不屬於 RIR 之一?",
-    "o": ["ARIN", "LACNIC", "RIPE NCC", "IETF"],
-    "a": [3]
-  },
-  {
-    "q": "2-21. IP 位址 224.0.0.10 屬於下列有級別位址的哪一類?",
-    "o": ["A", "B", "C", "D"],
-    "a": [3]
-  },
-  {
-    "q": "2-22. 有級別的 IPv4 網路位址中,扣除多點傳送(Multicast)及實驗(Experimental)保留不使用的部分,剩下的總共分為幾個級別?",
-    "o": ["1", "2", "3", "4"],
-    "a": [2]
-  },
-  {
-    "q": "2-23. B 類的有級別網路位址,其預設網路遮罩下列哪一項正確?",
-    "o": ["255.0.0.0", "255.255.0.0", "255.255.255.0", "255.255.255.255"],
-    "a": [1]
-  },
-  {
-    "q": "2-24. 關於有級別網路位址的敘述,下列哪一項錯誤?",
-    "o": ["A 級別的所有 IP 位址數量最多", "B 級別的所有 IP 是 C 級別的 255 倍", "C 級別的預設網路遮罩為 255.255.255.0", "D 級別用於多點傳送(Multicast)"],
-    "a": [1]
-  },
-  {
-    "q": "2-25. 下列哪些 IP 位址屬於 RFC 1918 所規定的私有 IP 範圍?(複選)",
-    "o": ["10.192.10.128", "172.32.128.192", "192.168.100.251", "172.19.224.252"],
-    "a": [0, 2, 3]
-  },
-  {
-    "q": "2-26. 下列哪一個 IPv4 位址不屬於 RFC 1918 所規定的私有 IP 範圍?",
-    "o": ["10.224.232.128", "192.168.22.21", "172.64.21.10", "172.31.192.168"],
-    "a": [2]
-  },
-  {
-    "q": "2-27. 全球共有幾個 IPv4 及 IPv6 位址的分配管理單位的位址,註冊機構 RIR(Regional Internet Registry)?",
-    "o": ["4", "5", "6", "8"],
-    "a": [1]
-  },
-  {
-    "q": "2-28. 私有的 IPv4 位址無法直接在網際網路上繞送,必須先透過下列哪一個技術轉換成公用 IP 位址?",
-    "o": ["RIP", "NAT", "DHCP", "NTP"],
-    "a": [1]
-  },
-  {
-    "q": "2-29. 一般用於主從式(Client-Sever)或同儕式(Peer-to-Peer)主機對主機的傳送型態,下列哪一項正確?",
-    "o": ["Multicast", "Broadcast", "Anycast", "Unicast"],
-    "a": [3]
-  },
-  {
-    "q": "2-30. 下列哪一項 IPv4 位址,不會出現在封包的來源位址欄位中?",
-    "o": ["10.10.1.1", "255.255.255.255", "192.168.10.1", "0.0.0.0"],
-    "a": [1]
-  },
-  {
-    "q": "2-31. 路由協定 RIP 第二版用於交換路由資料的傳送方式,屬於下列哪一種傳送型態?",
-    "o": ["Unicast", "Broadcast", "Multicast", "Anycast"],
-    "a": [2]
-  },
-  {
-    "q": "2-32. 關於 IPv4 位址的敘述,下列哪些正確?(複選)",
-    "o": ["私有 IP 是免費的,也節省了 IP 位址資源,適合在區域網路使用", "所有 IPv4 的位址均可以使用,但是不同主機不能使用相同的 IP 位址", "標準交換器可以用於隔離廣播,避免廣播流量影響太大範圍", "有限廣播(Limited Broadcast)的位址為 255.255.255.255"],
-    "a": [0, 3]
-  },
-  {
-    "q": "2-33. 關於廣播位址,下列敘述哪一項錯誤?",
-    "o": ["預設遮罩環境下,IPv4 位址 192.168.100.255 為廣播位址", "廣播可以區分為直接廣播(Directed)及有限(Limited)廣播兩種", "當主機收到廣播封包時,其處理方式與單點傳送(Unicast)封包不同", "直接廣播(Directed)是傳給特定網段的所有設備接收"],
-    "a": [2]
-  },
-  {
-    "q": "2-34. Windows 主機手動設定 IPv4 資料時，至少需要設定下列哪些欄位才能連上網際網路?(複選)",
-    "o": ["預設閘道", "IP 位址", "網卡 MAC 位址", "子網路遮罩"],
-    "a": [0, 1, 3]
-  },
-  {
-    "q": "2-35. 關於 IP 位址設定方式的敘述，下列敘述哪一項錯誤?",
-    "o": ["印表機、伺服器及網路設備適合使用靜態方式指定 IP 位址", "大型企業適合為所有員工配置靜態方式之 IP 位址。以避免 IP 衝突發生", "動態配置 IP 位址需要搭配 DHCP 服務", "筆型電腦等行動裝置適合採用動態方式指定 IP 位址"],
-    "a": [1]
-  },
-  {
-    "q": "2-36. 關於預設閘道的敘述，下列哪一項正確?",
-    "o": ["預設閘道是路由器的網路介面，而目的電腦連接在該介面上", "由交換器擔任預設閘道服務，不管多少介面只能設定一個 IP 位址", "當封包需要傳往另一個 IP 網段時，該封包將交由預設閘道轉送", "預設閘道的 IP 必須與自己位於不同的 IP 網段，方能傳輸資料"],
-    "a": [2]
-  },
-  {
-    "q": "2-37. 在一般企業環境中，下列哪一個裝置較不適合採用靜態方式指定 IP 位址?",
-    "o": ["位於配線間之機架式交換器", "僅供內部使用之企業網站", "連接 ISP 之對外路由器", "網管部門診斷用筆型電腦"],
-    "a": [3]
-  },
-  {
-    "q": "2-38. 下列哪一個 Windows 命令，可以查看透過 DHCP 所取得的 IP 位址及 DHCP 伺服器位址等相關資訊?",
-    "o": ["netstat -rn", "ipconfig /all", "netstat -p ip", "msconfig"],
-    "a": [1]
-  },
-  {
-    "q": "2-39. 當 DHCP 用戶端想透過 DHCP 伺服器取得 IP 位址，用戶端會先發出 DHCPDISCOVER 訊息，該訊息所攜帶的目的地 IP 位址及目的地 MAC 位址，下列何者正確?",
-    "o": ["目的地 IP 位址為 255.255.255.255；目的地 MAC 位址為 00-00-00-00-00-00", "目的地 IP 位址為 0.0.0.0；目的地 MAC 位址為 FF-FF-FF-FF-FF-FF", "目的地 IP 位址為 0.0.0.0；目的地 MAC 位址為 00-00-00-00-00-00", "目的地 IP 位址為 255.255.255.255；目的地 MAC 位址為 FF-FF-FF-FF-FF-FF"],
-    "a": [3]
-  },
-  {
-    "q": "2-40. 當某部主機採用自動取得 IP 位址之設定，這需要透過下列哪一種網路服務達成?",
-    "o": ["DNS", "DHCP", "HTTP", "HTTPS"],
-    "a": [1]
-  },
-  {
-    "q": "2-41. 一般正常 DHCP 自動取得 IP 環境中，用戶端需要傳送出幾個 DHCP 訊息?",
-    "o": ["1", "2", "3", "4"],
-    "a": [1]
-  },
-  {
-    "q": "2-42. 使用 DHCP 服務時，具有下列哪些特性?(複選)",
-    "o": ["IP 位址是租用型態，租用期限到達可以收回，再改配給其他裝置", "DHCP 伺服器只能架設在 Windows 或 Linux 主機上", "IP 位址是動態分配，因此不一定都取到同一個 IP 位址", "除了可以動態提供 IP 位址、網路遮罩、預設閘道資訊外，透過設定還可以提供 DNS 伺服器或 WINS 伺服器位址"],
-    "a": [0, 2, 3]
-  },
-  {
-    "q": "2-43. 路由器介面所設定之 IP 位址為 172.16.1.254 ，且網路遮罩設定為 255.255.255.224 時，則該路由器介面所連接網段的網路位址，下列哪一項正確?",
-    "o": ["172.16.1.0", "172.16.1.128", "172.16.1.192", "172.16.1.224"],
-    "a": [3]
-  },
-  {
-    "q": "2-44. 下列哪些是有效的 IPv6 位址?(複選)",
-    "o": ["2001:FF10::FD01", "2001:167:A09D:332F:21G4:2290:FD01:C1D1", "FE80::1", "2001:ACAD:0:5016:1400:F67A:3211"],
-    "a": [0, 2]
-  },
-  {
-    "q": "2-45. 關於內部的私有 IP 位址與外部的功用 IP 位址之間的轉換技術，下列哪一項正確?",
-    "o": ["NAN", "NTP", "NAT", "NTT"],
-    "a": [2]
-  },
-  {
-    "q": "2-46. IPv6 位址未如預期很快在 2003 年取代 IPv4，除了設備沒辦法全面支援外，還有下列哪一個原因?",
-    "o": ["IPv6 尚無法與 IPv4 設備互通，使用者普遍不願意更換到 IPv6", "IP 位址的需求未如預期，十年內尚有足夠的 IPv4 位址可供分配", "無 DHCP 伺服器協助，得手動設定 IPv6 位址，使得使用者意願不高", "私有 IP 位址及 NAT 技術，減緩 IPv4 位址的消耗速度"],
-    "a": [3]
-  },
-  {
-    "q": "2-47. IP 網段 A 中的電腦主機，若要能跟另一個 IP 網段 B 的電腦主機通訊，需要倚靠下列哪一個網路裝置?",
-    "o": ["路由器(Router)", "集線器(HUB)", "交換器(Switch)", "橋接器(Bridge)"],
-    "a": [0]
-  },
-  {
-    "q": "2-48. (請參考原題庫圖片) 如圖所示，為家用無線路由器或 IP 分享器的 DHCP 伺服器設定畫面，設定資料中的「Maximum number of Users:50」，下列敘述哪一項正確?",
-    "o": ["只能累計提供 50 位用戶端的 IP 租用服務", "該無線路由器或 IP 分享器最多僅能連接 50 位使用者", "使用者取得 IP 之後最多可以使用 50 分鐘", "最多提供 50 個 IP 位址的租用服務"],
-    "a": [3]
-  },
-  {
-    "q": "2-49. 關於家用無線路由器或 IP 分享器的敘述，下列哪一項正確?",
-    "o": ["無線路由器或 IP 分享器連接 ISP 的介面，必須手動靜態設定 IP 位址", "無線路由器或 IP 分享器所連接的內部無線網路，與有線網路為不同的 IP 網段", "內部網段可以透過無線路由器或 IP 分享器的 DHCP 伺服器功能配置 IP 位址", "無線網路服務不需要透過 NAT 轉換位址，但內部有線網路則需要 NAT 轉換位址"],
-    "a": [2]
-  },
-  {
-    "q": "2-50. (請參考原題庫圖片) 如附圖所示，為家用無線路由器或 IP 分享器的 DHCP 伺服器設定畫面，當用戶端透過此 DHCP 伺服器取得 IP 位址資訊時，預設閘道的位址設定，下列哪一項正確?",
-    "o": ["192.168.1.1", "192.168.1.20", "192.168.1.69", "192.168.1.100"],
-    "a": [0]
-  },
-  {
-    "q": "2-51. 設定家用無線路由器或 IP 分享器的 DHCP 伺服器服務時，下列敘述哪一項正確?",
-    "o": ["一般的無線路由器或 IP 分享器只能擔任 DHCP 伺服器，不能擔任用戶端", "DHCP 內部使用的 IP 範圍均為 192.168.1.0/24 網段，無法變更", "DHCP 伺服器提供了 IP 位址、網路遮罩外，並提供伺服器自己的 IP 位址擔任預設閘道工作", "DHCP 伺服器之 IP 租用期限固定為 24 小時"],
-    "a": [2]
-  },
-  {
-    "q": "2-52. 當封包由無線路由器或 IP 分享器傳往網際網路時，NAT 會更改該封包的哪一個欄位資料?",
-    "o": ["來源 IP", "目的 IP", "通訊協定", "標頭版本"],
-    "a": [0]
-  },
-  {
-    "q": "2-53. (請參考原題庫圖片) 如附圖所示，在網路連線資料中，若電腦 A 與電腦 B 能彼此正常通訊，則設備 C 為下列哪一種裝置?",
-    "o": ["防火牆(Firewall)", "交換器(Switch)", "路由器(Router)", "集線器(HUB)"],
-    "a": [2]
-  },
-  {
-    "q": "2-54. 關於預設閘道的敘述，下列哪一項是錯誤?",
-    "o": ["路由器單一介面下所連接的電腦設備，通常使用相同的預設閘道位址", "家用無線路由器或 IP 分享器，亦提供預設閘道服務給所連接的 ISP", "路由器介面與其所連接的電腦設備介面，通常使用相同的網路遮罩", "家用無線路由器或 IP 分享器可以透過 DHCP 服務指定用戶端的預設閘道位址"],
-    "a": [1]
-  },
-  {
-    "q": "2-55. 下列哪一項是 IPv6 位址表示法?",
-    "o": ["2001.0db8.acad.0001.2302.0000.0000.0001", "2001:0db8:acad:0001:2302:0000:0000:0001", "2001-0db8-acad-0001-2302-0000-0000-0001", "2001,0db8,acad,0001,2302,0000,0000,0001"],
-    "a": [1]
-  },
-  {
-    "q": "2-56. 共用單一公用位址的無線路由器或 IP 分享器，若收到來自網際網路的封包，需要哪一個欄位資訊才能判別該轉換成哪一個內部 IP 位址?",
-    "o": ["傳輸層 Port 編號", "交換器介面 Port 編號", "封包傳輸時間", "封包 ID 編號"],
-    "a": [0]
-  },
-  {
-    "q": "2-57. IPv6 位址表示方式中，用冒號區隔的每一個欄位共有多少位元?",
-    "o": ["8", "16", "24", "32"],
-    "a": [1]
-  },
-  {
-    "q": "2-58. 關於位址轉換 NAT 技術的敘述，下列哪一項正確?",
-    "o": ["NAT 設備內部使用私有 IP 位址的主機，仍須透過 NAT 轉換才能互通", "多少部主機連接在 NAT 設備內部，就至少需要準備多少個合法的公用 IP 位址，才足夠轉換", "NAT 設備內部使用的私有 IP 位址不能在網際網路上繞送，因此需要透過 NAT 轉換位址", "IPv4 位址不需要 NAT 技術，只有 IPv6 才需要"],
-    "a": [2]
-  },
-  {
-    "q": "2-59. IPv4 及 IPv6 位址分別有多少個位元組?",
-    "o": ["4 及 16", "4 及 32", "32 及 64", "32 及 128"],
-    "a": [0]
-  },
-  {
-    "q": "2-60. IPv4 及 IPv6 標準，是由下列哪一個單位所制訂的?",
-    "o": ["電機電子工程師學會(IEEE)", "網際網路研究專門工作組(IRTF)", "網際網路工程任務小組(IETF)", "網際網路號碼分配權威機構(IANA)"],
-    "a": [2]
-  },
-  {
-    "q": "2-61. 有了 IPv6 位址，為何人們仍然繼續使用 IPv4 位址，下列敘述哪一項正確?",
-    "o": ["IPv4 位址多達 42 億個，離配置用盡還需要非常久的時間", "IPv6 位址太長了，轉成點分隔十進制很難記憶與使用", "透過 RFC1918 私有 IP 及 NAT 技術，IPv4 位址消耗獲得減緩", "IPv6 目前還只是研發階段，尚未有產品支援 IPv6"],
-    "a": [2]
-  },
-  {
-    "q": "2-62. 隨著上網設備急速增加，IPv4 位址逐漸耗盡，因此 IETF 推出了下列哪一個新的 IP 位址技術?",
-    "o": ["IPv5", "IPv6", "IPv7", "IPv8"],
-    "a": [1]
-  },
-  {
-    "q": "2-63. (請參考原題庫圖片) 如附圖所示，為無線路由器或 IP 分享器設定，當電腦通過 DHCP 取得的 IP 位址為 192.168.0.121 並傳輸封包進入網際網路時，網際網路裡看到的來源 IP 位址，下列哪一個正確?",
-    "o": ["192.168.0.1", "192.168.0.121", "199.6.13.121", "199.6.13.1"],
-    "a": [2]
-  },
-  {
-    "q": "2-64. 關於 IPv6 表示法的雙冒號「::」用法，下列敘述哪些正確?(複選)",
-    "o": ["雙冒號只能使用一次", "雙冒號用來取代多個連續為 0 的位址區塊", "雙冒號不能出現在位址最前面", "雙冒號不能出現在位址最後面"],
-    "a": [0, 1]
-  },
-  {
-    "q": "2-65. 關於 IPv4 與 IPv6 位址的敘述，下列哪一項錯誤?",
-    "o": ["IPv4 位址與 IPv6 位址不能並存，因此目前全球仍繼續使用 IPv4 位址", "IPv6 位址因為位址足夠，可以免除網路位址轉換 NAT 的需求", "利用自動設定 IP 位址技術，IPv6 可以簡化管理工作", "IPv6 位址數量達 340 澗(10 的 36 次方)"],
-    "a": [0]
-  },
-  {
-    "q": "2-66. IPv6 具有多種自動取得位址的選項，該採用下列哪一種選項是根據網路設備發出的哪個訊息內容決定?",
-    "o": ["鄰居請求(Neighbor Solicitation)", "鄰居通告(Neighbor Advertisement)", "路由器請求(Router Solicitation)", "路由器通告(Router Advertisement)"],
-    "a": [3]
-  },
-  {
-    "q": "2-67. IPv6 位址除了將位元數由 IPv4 的 32 位元增加到 128 位元外，還具有下列哪些特性?(複選)",
-    "o": ["位址表示方法改為冒號區隔十六進位寫法", "封包標頭長度增加四倍", "更有效率(Efficiency)，並且能夠支援移動性(Mobility)", "僅位址位元數增加，標頭內容及欄位不變以便能與 IPv4 相容"],
-    "a": [0, 2]
-  },
-  {
-    "q": "2-68. IPv6 位址表示法中，單一 IPv6 位址最多會有多少個 16 進位的字元?",
-    "o": ["16", "24", "32", "64"],
-    "a": [2]
-  },
-  {
-    "q": "2-69. IPv6 位址 2001:0DB8:0000:0000:00FF:0000:0000:00D1 可以改寫為下列哪一些位址寫法?(複選)",
-    "o": ["2001:DB8::FF:0:0:D1", "2001:DB8:FF::D1", "2001:DB8::FF::D1", "2001:DB8:0:0:FF::D1"],
-    "a": [0, 3]
-  },
-  {
-    "q": "2-70. IPv6 支援的位址，自動取得機制包含下列哪些?(複選)",
-    "o": ["SLAAC", "DHCP6", "SLAAC+DHCP6", "ICMPv6"],
-    "a": [0, 1, 2]
-  },
-  {
-    "q": "3-01. 若要向網站請求網頁內容，下列哪一項協定正確?",
-    "o": ["DHCP", "HTTP", "VoIP", "SMIP"],
-    "a": [1]
-  },
-  {
-    "q": "3-02. 當管理者想登入遠方主機進行命令列操控，如同登入本地主機一般時，會採用下列哪一項服務?",
-    "o": ["SNMP", "HTML", "SSH", "SMTP"],
-    "a": [2]
-  },
-  {
-    "q": "3-03. 下列哪一項協定的伺服器，可以分發 IP 位址、遮罩、預設閘道及其他上網參數給客戶端電腦?",
-    "o": ["DHCP", "POP", "FTP", "SMTP"],
-    "a": [0]
-  },
-  {
-    "q": "3-04. 郵件主機和郵件主機之間傳遞信件時使用的協定，下列哪一項正確?",
-    "o": ["POP", "HTTP", "SMTP", "IMAP"],
-    "a": [2]
-  },
-  {
-    "q": "3-05. 用於擷取伺服器電子郵件到客戶端主機的協定，下列哪些正確?(複選)",
-    "o": ["SMTP", "IMAP", "HTML", "POP"],
-    "a": [1, 3]
-  },
-  {
-    "q": "3-06. 到線上購物網站，會用到下列哪些網際網路服務?(複選)",
-    "o": ["SSH", "HTTP", "FTP", "DNS"],
-    "a": [1, 3]
-  },
-  {
-    "q": "3-07. 網際網路常見的網路層協定，下列哪一項正確?",
-    "o": ["TCP", "UDP", "IP", "HTTP"],
-    "a": [2]
-  },
-  {
-    "q": "3-08. 關於 TCP 協定的敘述，下列哪些錯誤?(複選)",
-    "o": ["使用回覆封包確認傳達", "不再重送丟失的封包", "適用於網頁內容之傳輸", "適用於語言串流之傳輸"],
-    "a": [1, 3]
-  },
-  {
-    "q": "3-09. 瀏覽器請求網頁的過程，會用到下列哪些協定?(複選)",
-    "o": ["HTTP", "TCP", "UDP", "IP"],
-    "a": [0, 1, 3]
-  },
-  {
-    "q": "3-10. DNS 查詢主機 IP 的過程採用 UDP 協定的主因，下列哪一項正確?",
-    "o": ["查詢過程封包丟失也沒關係", "查詢過程封包可走不同路徑", "查詢內容用一個封包就裝得下", "查詢內容不需講究可靠傳輸"],
-    "a": [2]
-  },
-  {
-    "q": "3-11. 關於傳輸層的資料傳輸單位，下列哪一項正確?",
-    "o": ["對話(Session)", "分段(Segment)", "封包(Packet)", "訊框(Frame)"],
-    "a": [1]
-  },
-  {
-    "q": "3-12. 關於傳輸層公認連接埠(well-known port)的號碼範圍，下列哪一項正確?",
-    "o": ["0~1023", "1~1024", "1~1023", "0~1024"],
-    "a": [0]
-  },
-  {
-    "q": "3-13. 關於註冊連接埠(Registered Port)的敘述，下列哪些正確?(複選)",
-    "o": ["號碼範圍介於 1024~49151", "號碼範圍介於 1~1023", "可當成來源埠使用", "使用在一般常見的 Service 功能，如 HTTP、FTP"],
-    "a": [0, 2]
-  },
-  {
-    "q": "3-14. 關於私有連接埠(Private Port)的敘述，下列哪些正確?(複選)",
-    "o": ["號碼範圍介於 1024~65535", "號碼範圍介於 49152~65535", "常當成來源埠使用", "常當成目的地埠使用"],
-    "a": [1, 2]
-  },
-  {
-    "q": "3-15. 若要查詢網站的 IP 位址或網域名稱供主機連線之用，下列哪一項服務正確?",
-    "o": ["DHCP", "DNS", "SSH", "SMTP"],
-    "a": [1]
-  },
-  {
-    "q": "3-16. 下列哪一項是 DNS 服務的公認連接埠號?",
-    "o": ["21", "22", "53", "110"],
-    "a": [2]
-  },
-  {
-    "q": "3-17. 關於 DNS 服務的敘述，下列哪一項錯誤?",
-    "o": ["DNS 名稱有分階層", "常見的高層網域名稱有.com、.edu、.net", "DNS 利用網域名稱代替 IP 住址方便憶", "一個 IP 只能有一個 DNS 名稱"],
-    "a": [3]
-  },
-  {
-    "q": "3-18. 若要讓用戶不 IP，只需要填寫 www.tqc.org.tw 即可連上電腦技能基金會網站，下列哪一種協定正確?",
-    "o": ["ARP", "DNS", "HTTP", "HTML"],
-    "a": [1]
-  },
-  {
-    "q": "3-19. 關於 DNS 伺服器如何答覆一般 IP 詢問的敘述，下列哪一項錯誤?",
-    "o": ["伺服器內部有網域名稱及其 IP 的對照表供查詢之用", "伺服器若內建對照表查詢不到可代向網域其他伺服器查詢", "伺服器使用 TCP 傳輸層的 53 號連接埠接受請求", "伺服器使用 UDP 傳輸層的 53 號連接埠接受請求"],
-    "a": [2]
-  },
-  {
-    "q": "3-20. 請求網頁會用到的應用層協定，下列哪一項正確?",
-    "o": ["HTTP", "HTML", "TCP", "IP"],
-    "a": [0]
-  },
-  {
-    "q": "3-21. 安全的 HTTP 連線採用的公認連接埠號碼，下列哪一項正確?",
-    "o": ["25", "80", "110", "443"],
-    "a": [3]
-  },
-  {
-    "q": "3-22. 若瀏覽器同時對一個網站開啟兩個網頁，下列敘述哪一項錯誤?",
-    "o": ["瀏覽器將開啟兩條 HTTP 連線，連向同一個網站", "兩條 HTTP 連線的來源 IP 及目的地 IP 相同", "兩條 HTTP 連線的來源埠相同", "兩條 HTTP 連線的目的地埠相同"],
-    "a": [2]
-  },
-  {
-    "q": "3-23. 關於 HTTP 及 HTML 的敘述，下列哪一項錯誤?",
-    "o": ["瀏覽網頁同時會用到 HTTP 及 HTML", "HTTP 為傳輸層協定，負責網頁如何傳送", "HTML 為網頁內容標準，負責網頁如何呈現", "HTTP 以明文傳送，必須使用 HTTPS 才會以密文傳送"],
-    "a": [1]
-  },
-  {
-    "q": "3-24. 除了 HTTP 之外，常用的檔案傳輸協定還有下列哪一項?",
-    "o": ["TCP", "FTP", "DNS", "SSH"],
-    "a": [1]
-  },
-  {
-    "q": "3-25. 關於 FTP 的敘述，下列哪一項錯誤?",
-    "o": ["FTP 伺服器利用連接埠 21 號進行檔案管理及傳輸", "FTP 伺服器允許檔案的上傳、下載、刪除、更名操作", "FTP 客戶端功能常內建於作業系統及瀏覽器", "獨立 FTP 客戶端軟體常用圖形界面方便檔案拖拉操作"],
-    "a": [0]
-  },
-  {
-    "q": "3-26. 下列哪些是 FTP 伺服器使用公認的連接埠號碼?(複選)",
-    "o": ["20", "21", "23", "25"],
-    "a": [0, 1]
-  },
-  {
-    "q": "3-27. 關於 FTP 連線過程，下列哪一項錯誤?",
-    "o": ["FTP 客戶端和伺服器端之間利用控制連線傳送檔案操錯指令", "FTP 客戶端和伺服器端之間利用資料連線傳送檔案內容", "控制連線用到伺服主機的 21 號埠", "資料連線用到伺服主機的 22 號埠"],
-    "a": [3]
-  },
-  {
-    "q": "3-28. 下列哪一項是 TELNET 使用公認的 TCP 埠號?",
-    "o": ["23", "22", "21", "20"],
-    "a": [0]
-  },
-  {
-    "q": "3-29. 下列哪一項是 SSH 連線使用公認的 TCP 埠號?",
-    "o": ["23", "22", "21", "20"],
-    "a": [1]
-  },
-  {
-    "q": "3-30. 支援虛擬終端機連線並允許使用遠方主機命令列介面的協定，下列哪些正確?(複選)",
-    "o": ["HTTP", "RDP", "SSH", "TELNET"],
-    "a": [2, 3]
-  },
-  {
-    "q": "3-31. 下列哪一項不是虛擬終端機(VTY)連線的好處?",
-    "o": ["對遠方主機下命令列指令就像在本地主機一般", "若取得授權可以啟動或關閉遠方服務", "若取得授權可以修改遠方主機組態，甚至關閉遠方主機", "除了使用文字模式也可以使用圖形模式存取遠方主機"],
-    "a": [3]
-  },
-  {
-    "q": "3-32. 現在 TELNET 逐漸由 SSH 取代的原因，下列哪些正確?(複選)",
-    "o": ["TELNET 只能傳輸文字，SSH 可以傳輸圖形", "TELNET 採用明文傳輸，SSH 採用密文傳輸", "SSH 的帳密驗證能力強於 TELNET", "SSH 的傳輸速度優於 TELNET"],
-    "a": [1, 2]
-  },
-  {
-    "q": "3-33. 電子郵件寄送採用 SMTP 協定，其公認的 TCP 連接埠下列哪一項正確?",
-    "o": ["22", "25", "110", "143"],
-    "a": [1]
-  },
-  {
-    "q": "3-34. 關於 POP 及 IMAP 兩項服務的敘述，下列哪一項錯誤?",
-    "o": ["兩者皆用於擷取伺服器電子郵件到客戶端主機", "POP 預設伺服器郵件遭下載後，原郵件就不再保留", "IMAP 一直保留伺服器郵件，除非用戶想刪除", "同一台伺服器不能同時提供 POP 及 IMAP 兩種服務"],
-    "a": [3]
-  },
-  {
-    "q": "3-35. 關於網路電話的敘述，下列哪一項錯誤?",
-    "o": ["使用 VoIP 技術將聲音轉成數位資料放在網路傳輸", "網路電話和即時訊息服務一樣接採用同儕對同儕技術", "網路電話撥到普通電話須要經由閘道器連到公共交換電話網(PSTH)", "所有網路電話軟體接使用同一套協定及目的地埠號互通"],
-    "a": [3]
-  },
-  {
-    "q": "3-36. 關於 Wi-Fi 無線區網標準 IEEE 802.11 用到的電波頻帶，下列哪些正確?(複選)",
-    "o": ["840MHz", "930MHz", "2.4GHz", "5GHz"],
-    "a": [2, 3]
-  },
-  {
-    "q": "3-37. 提供辨識不同無線路由器的參數設定，下列哪一項正確?",
-    "o": ["網路模式", "網路名稱(SSID)", "標準頻道", "SSID 廣播"],
-    "a": [1]
-  },
-  {
-    "q": "3-38. 為了讓更多的新舊設備可以一起上網，無線路由器的網路模式宜選用下列哪一種模式?",
-    "o": ["802.11b", "802.11g", "802.11n", "混用模式"],
-    "a": [3]
-  },
-  {
-    "q": "3-39. 關閉 SSID 廣播的效果，下列哪一項錯誤?",
-    "o": ["節省能源", "讓裝置較難找到無線網路", "能稍微預防未授權裝置連上無線網路", "手動輸入 SSID 仍能連上無線網路"],
-    "a": [0]
-  },
-  {
-    "q": "3-40. 某無線網路路由器的網路模式只選用 802.11n 的主因，下列哪一項正確?",
-    "o": ["只使用一種無線標準傳輸速度最快", "不讓使用其他無線標準的裝置連上無線網路", "可讓最多種裝置連上無線網路", "有利於較舊的裝置連上無線網路"],
-    "a": [0]
-  },
-  {
-    "q": "3-41. 關於網路名稱(SSID)的敘述，下列哪一項錯誤?",
-    "o": ["字串不分大小寫", "允許英數字混合", "最多 32 字元", "用來區別自己所屬及可互通的無線網路(WLAN)"],
-    "a": [0]
-  },
-  {
-    "q": "3-42. 無線網路(WLAN)使用的媒介存取技術下列哪一項正確?",
-    "o": ["CSMA/CA", "CSMA/CB", "CSMA/CD", "CSMA/CE"],
-    "a": [0]
-  },
-  {
-    "q": "3-43. 無線主機(STA)需要使用網路時，會向存取點(AP)發出下列哪一種訊息?",
-    "o": ["RTS", "CTS", "ACK", "REQ"],
-    "a": [0]
-  },
-  {
-    "q": "3-44. 存取點(AP)同意無線主機(STA)使用網路時，會回覆下列哪一種訊息?",
-    "o": ["RTS", "CTS", "ACK", "READY"],
-    "a": [1]
-  },
-  {
-    "q": "3-45. 無線主機(STA)結束資料傳送後，會送出下列哪一種訊息表示釋放頻道?",
-    "o": ["RTS", "CTS", "ACK", "FREE"],
-    "a": [2]
-  },
-  {
-    "q": "3-46. 關於無線網路(WLAN)的 CSMA/CA 技術和乙太網路(Ethernet)的 CSMA/CD 技術，下列敘述哪一項錯誤?",
-    "o": ["兩種技術皆適用於媒介共享，傳輸容易產生碰撞的環境", "無線網路利用預約頻道機制避免碰撞", "乙太網路利用遇到碰撞停止傳輸一段時間的偵測機制減少碰撞", "無線網路和乙太網路皆有清楚定義的傳輸邊界範圍"],
-    "a": [3]
-  },
-  {
-    "q": "3-47. 關於 CSMA/CA 技術的資料傳輸過程，下列哪一項錯誤?",
-    "o": ["無線主機(STA)發出 RTS 訊息給存取點(AP)，請其轉發訊息通知所有主機頻道淨空以便傳送資料", "存取點確認頻道淨空後發出 CTS 訊息給所有主機同意傳送資料", "請求主機收到 CTS 訊息後開始傳送資料", "請求主機傳完資料後發出 ACK 訊息給存取點，請其轉發訊息通知所有主機頻道已釋放"],
-    "a": [0]
-  },
-  {
-    "q": "3-48. 無線路由器連接區域網路主機的接孔，下列哪一項正確?",
-    "o": ["標 INTERNET 的 RJ-45 接孔", "標 LAN 的 RJ-45 接孔", "標 DSL 的 RJ-11 接孔", "標 CABLE 的 BNC 接孔"],
-    "a": [1]
-  },
-  {
-    "q": "3-49. 經由數據機(Modem)過來的纜線，要連接到下列無線路由器的哪一個接孔?",
-    "o": ["標 INTERNET 的 RJ-45 接孔", "標 LAN 的 RJ-45 接孔", "標 DSL 的 RJ-11 接孔", "標 CABLE 的 BNC 接孔"],
-    "a": [0]
-  },
-  {
-    "q": "3-50. 關於無線路由器 MAC 過濾功能的敘述，下列哪一項錯誤?",
-    "o": ["提升無線網路安全又具備容易快速設定之彈性，方便所有人上網", "只有設定在 MAC 白名單中的無線主機才能順利連線", "有新主機想連線，必須由管理者手動加入 MAC 白名單中", "大部分的無線路由器都有支援 MAC 過濾功能"],
-    "a": [0]
-  },
-  {
-    "q": "3-51. 關於無線路由器的賓客模式(Guest Mode)，下列敘述哪一項錯誤?",
-    "o": ["不是每一台無線路由器都有支援賓客模式", "賓客模式一般採用開放式連線不須密碼驗證", "賓客模式允許連線主機和內部區域網路相連", "賓客模式允許連線主機和外部網際網路相連"],
-    "a": [2]
-  },
-  {
-    "q": "3-52. 下列哪一項不是手機常見的無線連線方式?",
-    "o": ["Wi-Fi", "WiMax", "行動數據", "藍牙"],
-    "a": [1]
-  },
-  {
-    "q": "3-53. 在公共圖書館最省錢又方便的手機上網方式，下列哪一項正確?",
-    "o": ["Wi-Fi", "藍牙", "行動數據", "連接網路插座"],
-    "a": [0]
-  },
-  {
-    "q": "3-54. 關於行動裝置預先設定好的上網方式，下列敘述哪一項錯誤?",
-    "o": ["如果裝置有開啟 Wi-Fi，則自動優先使用 Wi-Fi 網路", "如果沒有 Wi-Fi 網路，但有設定方案則自動使用行動數據", "行動數據從 4G 自動轉換到 3G 的過程原有連線會中斷", "行動數據有頻寬限制及收費關係只在找不到 Wi-Fi 時才使用"],
-    "a": [2]
-  },
-  {
-    "q": "3-55. 關於無線裝置採用藍牙連線的優點，下列哪一項錯誤?",
-    "o": ["擺脫纜線之糾纏", "距離躍近，傳輸速率越快", "省電功能可延長電池壽命", "可直接對連不需基地台之建置"],
-    "a": [1]
-  },
-  {
-    "q": "3-56. 藍牙適用下列哪些場合?(複選)",
-    "o": ["車用喇叭麥克風可供撥打或接收電話", "上網連線之分享", "無線鍵盤、滑鼠", "導遊廣播給全遊客之講解器"],
-    "a": [0, 1, 2]
-  },
-  {
-    "q": "3-57. 關於藍牙配對的敘述，下列哪一項錯誤?",
-    "o": ["任何時間最多八部裝置可以連線在一起", "裝置只要一開啟藍牙功能，就可以讓其他裝置找到", "掃描周邊藍牙裝置過程，可詢問其名稱及提供之服務等訊息", "第一次點選新藍牙裝置時，需要輸入個人識別碼(PIN)才能連線成功"],
-    "a": [1]
-  },
-  {
-    "q": "3-58. 想租用有專人維護的網站空間放自己公司的網頁，可使用下列 ISP 的哪一項服務?",
-    "o": ["網頁架站(Web Hosting)", "FTP 架站(FTP Hosting)", "設備管(Equipment Colocation)", "應用及媒體架站(Applications and Media Hosting)"],
-    "a": [0]
-  },
-  {
-    "q": "3-59. 想將公司主機放在 ISP 機房充分利用其頻寬，可使用下列 ISP 的哪一項服務?",
-    "o": ["網頁架站(Web Hosting)", "FTP 架站(FTP Hosting)", "設備管(Equipment Colocation)", "應用及媒體架站(Applications and Media Hosting)"],
-    "a": [2]
-  },
-  {
-    "q": "3-60. 關於 ISP 的敘述，下列哪一項錯誤?",
-    "o": ["ISP 讓家用網路連上網際網路", "許多 ISP 還提供電子郵件帳號等附加服務給契約用戶", "每家 ISP 須連向其他 ISP 形成一個連結網路供各地用戶互連", "ISP 之間採平層(Flat)架構互連，以確保來源到目的地量走最短路徑"],
-    "a": [3]
-  },
-  {
-    "q": "3-61. 關於網際網路骨幹的敘述，下列哪一項錯誤?",
-    "o": ["猶如資訊高速公路提供快速資料傳輸", "以平層(Flat)架構連結世界各服務供應商的網路", "主要傳輸媒介採用光纖纜線", "連結各城市或大陸的光纖纜線常走地底或海底"],
-    "a": [1]
-  },
-  {
-    "q": "3-62. 下列哪一種 ISP 沒有獨立自己埋線或架基地台?",
-    "o": ["本地有線電視供應商", "有線電話服務供應商", "智慧手機的蜂巢網路服務供應商", "租用別家公司實體網路頻寬的獨立供應商"],
-    "a": [3]
-  },
-  {
-    "q": "3-63. 家裡網路欲連上 ISP，下列哪一項是安全必須的設備?",
-    "o": ["數據機", "路由器", "交換器", "集線器"],
-    "a": [1]
-  },
-  {
-    "q": "3-64. 家裡電腦欲想連上 ISP，下列哪一項是最基本的設備?",
-    "o": ["數據機", "路由器", "交換器", "集線器"],
-    "a": [0]
-  },
-  {
-    "q": "3-65. 如家裡同時須要桌機及行動裝置上網，採購下列哪一項單一設備最划算?",
-    "o": ["交換器", "無線整合型路由器", "無線訊號延伸器", "集線器"],
-    "a": [1]
-  },
-  {
-    "q": "3-66. 如果數據機或路由器提供的有線埠數不夠，則利用下列哪些設備能簡單增加有線埠數?(複選)",
-    "o": ["IP 分享器", "路由器", "交換器", "集線器"],
-    "a": [2, 3]
-  },
-  {
-    "q": "3-67. 關於整合型無線路由器的特徵,下列哪一項錯誤 ?",
-    "o": ["可同時提供有線及無線裝置連網", "有線及無線裝置一般分處兩個不同的網段", "可提供 DHCP 功能自動分發 IP 等上網參數", "一般允許內部網路對外連線 ,但不允許外部網路對內連線"],
-    "a": [1]
-  },
-  {
-    "q": "3-68. 關於從家裡電腦直接撥接數據機對外上網的敘述,下列哪一項錯誤 ?",
-    "o": ["直接利用數據機撥接取得的電腦網址為公有 IP", "直接連數據機容易讓電腦受到外部攻擊", "外部網路可直接連線到家裡電腦", "遇電腦想當服器供外部網路使用之場合此為最佳作法"],
-    "a": [3]
-  },
-  {
-    "q": "3-69. 從家裡電腦連上網際網路過程,若寫下訊號沿途經過的設備路徑,則下列哪些不安全?(複選)",
-    "o": ["交換器、路由器、數據機", "路由器、數據機", "交換器、數據機", "數據機"],
-    "a": [2, 3]
-  },
-  {
-    "q": "3-70. 家中主機上網建議透過整合型無線路由器的理由,下列哪一項錯誤 ?",
-    "o": ["主機取得的是私有 IP", "主機不會受到外部攻擊", "家中伺服器可由內部有線和無線主機一起存取", "家中伺服器將因無法提供外部網路使用而獲得保護"],
-    "a": [3]
-  },
- {
-    "q": "4-01.駭客通常是指擅長某域程式語言的程式專家 ,其中一類駭客是以改善為目標 ,破解某個程式並加以改善、增強該程式的功能或修補該程式的漏洞,這屬於下列哪一類的駭客 ?",
-    "o": ["灰帽駭客", "白帽駭客", "藍帽駭客", "黑帽駭客"],
-    "a": [1]
-  },
-  {
-    "q": "4-02.駭客通常是指擅長某域程式語言的程式專家 ,其中一類客是以利慾為目標 ,透過破解或入侵來獲取不法利益或者發洩負面情緒,這屬於下列哪一類的駭客 ? [cite: 248-249]",
-    "o": ["灰帽駭客", "白帽駭客", "藍帽駭客", "黑帽駭客"],
-    "a": [3]
-  },
-  {
-    "q": "4-03.下列哪一項是電腦蠕蟲傳播的管道或方式 ? ",
-    "o": ["SQL 攻擊(SQL Injection)", "跨站腳本(Cross Site Scripting,XSS)", "緩衝區溢位(Buffer Overflow)", "跨站請求偽造(Cross Site Request Forgery,CSRF)"],
-    "a": [2]
-  },
-  {
-    "q": "4-04 惡意程式就感染的途徑與目的可分成不同類別,有一類惡意程式會偽裝成有用的軟體引誘使用者去安装,安裝後通常會在被感染的電腦開一道後門,讓遠端的駭客可以遙控這部電腦,下列哪一項正確 ?",
-    "o": ["病毒程式(Virus)", "木馬程式(Trojan Horse)", "蠕蟲軟體(Worms)", "恐嚇軟體(Scareware)"],
-    "a": [1]
-  },
-  {
-    "q": "4-05.惡意程式就感染的途徑與目的可分成不同類別,有一類惡意程式不需要依附在其他程式就可以自行複製及傳播,主要是鑽作業系統或是特定網路服務程式的漏洞,下列哪一項正確 ? ",
-    "o": ["病毒程式(Virus)", "木馬程式(Trojan Horse)", "蠕蟲軟體(Worms)", "殭屍程式(Bot)"],
-    "a": [2]
-  },
-  {
-    "q": "4-06.惡意程式就感染的途徑與目的可分成不同類別,有一類惡意程式是透過執行某個程式或是開啟 word 或 Excel 等文件來傳播,同時也會感染電腦中的其他執行檔或是前述文件檔,發作後通常會讓電腦運作變慢,下列敘述哪一項正確 ? ",
-    "o": ["病毒程式(Virus)", "木馬程式(Trojan Horse)", "蠕蟲軟體(Worms)", "殭屍程式(Bot)"],
-    "a": [0]
-  },
-  {
-    "q": "4-07.惡意程式就感染的途徑與目的可分成不同類別,有一類惡意程式可以中央控管許多電腦 ,任何時候都能用來散發垃圾郵件、進行網路釣魚攻擊或執行阻斷服務(DoS)攻擊,讓網站無法被連上,下列敘述一項正確 ? ",
-    "o": ["病毒程式(Virus)", "木馬程式(Trojan Horse)", "蠕蟲軟體(Worms)", "殭屍程式(Bot)"],
-    "a": [3]
-  },
-  {
-    "q": "4-08.經常自某個寄件人處收到一些電子郵件 ,内容也實有趣或有用,日漸習慣開啟該類郵件並信賴該郵件的内容,然而有次收到的郵件中有一個連結 ,點選後被導向惡意網站,致使電腦被植入病毒或是綁架,這種手法下列哪一項正確 ? ",
-    "o": ["跨站請求偽造(Cros Site Request Forgery,CSRF)", "社交工程(Social Engineering)", "跨站腳本(Cross Site Scripting,XSS)", "阻斷服務攻撃(Deny of Service,DoS)"],
-    "a": [1]
-  },
-  {
-   "q": "4-09.透過搜尋引擎尋找銀行的網址,並未注意連結的網址,點選進去後進行登入程序,結果第一次登入時系統跳出帳號密碼錯誤訊息,點選「確認」或類似按鈕後,畫面重新導向登入畫面,再次輸入帳號及密碼,這次就能正確登入,但隔幾天銀行帳却被盜用,上述狀況最有可能的原因是下列哪一項 ? ",
-    "o": ["連結到釣魚網站", "帳號密碼被側錄", "跨網站腳本攻擊", "會期(Session)綁架"],
-    "a": [0]
-  },
-  {
-   　"q": "4-10.當攻擊者透過網路通訊協定的漏洞,鎖定特定目標主機,大量重複傳送封包(Packets),企圖讓該主機的系統工作超過其負荷,造系統癱痪,這種攻擊方式是屬於下列哪一種類型 ? [cite: 308-309]",
-    "o": ["溢位(Overflow)攻撃", "中間人(Man In The Middle)攻撃", "阻斷服務(Denial Of Services)攻撃", "釣魚(Phishing)攻撃"],
-    "a": [2]
-  },
-  {
-    "q": "4-11.下列哪一項軟體工具可協助電腦系統管理員 ,用來隱藏不讓一般使用者看到的檔案 ,可是也經常被攻擊者利用來取得系統管理員的權限,並對受害的電腦系統植入惡意程式? [cite: 314-315]",
-    "o": ["根目錄工具包(Rootkits)", "系統補丁更新(Patch Update)", "鍵盤側錄(Keylogger)", "封包過濾(Packet Filter)"],
-    "a": [0]
-  },
-  {
-    "q": "4-12.在通行密碼(Password)的安全威脅中,若攔截使用者的通行密碼,重新輸入到主機系統,以通過系統驗證,這種攻擊法下列哪一項正確 ? [cite: 321-322]",
-    "o": ["行騙法(Spoofing)", "字典攻擊法(Dictionary Attack)", "猜測攻擊法(Guessing Attack)", "重送攻撃(Replaying Attack)"],
-    "a": [3]
-  },
-  {
-    "q": "4-13.電腦網路探測工具 Traceroute,是利用下列 ICMP 的哪一類別碼功能來搜尋路徑中的路由器? [cite: 328-329]",
-    "o": ["ICMP Echo Reply", "ICMP Echo Request", "ICMP Time Exceeded", "ICMP Redirection"],
-    "a": [2]
-  },
-  {
-    "q": "4-14.下列哪一個軟體不能偵測出病毒之存在 ? [cite: 335]",
-    "o": ["MEM.EXE", "CHKDSK.EXE", "DEBUG.COM", "SCAN.COM"],
-    "a": [1]
-  },
-  {
-    "q": "4-15.下列哪一項並不是預防電腦感染病毒的方法 ? [cite: 341]",
-    "o": ["對所有可疑檔案加密", "不開啟來路不明的檔案", "設定較高的瀏覽器安全等級", "安裝防毒軟體,並定時或自動更新病毒碼"],
-    "a": [0]
-  },
-  {
-    "q": "4-16.為避免 ARP spoofing 攻擊而造成個人電腦之路由器設定錯誤 ,最簡易的方法就是利用 netstat 網路工具來查詢電腦所連接的閘道器是否正確,下列哪一個是正確的指令 ? [cite: 346-347]",
-    "o": ["netstat -st", "netstat -r", "netstat -u", "netstat -p"],
-    "a": [1]
-  },
-  {
-    "q": "4-17.下列哪些網路安全工具可以檢測系統的弱點?(複選) [cite: 353]",
-    "o": ["nessus", "MRTG", "SNMP", "nmap"],
-    "a": [0, 3]
-  },
-  {
-    "q": "4-18.下列那一項不屬於防毒軟體之設計方式 ? [cite: 359]",
-    "o": ["抽查式的防毒軟體", "掃描式的防毒軟體", "檢查碼式的防毒軟體", "推測病毒行為模式的防毒軟體"],
-    "a": [0]
-  },
-  {
-    "q": "4-19.防毒軟體的功能不包含下列哪一項 ? [cite: 365]",
-    "o": ["即時偵測電腦病毒", "掃瞄檔案是否有電腦病毒", "掃瞄電腦系統是否有安全漏洞", "處理中電腦病毒的檔案"],
-    "a": [2]
-  },
-  {
-    "q": "4-20.防毒軟體安裝完成後是否還需要做更新動作,下列敘述哪一項正確 ? [cite: 371]",
-    "o": ["不需要,因為軟體已經可以阻擋所有的病毒", "需要,因為防毒軟體等級可能不夠好", "需要,因為軟體更新可以新增防毒樣本", "需要,因為軟體更新可以讓電腦的執行速度更快"],
-    "a": [2]
-  },
-  {
-    "q": "4-21.電腦遭駭客攻撃,最大原因為網路安全防護太脆弱,所以我們應該安裝下列哪一項基本的防護工具? [cite: 377-378]",
-    "o": ["防毒軟體與系統軟體", "防火牆與防毒軟體", "兩套不同廠牌的防毒軟體", "防火牆與系統軟體"],
-    "a": [1]
-  },
-  {
-    "q": "4-22.萬一電腦被植入間諜軟體 ,下列處理方式哪一項正確 ? [cite: 383]",
-    "o": ["只要電腦裡沒有重要資料就沒關係", "使用移除工具將間諜軟體移除", "修補作業系統", "做資料備份"],
-    "a": [1]
-  },
-  {
-    "q": "4-23.電腦如果出現下列哪一種現象時 ,可能是被植入間諜軟體? [cite: 389]",
-    "o": ["經常突然跳出來路不明的視窗", "鍵盤或滑鼠無法操作", "連結不到某些網站", "無法連上無線網路"],
-    "a": [0]
-  },
-  {
-    "q": "4-24. 一旦電腦被植入間諜程式如果想移除它 ,下列哪一種措施錯誤 ? [cite: 395]",
-    "o": ["上網查詢相關手動移除方式 ,但移除前先將重要資訊備份", "上網下載間諜移除程式,直接安裝後就可以清除", "至可靠的網下載經認證過的清除軟體,備份重要資訊後再執行清除動作", "洽詢專業廠商處理"],
-    "a": [1]
-  },
-  {
-    "q": "4-25.關於防毒軟體的敘述,下列哪一項錯誤 ? [cite: 401]",
-    "o": ["免費的防毒軟體就是沒有付費的軟體好", "付費的防毒軟體不一定比免費的軟體差", "免費的防毒軟體不一定比付費的軟體差", "付費的防毒軟體不一定比免費的軟體好"],
-    "a": [0]
-  },
-  {
-    "q": "4-26.若要隱藏内部網路伺服器的 IP 位址(IP Address)及連接埠(Port),應採用下列哪一種類型的防火牆技術? [cite: 407-408]",
-    "o": ["屏蔽路由器(Screening Router)", "動態封包過濾器(Dynamic Packet Filter)", "網路位址轉(Network Address Translation)", "應用層閘道(Application Level Gateway)"],
-    "a": [2]
-  },
-  {
-    "q": "4-27.傳統的防火牆可達成下列那一項作業 ? [cite: 414]",
-    "o": ["防止病毒/蠕蟲入侵", "驗證資料的完整性", "封包過濾", "阻擋後門程式"],
-    "a": [2]
-  },
-  {
-    "q": "4-28.關於防火牆的敘述,下列哪一項錯誤 ? [cite: 419]",
-    "o": ["防火牆可以檢查封包的内容防止病毒通過", "防火牆可以檢查封包的埠號(Port),將不合乎預先設定之條件的封包丟棄", "防火牆可以管制封包的來源與流向,將不合乎預先設定之條件的封包丟棄", "封包過濾防火牆(Packet-filtering Firewall)的安全性比狀態檢視防火牆(Stateful Inspection Firewall)低"],
-    "a": [0]
-  },
-  {
-    "q": "4-29.關於防火牆的限制,下列哪一項錯誤 ? [cite: 426]",
-    "o": ["無法保護 bypass 的攻擊", "可以防止內部攻擊", "防火牆管不到不經過他的連線", "防火牆無法防範病毒爆發"],
-    "a": [1]
-  },
-  {
-    "q": "4-30.關於 DMZ(DeMilitarize Zone)的敘述,下列哪一項錯誤 ? [cite: 432]",
-    "o": ["DMZ 泛指内部網路和外部網路之間的緩衝地帶", "只要外部使用者可以直接接觸到的系統,原則上應該架設在 DMZ 内", "對外的服務,如 WEB、FTP 等皆須建置在 DMZ 内,避免被入侵時内部網路受到嚴重的威脅", "放置在 DMZ 内的對外服務,若要存取内部網路可以直接進行,沒有安全問題"],
-    "a": [3]
-  },
-  {
-    "q": "4-31.架設 DMZ(DeMilitarized Zone)前,必須有下列哪些前置動作?(複選) [cite: 438]",
-    "o": ["災難復原與備份", "建置在 DMZ 内的服務", "內部網路與 DMZ 的網路架構", "設定相關規則政策"],
-    "a": [0, 1, 2, 3]
-  },
-  {
-    "q": "4-32.如附圖所示,為防火牆配置架構,下列哪些是此 DMZ(DeMilitarize Zone)架構的缺點?(複選) [cite: 444-445]",
-    "o": ["如有大量的頻寬需求,外部防火牆必須有處理大量資料的能力", "建置成本不高", "內部網路與網際網路之間的傳輸會通過 DMZ", "內部網路對外需經過二層防火牆"],
-    "a": [0, 2, 3]
-  },
-  {
-    "q": "4-33.下列哪一項不是網路轉址  NAT 服務的優點? [cite: 450]",
-    "o": ["由於只使用少數 IP 對應後端電腦,因此大幅減少實體 IP 的使用量", "外部網路 IP 可重複在不同環境下使用", "只有實體 IP 才會被外部存取,因此在内部私有 IP 網段內安全度大為提升", "内部網路 IP 可重複在不同環境下使用"],
-    "a": [1]
-  },
-  {
-    "q": "4-34.數位憑證之應用,與下列哪一個資訊安全技術關聯性最直接 ? [cite: 456]",
-    "o": ["AES", "Triple DES", "Blowfish", "RSA"],
-    "a": [3]
-  },
-  {
-    "q": "4-35.如附圖所示,下列敘述哪些是此 DMZ(DeMilitarized Zone)架構的優點優點?(複選) [cite: 462]",
-    "o": ["建置費用極高", "DMZ 和内部網路不會佔用彼此頻寬", "内部網路、DMZ 及 Internet 區隔容易", "DMZ 與 LAN 内之電腦可以不受限制互相存取"],
-    "a": [1, 2]
-  },
-  {
-    "q": "4-36.為了保護資料私密性,目前大部分都不採取單一  DES,最主要的原因,下列哪一項正確 ? [cite: 468]",
-    "o": ["密鑰長度太短容易受暴力攻擊", "受專利保護應用成本相對偏高", "核心技術不夠公開透明有疑慮", "核心功能已被破解而不安全"],
-    "a": [0]
-  },
-  {
-    "q": "4-37.網站資料庫系統遭受資料隱碼入侵(SQL injection)攻擊,下列哪一項是被攻擊的主要原因? [cite: 534-535]",
-    "o": ["網站管理者採取短於 8 字元長度的通行密碼", "網站管理者並未定期更換通行密碼", "網站設計者未對使用者輸入之資料進行完整查驗", "網站設計者未對輸出給使用者的資料進行資料安全性查驗"],
-    "a": [2]
-  },
-  {
-    "q": "4-38.使用加密演算法對某資料進行加密,是要確保該資料可以滿足下列哪一項安全之需求 ? [cite: 480]",
-    "o": ["鑑別性(Authenticity)", "完整性(Integrity)", "機密性(Confidentialiy)", "不可否認性(Non-Repudiation)"],
-    "a": [2]
-  },
-  {
-    "q": "4-39.關於數位簽章(Digital Sinnature)的運作原理與應用特性,下列敘述哪一項錯誤 ? [cite: 486-491]",
-    "o": ["簽署者使用所持有的私鑰對欲簽署訊息進行簽署", "驗證者必須獲得簽署者的公鑰後,才能進行簽章驗證", "簽署者可重複使用某一訊息的合法簽章 ,做為另一不同訊息的合法簽章", "簽署者、欲簽署訊息、簽章三者之間存在唯一的繫連關係 ,可用以達成簽署者對簽署訊息的不可否認性"],
-    "a": [2]
-  },
-  {
-    "q": "4-40.為了防止天然災害對儲存資料所造成的毁損或遺失,單位應採取下列哪一項安全措施 ? [cite: 493]",
-    "o": ["人力備援", "資料加密", "存取控制", "資料備份"],
-    "a": [3]
-  },
-  {
-    "q": "4-41.企業組織欲導入 ISO 27001 資訊安全管理系統,在標準的執行步驟中,下列哪一項是第一個步驟? [cite: 560-561]",
-    "o": ["制訂資訊安全政策", "制訂適用性聲明", "定義資訊安全管理系統的適用範圍", "制訂營運持續計畫"],
-    "a": [2]
-  },
-  {
-    "q": "4-42.企業組織欲符合 ISO 27001 資訊安全管理系統標準的稽核要求,必須建立完整的四階文件。企業組織内相關資訊安全的管理程序文件是屬於第幾階文件? [cite: 566-567]",
-    "o": ["第一階文件", "第二階文件", "第三階文件", "第四階文件"],
-    "a": [1]
-  },
-  {
-    "q": "4-43.在公開金鑰密碼的系統中,如果 A 希望他所送出之特定文件僅有 B 可以讀取,其他人都在不能讀取,請問 A 應該對該份文件採用下列哪一項進行加密 ? [cite: 573-574]",
-    "o": ["A 的公開金鑰", "A 的私密金鑰", "B 的公開金鑰", "B 的私密金鑰"],
-    "a": [2]
-  },
-  {
-    "q": "4-44.關於資訊中心的安全防護措施,下列哪一項錯誤 ? [cite: 580]",
-    "o": ["重要檔案每天備份三份以上,並分別存放", "裝設穩壓電源供應器及不斷電系統", "設置煙霧及溫度感測器等設備,以防止災害發生", "不同部門,資料也可以相互交流,以便支援合作,順利完成工作"],
-    "a": [3]
-  },
-  {
-    "q": "4-45.如果一個僱員必須被停職 ,他的網路存取權限應該在下列哪一個時間點被終止 ? [cite: 586]",
-    "o": ["停職後一週", "停職前一週", "通知他停職前", "不需關閉"],
-    "a": [2]
-  },
-  {
-    "q": "5-01.下列哪一個  IP 是被定義為 LoopBack IP Address,可做為 TCP/IP 連線測試使用? [cite: 593-596]",
-    "o": ["0.0.0.0", "255.255.255.255", "127.0.0.1", "192.168.240.200"],
-    "a": [2]
-  },
-  {
-    "q": "5-02.關於網路故障排除的方法 ,下列哪一項錯誤 ? [cite: 598-602]",
-    "o": ["下而上的檢測", "上而下的檢測", "任意檢測", "分區檢測"],
-    "a": [2]
-  },
-  {
-    "q": "5-03.當網路發生故障時,應採取的故障管理(Fault Management)作為,下列哪些正確?(複選) [cite: 604-608]",
-    "o": ["偵測(Detect)", "隔離(Isolate)", "重設(Reconfigure)", "編碼(Coding)"],
-    "a": [0, 1, 2]
-  },
-  {
-    "q": "5-04.下列哪些是屬於組態管理(Configuration Management)内容,並應該錄在網管文件資料之中。(複選) [cite: 610-615]",
-    "o": ["元件清單(Inventory)", "流量負載(Traffic load)", "組態(Configuration)", "參數存參(Provision)"],
-    "a": [0, 2, 3]
-  },
-  {
-    "q": "5-05.面對日趨複雜的網路環境,下列哪一項可協助網管人員有效的管理複雜網路 ,並有助於尋找問題所在? [cite: 617-622]",
-    "o": ["ARP", "ICMP", "SNMP", "MIB"],
-    "a": [2]
-  },
-  {
-    "q": "5-06.簡單網路管理協定(Simple Network Management Protocpl,SNMP)在網路管理中,其功能不包含下列哪一項 ? [cite: 624-628]",
-    "o": ["故障管理", "組態管理", "效能管理", "帳戶管理"],
-    "a": [3]
-  },
-  {
-    "q": "5-07.測試網路封包能否通過 IP 協定到達特定主機,可使用列哪一項公用程式 ? [cite: 630-634]",
-    "o": ["ping", "ipconfig", "netstat", "tracert"],
-    "a": [0]
-  },
-  {
-    "q": "5-08.追蹤本機端電腦到目的電腦之間所經過的節點(Node),可使用下列哪一項公用程式 ? [cite: 636-640]",
-    "o": ["ping", "ipconfig", "netstat", "tracert"],
-    "a": [3]
-  },
-  {
-    "q": "5-09.網路卡燈號(綠燈、橘燈)兩者燈號皆未顯示,下列哪些是可能發生的狀況?(複選) [cite: 642-646]",
-    "o": ["網路卡未正常驅動", "網路卡故障", "ISP 未能提供服務", "DHCP 未能正常發送 IP"],
-    "a": [0, 1]
-  },
-  {
-    "q": "5-10 若要查看網路介面組態,可使用下列哪一項公用程式 ? [cite: 648-652]",
-    "o": ["ping", "sysconfig", "ipconfig", "getmac"],
-    "a": [2]
-  },
-  {
-    "q": "5-11.下列哪一項是  Widows 系端遠端連線預設連接埠(Port)號? [cite: 654-658]",
-    "o": ["3389", "5800", "5900", "8080"],
-    "a": [0]
-  },
-  {
-    "q": "5-12.查詢路由表及新增或移除某個路由路徑,可使用下列哪一項公用程式 ? [cite: 660-663]",
-    "o": ["arp", "nbtstat", "pathping", "route"],
-    "a": [3]
-  },
-  {
-    "q": "5-13.不列哪些為電腦使用上正確的防護作為?(複選) [cite: 665-669]",
-    "o": ["關閉防火牆", "即時更新電腦系統", "安裝防毒軟體並定期更新", "定期進行資料備份"],
-    "a": [1, 2, 3]
-  },
-  {
-    "q": "5-14.檢測網路服務中 DNS 可否正進行網域名解析,可使用下列哪一項公用程式 ? [cite: 671-675]",
-    "o": ["arp", "traceroute", "nbtstat", "nslookup"],
-    "a": [3]
-  },
-  {
-    "q": "5-15.下列哪一項狀況會使整個區域網路造成癱痪 ? [cite: 677-681]",
-    "o": ["Client 端電腦故障", "網路迴圈(Loop)", "無線網卡故障", "有線網卡故障"],
-    "a": [1]
-  },
-  {
-    "q": "5-16.下列哪些是建立 VLAN 帶來的好處?(複選) [cite: 683-687]",
-    "o": ["降低網絡設計的自由度", "增加安全性", "增加管理成本", "增加可管理性"],
-    "a": [1, 3]
-  },
-  {
-    "q": "5-17.下列哪些是引起網路廣播風暴(Broadcast Storm)可能原因? [cite: 689-693]",
-    "o": ["網路設備故障", "網路卡故障", "ARP 病毒", "網路迴圈 (Loop)"],
-    "a": [0, 1, 2, 3]
-  },
-  {
-    "q": "5-18.網路守護控管軟體, 一般可以控管的範圍包含下列哪些 ?(複選) [cite: 695-698]",
-    "o": ["阻擋不當網站", "阻擋網頁下載", "上網時間控管", "上網地點控管"],
-    "a": [0, 2]
-  },
-  {
-    "q": "5-19.主要可負責監聽網路封包,並依據預先設定的安全策略(SecurityPolicy),當網路發生異常時,可即時通報、有效的紀錄各項異常結果,是指下列哪一項有效作為 ? [cite: 700-705]",
-    "o": ["入侵防護(Intrusion Prevention System,IPS)", "入侵偵測(Intrusion Detection System,IDS)", "病毒防護", "系統更新"],
-    "a": [1]
-  },
-  {
-    "q": "5-20.下列哪些作為是企業網路防護的有效措施?(複選) [cite: 707-711]",
-    "o": ["建置光纖網路(Optical Network)", "進行入侵防護(Intrusion Prevention System,IDS)", "進行入侵偵測(Intrusion Detection System,IPS)", "建立防火牆(Firewall)"],
-    "a": [1, 2, 3]
-  },
-  {
-    "q": "5-21.下列哪一項設備可用來檢測光纖網路中事件點的位置 ? [cite: 713-717]",
-    "o": ["光時域反射器(Optical Time-Domain Reflectometer,OTDR)", "光源(Light Source)", "光功率計(Power Meter)", "網路測試器(Cable Tester)"],
-    "a": [0]
-  },
-  {
-    "q": "5-22. 一般用來偵測光纖纜線常用的波長有下列哪些 ?(複選) [cite: 719-723]",
-    "o": ["990nm", "1,100nm", "1,310nm", "1,550nm"],
-    "a": [2, 3]
-  },
-  {
-    "q": "5-23.關於網路頻寬速度問題,應向下列哪一個單位洽詢 ? [cite: 725-729]",
-    "o": ["PC 製造商", "Hub 製造商", "Switch 製造商", "網際網路服務供應商(ISP)"],
-    "a": [3]
-  },
-  {
-    "q": "5-24.使用一般的網路測試器 (Cable Tester)進行網路線測試,其功能不包含下列哪一項 ? [cite: 730-734]",
-    "o": ["導通", "斷路", "短路", "網路速度"],
-    "a": [3]
-  },
-  {
-    "q": "5-25. 一般的網路測試器 (Cable Tester)可測試的接頭形式,不包含下列哪一項 ? [cite: 736-740]",
-    "o": ["RJ-11 接頭", "RJ-12 接頭", "RJ-45 接頭", "SC 接頭"],
-    "a": [3]
-  },
-  {
-    "q": "5-26.若兩台電腦主機須進行網路實體連接,則對接兩台主機網路卡網路線可使用下列哪些 TIA/EIA 標準的接法?(複選) [cite: 742-747]",
-    "o": ["568A/568A", "568A/568B", "568B/568A", "568B/568B"],
-    "a": [1, 2]
-  },
-  {
-    "q": "5-27.下列哪一項屬於實體層的故障問題 ? [cite: 749-753]",
-    "o": ["纜線短路", "廣播風暴", "路由器故障", "IP 位置錯誤"],
-    "a": [0]
-  },
-  {
-    "q": "5-28.SNMP 管理模式主要透過下列哪些基本指令,以達成網路管理目的?(複選) [cite: 755-759]",
-    "o": ["clr", "get", "set", "trap"],
-    "a": [1, 2, 3]
-  },
-  {
-    "q": "5-29.電腦主機與網路設備進行網路實體連接,則網路線可使用下列哪些 TIA/EIA 標準的接法?(複選) [cite: 761-765]",
-    "o": ["568A/568A", "568A/568B", "568B/568A", "568B/568B"],
-    "a": [0, 3]
-  },
-  {
-    "q": "5-30.若偵測到網路異常,經判定為 Hub 故障,係屬於 OSI 哪一層 ? [cite: 767-771]",
-    "o": ["應用層", "網路層", "實體層", "資料鏈結層"],
-    "a": [2]
-  },
-  {
-    "q": "5-31.關於網路障礙管理(Fault Management), 一般大致區分為列哪些 ?(複選) [cite: 773-777]",
-    "o": ["故障定位", "CPU 效能監視", "安全問題", "警示監視"],
-    "a": [0, 3]
-  },
-  {
-    "q": "5-32.SNMP 網路管理主要運作方式 ,下列哪一項錯誤 ? [cite: 779-783]",
-    "o": ["堆疊(Stack)", "輪詢(Polling)", "警示(Trap)", "設定(Set)"],
-    "a": [0]
-  },
-  {
-    "q": "5-33.下列哪一項可在公共網路架構上使用以加密的通道協議 (Tunneling Protocol)建立一個私人且安全的網路 ? [cite: 785-790]",
-    "o": ["NMS(Network Management System)", "VPN(Virtual Private Network)", "NOS(Network Operating System )", "VPC(Virtual Private Cloud)"],
-    "a": [1]
-  },
-  {
-    "q": "5-34.關於無線網路的 SSID 敘述,下列哪一項錯誤 ? [cite: 792-796]",
-    "o": ["可自由設定名稱", "最長可輸入  32 個字元", "無線網路的識別名稱", "網路上的 SSID 必須為隱藏"],
-    "a": [3]
-  },
-  {
-    "q": "5-35.若要建立 WDS(Wireless Distribution System)的條件,下列哪一項錯誤 ? [cite: 798-801]",
-    "o": ["兩台 AP 的連線模式需相同", "兩台 AP 設定相同 SSID", "AP-2 的 DHCP 應設定 Enable", "兩台 AP 須設定為同一網段不同  IP"],
-    "a": [2]
-  },
-  {
-    "q": "5-36.若 Client 端電腦無法取得動態 IP 位址,下列哪一項是可能發生題的伺服器 ? [cite: 809, 803-806]",
-    "o": ["NAT", "DHCP", "DNS", "WEB"],
-    "a": [1]
-  },
-  {
-    "q": "5-37.若使用網域名稱無法連上網頁,使用 IP 位址可以連上網頁,下列哪一項是可能發生問題的伺服器。 [cite: 810, 808, 811-814]",
-    "o": ["NAT", "DHCP", "DNS", "WEB"],
-    "a": [2]
-  },
-  {
-    "q": "5-38.網路佈線實務中,應採用下列哪一項佈線作為較為適宜 ? [cite: 816-820]",
-    "o": ["挑選昂貴的網路線材", "不必理會標準作業程序", "可不依網路拓樸佈線", "採用結構化網路佈線"],
-    "a": [3]
-  },
-  {
-    "q": "5-39.下列哪些設備故障,可能會造成無線網路斷線無法使用?(複選) [cite: 822-826]",
-    "o": ["無線 AP", "無線滑鼠", "防火牆", "無線網卡"],
-    "a": [0, 3]
-  },
-  {
-    "q": "5-40.光纖網路中,若單芯單模的光纜斷線,可採用的修復作為下列哪些正確?(複選) [cite: 828-831]",
-    "o": ["使用光纖連接器與插座進行連接", "更換 RJ-45 接頭", "採用熔接方式修復", "更換 Cat.6 網路線"],
-    "a": [0, 2]
-  },
-  {
-    "q": "5-41.兩台電腦都設定相同 IP,下列敘述哪一項正確 ? [cite: 833-837]",
-    "o": ["兩台電腦都可以上網", "會造成兩台電腦 IP 衝突,無法上網", "會造成 DHCP 伺服器當機", "會形成廣播封包"],
-    "a": [1]
-  },
-  {
-    "q": "5-42.區域網路中,動態 IP 的管理與分配,是下列哪一項服器所能提供的功能 ? [cite: 839-843]",
-    "o": ["FTP", "NAT", "DHCP", "DNS"],
-    "a": [2]
-  },
-  {
-    "q": "5-43.固定 IP 設定時,應設定相關内容包含下列哪些?(複選) [cite: 845-849]",
-    "o": ["動態 IP 位址", "IP 位址", "預設閘道", "子網路遮罩"],
-    "a": [1, 2, 3]
-  },
-  {
-    "q": "5-44.常用的無線網路頻段,包含下列哪些?(複選) [cite: 851-855]",
-    "o": ["2.4GHz", "3GHz", "4GHz", "5GHz"],
-    "a": [0, 3]
-  },
-  {
-    "q": "5-45.經查 ADSL 數據機出現訊號異常,可行的解決方法為下列哪些 ?(複選) [cite: 857-861]",
-    "o": ["將電腦重新開機", "將數據機重置", "向 ISP 網路客服中心查詢", "將集線器電源關閉重新啟動"],
-    "a": [1, 2]
-  },
-  {
-    "q": "5-46.當網路發生異常封包或是相關行為時,可即時通報網管人員 ,並採取相對處置措施,是指下列哪一項作為 ? [cite: 863-867]",
-    "o": ["入侵防護(Intrusion Prevention System,IPS)", "入侵偵測(Intrusion Detection System,IDS)", "病毒防護", "系統更新"],
-    "a": [0]
-  },
-  {
-    "q": "5-47.由主機名稱查詢 IP 的過程, 一般稱之為下列哪一項 ? [cite: 869-873]",
-    "o": ["正解(Forward)", "反解(Reverse)", "解析(Resolve)", "分析(Analysis)"],
-    "a": [0]
-  },
-  {
-    "q": "5-48.常見的無線網路安全機制,包含下列哪些項目?(複選) [cite: 875-879]",
-    "o": ["WEP", "WPA", "WPA2", "SSID"],
-    "a": [0, 1, 2]
-  },
-  {
-    "q": "5-49.若要防止電腦受到不明網路攻擊或中毒,可行的有效方法不包含下列哪一項 ? [cite: 881-885]",
-    "o": ["任意下載不明檔案", "安裝防火牆並即時更新", "作業系統啟動即時更新", "保持良好的電腦使用習慣"],
-    "a": [0]
-  },
-  {
-    "q": "5-50.對於公司員工離職,網管人員應採取的作為下列哪一項正確 ? [cite: 887-891]",
-    "o": ["正式離職前即可隨即停用其相關使用權限", "運用公司網路私架 FTP 以供資訊交流使用", "離職後依然開放公司網路相關權限供其使用", "依公司標準程序停用其網路相關使用權限"],
-    "a": [3]
-  },
-  {
-    "q": "5-51.加入專業的網路專業技術社群,有下列哪些好處?(複選) [cite: 893-897]",
-    "o": ["吸取經驗", "獲取新知", "促進專業成長", "結交專業同好"],
-    "a": [0, 1, 2, 3]
-  },
-  {
-    "q": "5-52.在網路的故障排除中,若有關於設備問題,可洽詢的最直接外部資源協助為下列哪一個單位? [cite: 899-903]",
-    "o": ["網路社群", "網路搜尋", "產品技術支援中心", "軟體廠商"],
-    "a": [2]
-  },
-  {
-    "q": "5-53.在網路的故障排除中,下列哪些是可能尋求的外部資源?(複選) [cite: 905-909]",
-    "o": ["先前維護文件", "會計部門", "系統建置廠商", "相關網路專家"],
-    "a": [0, 2, 3]
-  },
-  {"q": "5-54.關於網路機房管理,下列哪些是應有的積極作為? (複選) [cite: 911-915]","o": ["管制人員進出", "建置不斷電 UPS 系統", "建立標準作業程序", "機房無須消防設施"], "a": [0, 1, 2]},
-  {"q": "5-55.關於有線網路與無線網路之敘述,下列哪一項正確 ? [cite: 917-921]","o": ["有線網路無須考量佈線問題", "有線網路無法使用光纖纜線", "無線網路須考量無線射頻技術問題", "無線網路比有線網路安全性較高"],"a": [2]}
-    ];
+<!-- CHAPTER SELECT -->
+<div id="chapter-select" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;">
+  <div style="display:flex;align-items:center;gap:1rem;margin-bottom:2rem;width:100%;max-width:900px;">
+    <button class="back-btn" onclick="goHome()">← 返回</button>
+    <div style="font-size:1.3rem;font-weight:800;">選擇章節</div>
+  </div>
+  <div class="chapters-grid" id="chapters-grid"></div>
+</div>
 
-    // 如果您有完整的題目資料，請在此處替換上面的 BANK_1_DATA
-    // 下面這個變數模擬您完整貼上的資料，實際使用時請忽略此註解
-    // const BANK_1_DATA = [ ... 您的 900 題資料 ... ];
+<!-- BROWSE -->
+<div id="browse" style="display:none;min-height:100vh;padding:1.5rem;max-width:900px;margin:0 auto;">
+  <div style="display:flex;align-items:center;gap:1rem;margin-bottom:2rem;flex-wrap:wrap;">
+    <button class="back-btn" onclick="goHome()">← 返回</button>
+    <div style="font-size:1.3rem;font-weight:800;">題庫瀏覽</div>
+  </div>
+  <div id="browse-ch-tabs" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;"></div>
+  <div id="browse-list"></div>
+</div>
 
-    
-    // 配置設定
-    // 第一個按鈕：測驗模式 (原本的邏輯)
-    // 第二個按鈕：閱覽模式 (使用電腦網路題庫，但純看題)
-    const QUESTION_BANKS = [
-      {
-        id: 'quiz-mode',
-        title: '電腦網路 (測驗模式)',
-        description: '隨機抽題 / 計時測驗 / 考後檢討',
-        icon: 'test',
-        mode: 'quiz', // 模式：測驗
-        limit: 40,
-        questions: BANK_1_DATA // 使用電腦網路資料
-      },
-      {
-        id: 'browse-mode',
-        title: '電腦網路 (閱覽模式)', // 標題改為閱覽模式
-        description: '分章節瀏覽 / 顯示答案 / 純閱讀',
-        icon: 'read',
-        mode: 'browse', // 模式：閱覽
-        limit: 0, // 閱覽模式不需要限制題數，顯示該章節所有題目
-        questions: BANK_1_DATA // 同樣使用電腦網路資料
-      }
-    ];
+<!-- QUIZ -->
+<div id="quiz">
+  <div class="quiz-header">
+    <button class="back-btn" onclick="goHome()">← 返回</button>
+    <div class="quiz-title" id="quiz-title"></div>
+  </div>
+  <div class="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+  <div class="q-counter" id="q-counter"></div>
+  <div class="question-box">
+    <div class="question-text" id="question-text"></div>
+  </div>
+  <div class="options" id="options"></div>
+  <div id="feedback"></div>
+  <div class="action-row" id="action-row"></div>
+</div>
 
-    // --- HELPER FUNCTIONS ---
+<!-- RESULT -->
+<div id="result">
+  <div class="result-card">
+    <div class="score-circle" id="score-circle">
+      <div class="score-inner">
+        <div class="score-num" id="score-num"></div>
+        <div class="score-label">得分</div>
+      </div>
+    </div>
+    <div class="result-title" id="result-title"></div>
+    <div class="result-sub" id="result-sub"></div>
+    <div class="stat-row">
+      <div class="stat"><div class="stat-val" id="stat-correct" style="color:var(--correct)"></div><div class="stat-key">答對</div></div>
+      <div class="stat"><div class="stat-val" id="stat-wrong" style="color:var(--wrong)"></div><div class="stat-key">答錯</div></div>
+      <div class="stat"><div class="stat-val" id="stat-total"></div><div class="stat-key">總題數</div></div>
+    </div>
+    <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-primary" id="retry-btn">再練一次</button>
+      <button class="btn btn-ghost" onclick="goHome()">返回主選單</button>
+    </div>
+  </div>
+  <div style="font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--muted)">答錯題目</div>
+  <div class="review-list" id="review-list"></div>
+</div>
 
-    const shuffleArray = (array) => {
-      if (!array || array.length === 0) return [];
-      const newArray = [...array];
-      for (let i = newArray.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-      }
-      return newArray;
-    };
+<script>
+const QUESTIONS = {"01":[{"id":"01-001","question":"關於專案的特性，下列哪些正確？（複選）","A":"特定目標","B":"明確起迄日期","C":"預算有限","D":"逐步完善","ans":"ABCD"},{"id":"01-002","question":"下列哪些是一般專案成功的必要條件？（複選）","A":"如期","B":"滿足顧客需求","C":"改變企業文化","D":"使用最少的資源","ans":"AB"},{"id":"01-003","question":"關於專案的特性，下列哪些正確？（複選）","A":"專案有其不確定性","B":"每一專案皆有其獨特性","C":"具備明確的目標","D":"專案人員均「不是」組織編制人員","ans":"ABC"},{"id":"01-004","question":"在執行專案時，成本、時間、品質皆會設定其基準，下列哪一項是作為品質的基準？","A":"預算","B":"時間","C":"驗收標準","D":"組織","ans":"C"},{"id":"01-005","question":"關於專案組織的敘述，下列哪一項正確？","A":"原來就存在的","B":"隸屬人事部門","C":"臨時性","D":"隸屬總務部門","ans":"C"},{"id":"01-006","question":"關於專案管理流程群組（Process Groups），下列哪一項與目標、時程、預算關係最密切？","A":"規劃（Planning）","B":"執行（Executing）","C":"起始（Initiating）","D":"監視及控制（Monitoring and Controlling）","ans":"A"},{"id":"01-007","question":"關於專案管理流程群組（Process Groups），下列哪一項與變更關係最密切？","A":"規劃（Planning）","B":"執行（Executing）","C":"起始（Initiating）","D":"監視及控制（Monitoring and Controlling）","ans":"D"},{"id":"01-008","question":"下列哪些項目是專案組合管理（Project Portfolio Management）的內容？（複選）","A":"建立組合（Portfolio）的投資策略","B":"評價專案的優先順序","C":"建立一個可實現投資目標的組合","D":"消費者研究","ans":"ABC"},{"id":"01-009","question":"下列哪一項「不是」專案？","A":"交通工程建設","B":"產品創新研發","C":"公家單位的行政工作","D":"企業部門電子化","ans":"C"},{"id":"01-010","question":"關於專案的特性，下列哪些正確？（複選）","A":"獨特性","B":"一般性","C":"資源與成本限制","D":"不重複性","ans":"ACD"},{"id":"01-011","question":"一般的專案生命週期（Project Life Cycle）在下列哪一項階段最冗長？","A":"起始（Initiating）","B":"規劃（Planning）","C":"執行（Executing）","D":"結束（Closing）","ans":"C"},{"id":"01-012","question":"專案生命週期（Project Life Cycle）的整個過程中所創造出的交付標的（Deliverable）可以是下列哪些項目？（複選）","A":"產品","B":"服務","C":"報告","D":"里程碑（Milestone）","ans":"ABC"},{"id":"01-013","question":"下列哪一項狀況可視為「專案成功」？","A":"提供合約所條列之需求","B":"專案經理（Project Manager）宣布專案完成","C":"提送交付標的（Deliverable）於業主（Owner）","D":"符合專案利害關係人（Project Stakeholder）的需求","ans":"D"},{"id":"01-014","question":"下列哪些是專案的限制條件（Constraints）？（複選）","A":"範疇（Scope）","B":"訊息（Message）","C":"成本（Cost）","D":"時間（Time）","ans":"ACD"},{"id":"01-015","question":"關於專案式組織（Projectized Organization）的特色，下列哪一項錯誤？","A":"專案團隊成員常常安排在同一地點","B":"大部分資源用於專案工作","C":"專案經理（Project Manager）有很小的獨立性和許可權","D":"專案經理（Project Manager）有很大的獨立性和許可權","ans":"C"},{"id":"01-016","question":"你是一個專案經理（Project Manager）剛剛被分配到一個正在進行的專案中，這個專案落後於進度計畫五週。可是你的專案團隊成員將要被功能經理（Functional Manager）派到另一個專案上去。下列哪一項是你的組織型態？","A":"矩陣式（Matrix）","B":"功能式（Functional）","C":"專案式（Projectized）","D":"簡單式（Simple）","ans":"B"},{"id":"01-017","question":"關於專案成功的原因，下列哪一項最正確？","A":"有足夠的資金","B":"有好的專案管理","C":"有很多專案利害關係人（Project Stakeholder）","D":"使用專案式組織（Projectized Organization）架構","ans":"B"},{"id":"01-018","question":"你是專案經理（Project Manager），客戶告訴你，他已經沒有錢支付該專案了。下列哪一項是你首先應做的事？","A":"罷工","B":"延長專案時間，讓客戶籌錢","C":"削減專案人力","D":"清查已執行範圍，並開始做結案工作","ans":"D"},{"id":"01-019","question":"下列哪一項組織架構，適合處理包含多種專業技術的專案？","A":"矩陣式（Matrix）","B":"功能式（Functional）","C":"專案式（Projectized）","D":"簡單式（Simple）","ans":"A"},{"id":"01-020","question":"下列哪一項是專案經理（Project Manager）在專案管理上最重要的工作能力？","A":"問題解決（Problem Solving）","B":"協調（Coordination）","C":"規劃（Planning）","D":"監控（Monitoring）","ans":"A"},{"id":"01-021","question":"關於專案生命週期（Project Life Cycle）的定義，下列哪一項正確？","A":"是可以不斷重複的","B":"與產品生命週期（Product Life Cycle）一樣，在不同的環境裡，發生的時間和過程是不一樣的","C":"與產品生命週期（Product Life Cycle）不一樣，有明確的開始與結束日期","D":"是由若干工作成果所組合而成","ans":"C"},{"id":"01-022","question":"專案（Project）與日常工作（Operation）的差異，下列哪一項敘述正確？","A":"專案是創新性與系統性，日常工作是程序性與重複性","B":"專案是創新性與系統性，日常工作是持續性與重複性","C":"專案是暫時性與獨特性，日常工作是程序性與重複性","D":"專案是暫時性與獨特性，日常工作是持續性與重複性","ans":"D"},{"id":"01-023","question":"你是艾瑞克通訊科技公司的工程部經理，目前高階主管授權你執行一項新產品研發專案。在管理該專案時，下列哪一項「不是」你管理的重點？","A":"辨識需求","B":"確定一個明確、可實現的目標","C":"平衡範疇（Scope）、時程、成本與品質的衝突","D":"積極表現能力並超越專案利害關係人（Project Stakeholder）對專案的需求與期待","ans":"D"},{"id":"01-024","question":"絕大多數的專案成本會在下列哪一項階段中被花費掉？","A":"規劃（Planning）","B":"執行（Executing）","C":"監視及控制（Monitoring and Controlling）","D":"結束（Closing）","ans":"B"},{"id":"01-025","question":"專案經理（Project Manager）為全職投入工作，但專案行政人員為兼職工作，是下列哪一項組織？","A":"功能組織（Functional Organization）","B":"弱矩陣組織（Weak Matrix Organization）","C":"平衡矩陣組織（Balanced Matrix Organization）","D":"強矩陣組織（Strong Matrix Organization）","ans":"C"},{"id":"01-026","question":"下列哪一項是專案式組織（Projectized Organization）的最大優點？","A":"團隊成員有個家，可以根據績效表現而晉升","B":"不需要特別訓練，專案成員即可上手工作","C":"專案經理（Project Manager）擁有絕大多數的權限，行政人員可全職參與專案","D":"容易獲得其他功能（Functional）部門的支持","ans":"C"},{"id":"01-027","question":"下列哪一項「不是」專案？","A":"公司公益活動","B":"消防暨工安演習","C":"早晚門禁檢查","D":"豪華郵輪建造","ans":"C"},{"id":"01-028","question":"在專案生命週期（Project Life Cycle）中，贊助者（Sponsor）影響最大的時期是在下列哪一項階段？","A":"結束（Closing）","B":"執行（Executing）","C":"規劃（Planning）","D":"起始（Initiating）","ans":"D"},{"id":"01-029","question":"身為專案經理（Project Manager），對於其所涉及之管理知識及理論，應有下列哪一項認知？","A":"主要是一種專案管理軟體使用","B":"一般管理知識、應用領域知識及非實務經驗","C":"一般管理知識、應用領域知識及工具、技術、方法","D":"實務及經驗學習（Lessons Learned）非為應用依據","ans":"C"},{"id":"01-030","question":"一般通例而言，專案利害關係人（Project Stakeholder）之間有異議時，應當以有利於下列哪一方的方式解決？","A":"專案贊助者（Project Sponsor）","B":"顧客","C":"專案團隊（Project Team）","D":"專案執行組織的決策階層","ans":"B"},{"id":"01-031","question":"關於專案的敘述，下列哪些正確？（複選）","A":"專案有既定的目標與時程","B":"專案具有獨特性","C":"專案是永久性的工作","D":"專案的不確定性大","ans":"ABD"},{"id":"01-032","question":"關於專案的敘述，下列哪一項錯誤？","A":"專案是可以複製的","B":"專案的產品可包括軟、硬體","C":"每一個專案皆有資源的限制","D":"並非每一個專案啟動前均需達成財務可行","ans":"A"},{"id":"01-033","question":"下列哪一項是公司的專案管理程序訂定的負責單位？","A":"專案團隊（Project Team）","B":"專案保證組","C":"專案支援組","D":"專案管理辦公室（Project Management Office, PMO）","ans":"D"},{"id":"01-034","question":"將專案計畫付諸行動，是屬於專案管理流程群組（Process Groups）中的下列哪一項階段？","A":"起始（Initiating）","B":"規劃（Planning）","C":"執行（Executing）","D":"監視及控制（Monitoring and Controlling）","ans":"C"},{"id":"01-035","question":"專案整合管理（Project Integration Management）知識領域不包含下列哪一項流程？","A":"起始（Initiating）","B":"發展專案管理計畫書（Develop Project Management Plan）","C":"指導及管理專案管理工作（Direct and Manage Project Work）","D":"實施整合變更控制（Perform Integrated Change Control）","ans":"A"},{"id":"01-036","question":"專案管理可以替企業帶來下列哪些利益？（複選）","A":"降低品質","B":"降低成本","C":"減低風險","D":"增加人員","ans":"BC"},{"id":"01-037","question":"關於功能組織（Functional Organization）的敘述，下列哪些錯誤？（複選）","A":"功能組織（Functional Organization）以專業為重心，且依功能分組","B":"功能組織（Functional Organization）中的每個部門或事業群都是獨立管理","C":"對專案經理（Project Manager）而言，他們擁有很大的正式職權","D":"所有員工都向一位經理報告，且有清楚的指揮系統","ans":"BC"},{"id":"01-038","question":"下列哪一項組織結構中的專案經理（Project Manager）具有最高權限與最大權力？","A":"專案式組織（Projectized Organization）","B":"功能組織（Functional Organization）","C":"矩陣式組織（Matrix Organization）","D":"彈性式組織（Flexible Organization）","ans":"A"},{"id":"01-039","question":"當專案活動造成某人被牽扯進入或被影響到時，或者專案活動造成某人獲得或損失時，「某人」被稱為下列哪一項？","A":"專案團隊（Project Team）成員","B":"顧客","C":"利害關係人（Stakeholder）","D":"支援者","ans":"C"},{"id":"01-040","question":"協調（Coordination）管理一群相關的專案，稱為下列哪一項？","A":"特殊專案管理","B":"敏捷式專案管理（Agile Project Management）","C":"計畫管理（Program Management）","D":"專案群組合（Portfolio）","ans":"C"},{"id":"01-041","question":"為創建一獨特的產品、服務或結果所做的一次性努力，稱為下列哪一項？","A":"新產品發展","B":"專案","C":"計畫","D":"事業","ans":"B"},{"id":"01-042","question":"專案經理（Project Manager）的領導型態必須配合專案團隊（Project Team）的不同發展階段，所以必須經過下列哪一項的連續步驟？","A":"紀律、獨裁、參與","B":"專案式（Projectized）、矩陣式（Matrix）、功能式（Functional）","C":"團隊建立，團隊發展，責任委派","D":"指導、訓練、支持、委派","ans":"D"},{"id":"01-043","question":"一間台灣大型公司的經理要簽訂一個合約，在海南島建立一個國際機場。該專案需要數年去建立與測試，請問下列哪一項組織架構適合管理這個專案？","A":"功能組織（Functional Organization）","B":"承包商組織（Contractor Organization）","C":"矩陣式組織（Matrix Organization）","D":"專案式組織（Projectized Organization）","ans":"D"},{"id":"01-044","question":"專案經理（Project Manager）需要負責專案過程中所發生的事件，其中最重要的責任為下列哪一項？","A":"風險管理（Risk Management）","B":"品質管理（Quality Management）","C":"成本管理（Cost Management）","D":"整合（Integration）","ans":"D"},{"id":"01-045","question":"假設你是一間大型營造公司的專案經理（Project Manager），需在一年內蓋好供奧運選手居住的合格建築物；你有充裕的經費且相關資源的取得沒有困難，以專案成功關鍵因素概念，未來對該專案影響最大的專案限制因素為下列哪些？（複選）","A":"時間","B":"範疇（Scope）","C":"資源","D":"品質","ans":"AB"},{"id":"01-046","question":"在大型的組織中，專案促進者（Expediter）被要求替重要客戶管理專案，該專案促進者的職位可以在下列哪一組織中被發現到？","A":"強矩陣（Strong Matrix）","B":"弱矩陣（Weak Matrix）","C":"功能式（Functional）","D":"專案式（Projectized）","ans":"C"},{"id":"01-047","question":"專案經理（Project Manager）將會管理一個大而複雜的專案，工作地點是在非洲建立一個國際機場，並且需要至少4年的專案時程。對此，最佳專案管理的組織應屬於下列哪一項？","A":"強矩陣（Strong Matrix）","B":"弱矩陣（Weak Matrix）","C":"專案式（Projectized）","D":"功能式（Functional）","ans":"C"},{"id":"01-048","question":"專案經理（Project Manager）所擁有的權力大小與下列哪一項有關？","A":"專案經理（Project Manager）的溝通技巧","B":"組織結構","C":"專案經理（Project Manager）的影響力","D":"員工的配合度","ans":"B"},{"id":"01-049","question":"在專案整個生命週期裡，專案的預期支出的圖形經常呈現S曲線，這種現象代表下列哪一項？","A":"所有專案的週期特性","B":"問題總是出現在執行階段","C":"在結束階段的支出很高","D":"專案預算的大部分將會在執行階段花費掉","ans":"D"},{"id":"01-050","question":"在一項南北高速鐵路的專案中，你負責破壞舊建築，直接向專案經理（Project Manager）報告；且為約聘性質，在任務結束後即需離開，此組織為下列哪一項？","A":"功能組織（Functional Organization）","B":"弱矩陣組織（Weak Matrix Organization）","C":"專案式組織（Projectized Organization）","D":"平衡矩陣組織（Balanced Matrix Organization）","ans":"C"},{"id":"01-051","question":"A公司下有數十個專案正評估是否啟動，B君為專案管理辦公室（Project Management Office, PMO）的主管，他正評估三個與組織策略目標相關的專案，請問下列哪一專案不是他正在評估的專案？","A":"智慧型手機二代研發專案","B":"公司ERP（Enterprise Resource Planning）系統建置專案","C":"生產線改善專案","D":"不良品回收專案","ans":"D"},{"id":"01-052","question":"下列哪一項流程群組（Process Groups）中專案的風險最高，且利害關係人（Stakeholder）對專案成果的影響力最大？","A":"規劃（Planning）","B":"執行（Executing）","C":"起始（Initiating）","D":"控制（Control）","ans":"C"},{"id":"01-053","question":"下列哪一項是功能組織（Functional Organization）的優點？","A":"所有員工向單一主管負責","B":"所有員工向兩個或兩個以上主管負責，但只能效忠功能經理（Functional Manager）","C":"功能組織（Functional Organization）的重心在專案工作","D":"團隊具有同步協調特性","ans":"A"},{"id":"01-054","question":"利害關係人（Stakeholder）於下列哪一專案階段（Project Phase）的影響力最大？","A":"起始（Initiating）","B":"規劃（Planning）","C":"執行（Executing）","D":"監視及控制（Monitoring and Controlling）","ans":"A"},{"id":"01-055","question":"關於「專案目的」的敘述，下列哪一項錯誤？","A":"目的是用來衡量專案成功的可量化準則，可量化準則至少應包括時程、成本與品質基準","B":"專案的目的通常有其特殊性","C":"目的應該有時間範圍，並有指定的結束時間","D":"敘述專案產品或服務的理想化特性","ans":"D"},{"id":"01-056","question":"大型專案的專案經理（Project Manager）多次與客戶會議，判斷客戶只能接受非常低的風險容忍，下列哪一項為客戶可能的反應？","A":"願意接受高風險換取高獲益","B":"不願意接受高風險換取高獲益","C":"會瞭解專案風險發生時間","D":"不會瞭解專案風險發生時間","ans":"B"},{"id":"01-057","question":"有關專案組合管理（Portfolio Management）及計畫管理（Program Management）的敘述，下列哪一項正確？","A":"當專案彼此間共享資源及技術，但彼此專案產出無強烈關聯性，採用專案組合管理","B":"當數個專案的結果有緊密的相依性，須採用專案組合管理","C":"專案組合管理範圍通常涵蓋數個專案，對專案進行重要排序及選擇，以及所涵蓋專案資源的管理，其管理範圍不會包含任何計畫","D":"計畫管理的範疇（Scope）通常較專案組合管理範疇（Scope）大","ans":"A"},{"id":"01-058","question":"企業環境因素（Enterprise Environmental Factors）所指的為一個不是專案團隊（Project Team）所能控制的狀況，但是影響、制約及指導專案，因此是多數專案規劃子流程的投入（Input），下列哪一項「不是」屬於企業環境因素（Enterprise Environmental Factors）？","A":"公司的文化","B":"公司過去執行類似的專案","C":"公司的人事制度","D":"公司建置的ERP（Enterprise Resource Planning）系統","ans":"B"},{"id":"01-059","question":"專案治理（Project Governance）架構提供專案經理（Project Manager）與團隊成員管理專案的結構、流程及決策工具，已成功完成專案的交付，下列哪一項「不是」專案治理（Project Governance）架構的重要元素？","A":"專案成功及交付的允收準則（Acceptance Criteria）","B":"專案的決策流程","C":"專案的可行性分析","D":"專案團隊（Project Team）、組織群組及外部利害關係人（Stakeholder）的關係","ans":"C"},{"id":"01-060","question":"下列哪一項說明正確？","A":"專案的初期不確定性最大，專案範疇（Project Scope）變更所需費用最大","B":"專案的初期不確定性最大，專案範疇（Project Scope）變更所需費用最小","C":"專案的初期不確定性最小，專案範疇（Project Scope）變更所需費用最大","D":"專案的初期不確定性最小，專案範疇（Project Scope）變更所需費用最小","ans":"B"}],"02":[{"id":"02-001","question":"關於專案起始的時候，專案經理（Project Manager）經常做的事，下列哪一項錯誤？","A":"細部的規劃（Planning）","B":"工作指示（Instruction）","C":"協助發展專案章程（Develop Project Charter）","D":"工作時程表的發布","ans":"A"},{"id":"02-002","question":"專案工作說明書（Statement of Work, SOW）主要是由下列哪一方提供？","A":"需求者、業主或委託人","B":"專案贊助者（Project Sponsor）","C":"主承包商（Contractor）","D":"專案經理（Project Manager）","ans":"A"},{"id":"02-003","question":"發展專案章程（Develop Project Charter）的目的為下列哪一項？","A":"敘述專案的評選方法","B":"確認專案目標及授權取得專案資源","C":"確認專案贊助者（Project Sponsor）","D":"確認專案團隊（Project Team）、專案經理（Project Manager）及專案贊助者（Project Sponsor）","ans":"B"},{"id":"02-004","question":"發展專案章程（Develop Project Charter）的過程中，需下列哪一項投入（Input）？","A":"專案工作說明書（Statement of Work, SOW）、專案評選方法、企業組織","B":"合約、專案評選方法、企業環境及資源、組織流程","C":"專案工作說明書（Statement of Work, SOW）、企業環境及資源、專案評選方法、組織流程","D":"合約、專案工作說明書（Statement of Work, SOW）、企業環境及資源、組織流程","ans":"D"},{"id":"02-005","question":"你是國際土地開發公司的專案經理（Project Manager），經由本益比分析結果得知跨海專案A的執行成本現值為US $ 2,400,000，潛在利益所得現值為US $12,000,000，未來的營運成本現值為US $3,000,000；專案B的執行成本現值為US $2,800,000，潛在利益所得現值為US $14,000,000，未來的營運成本現值為US $2,000,000，下列哪一項專案你最為推薦？","A":"專案B，因為營運成本現值較低","B":"專案A，因為淨獲利現值較高","C":"專案B，因為淨現值較高","D":"專案A，因為執行成本現值較低","ans":"C"},{"id":"02-006","question":"下列哪些是專案章程（Project Charter）的內容？（複選）","A":"專案總體預算","B":"專案經理（Project Manager）","C":"專案經驗","D":"專案目的","ans":"ABD"},{"id":"02-007","question":"發展一份正式被核准的文件，並授權專案經理（Project Manager）在專案活動中動用組織的資源，是指下列哪一項的定義？","A":"範疇聲明（Scope Statement）","B":"工作說明書（Statement of Work, SOW）","C":"專案章程（Project Charter）","D":"合約（Contract）","ans":"C"},{"id":"02-008","question":"專案章程（Project Charter）在下列哪一項流程群組（Process Groups）中產生？","A":"可行性（Feasibility）","B":"起始（Initiating）","C":"規劃（Planning）","D":"審核（Audit）","ans":"B"},{"id":"02-009","question":"最理想狀況，專案經理（Project Manager）的人選應該在下列哪一項指定？","A":"專案起始（Initiating）","B":"專案計畫書發展過程","C":"專案執行（Executing）","D":"專案範疇規劃","ans":"A"},{"id":"02-010","question":"關於專案起始（Initiating）流程群組（Process Groups）的敘述，下列哪些正確？（複選）","A":"定義及確認專案範疇（Project Scope）","B":"確認專案開始進行，並獲得人力及財務資源承諾","C":"定義及確認專案目標","D":"發展專案計畫書（Project Plan）","ans":"BC"},{"id":"02-011","question":"專案工作說明書（Statement of Work, SOW）是敘述專案承諾要完成的產品或服務，此份文件通常是由下列哪些對象撰寫的？（複選）","A":"買方","B":"專案贊助者（Project Sponsor）","C":"專案經理（Project Manager）","D":"外包商（Contractor）或供應商（Supplier）","ans":"AB"},{"id":"02-012","question":"下列哪一項是專案章程（Project Charter）的目的？","A":"認可與承認專案的存在，並將組織資源撥付給專案","B":"承認專案團隊與專案經理（Project Manager）的存在","C":"評選出最適當的專案","D":"擬定專案評選準則","ans":"A"},{"id":"02-013","question":"下列哪一項文件是確認專案的存在？","A":"工作說明書（Statement of Work, SOW）","B":"專案委派任務","C":"專案章程（Project Charter）","D":"產品敘述","ans":"C"},{"id":"02-014","question":"專案經理（Project Manager）被建築公司雇用，並且負責完工大樓的裝潢。他的專案第一件事是建立下列哪一項？","A":"工作分解結構（Work Breakdown Structure, WBS）","B":"預算基準（Baseline）","C":"專案章程（Project Charter）","D":"專案計畫","ans":"C"},{"id":"02-015","question":"關於專案起始（Initiating）流程群組（Process Groups）中的產品敘述，下列哪一項正確？","A":"是一項產出（Output），說明產品或服務的特性","B":"是一項產出（Output），說明產品或服務的特性及專案早期的細節","C":"是一項投入（Input），說明產品或服務的特性及專案早期的細節","D":"是一項投入（Input），說明產品或服務的特性","ans":"D"},{"id":"02-016","question":"關於專案起始（Initiating）流程群組（Process Groups）的目的，下列哪一項正確？","A":"正式確認專案目標","B":"正式確認專案背後的需求","C":"正式確認專案利害關係人（Project Stakeholder）","D":"正式確認專案贊助者（Project Sponsor）","ans":"A"},{"id":"02-017","question":"下列哪些「有可能是」專案利害關係人（Project Stakeholder）？（複選）","A":"贊助者（Sponsor）","B":"廠商（Factory）","C":"委託人（Client）","D":"顧客（Customer）","ans":"ABCD"},{"id":"02-018","question":"利害關係人（Stakeholder）中，下列哪一方對於「降低成本」管控作業極具關切及注意？","A":"顧客及使用者","B":"專案經理（Project Manager）及專案團隊（Project Team）","C":"贊助者（Sponsor）或業主（Owner）","D":"執行專案組織的高階決策人員","ans":"C"},{"id":"02-019","question":"蒐集需求結束後，A專案經理（Project Manager）將檢視專案關鍵利害關係人（Stakeholder）的期望，已將這些利害關係人（Stakeholder）的期望設計成專案須完成的工作，請問下列哪一項利害關係人（Stakeholder）的期望他可先忽略？","A":"專案贊助人（Project Sponsor）","B":"主要顧客","C":"重要材料供應商","D":"專案相關專利廠商","ans":"C"},{"id":"02-020","question":"進行利害關係人（Stakeholder）分析時，下列哪一項不是分析的重點？","A":"利害關係人（Stakeholder）的權利","B":"利害關係人（Stakeholder）與專案執行團隊的接近程度（參與專案的程度）","C":"利害關係人（Stakeholder）接受專案資訊時，對專案產生的反應程度","D":"利害關係人（Stakeholder）的社會及經濟狀況","ans":"D"}],"03":[{"id":"03-001","question":"某專案開發磁浮列車，當專案開發產品時須考量產品移交給顧客後之營運及維護的成本，移交後之營運及維護成本應屬於下列哪一項？","A":"比例分配的成本（Prorated Cost）","B":"專案間接成本（Indirect Cost）","C":"產品生命週期（Product Life Cycle）成本","D":"專案直接成本（Direct Cost）","ans":"C"},{"id":"03-002","question":"生命週期成本（Life Cycle Cost）是指下列哪一項？","A":"針對專案產品整個生命裡，產品成本的呈現方法","B":"政府的會計方法","C":"專案生命的預測方法","D":"專案完成時的評估方法","ans":"A"},{"id":"03-003","question":"你是ABC公司的專案經理（Project Manager），下列哪些是你製作專案範疇聲明書（Project Scope Statement）的投入（Input）？（複選）","A":"專案章程（Project Charter）","B":"需求文件","C":"事業環境因素","D":"組織流程資產","ans":"ABD"},{"id":"03-004","question":"下列哪一項不包含在專案範疇聲明書（Project Scope Statement）中？","A":"請求變更","B":"專案交付標的（Deliverable）","C":"產品允收準則（Acceptance Criteria）","D":"成本估計","ans":"A"},{"id":"03-005","question":"專案的品質管理，下列哪一項「不是」戴明（Deming）的觀點？","A":"改善製程，提高產品品質的一致性，減少重工（Rework）、浪費","B":"生產力是品質的副產品","C":"品質就是適用","D":"第一次就做對","ans":"C"},{"id":"03-006","question":"品質機能展開（Quality Function Deployment, QFD），是將消費者的需求轉換為產品的屬性且為可以測知的一種方法。下列哪一項「不是」執行QFD的效果？","A":"對產品有清楚的目標","B":"增加設計的工程變更","C":"縮短總設計時間","D":"降低試製成本","ans":"B"},{"id":"03-007","question":"規劃品質管理（Plan Quality Management）是一個制定品質標準的過程，根據某些流程產出（Output）來確定哪些品質標準與專案有關。關於它的產出（Output），下列哪一項錯誤？","A":"品質指標","B":"專案文件更新","C":"操作定義","D":"品質檢核表","ans":"C"},{"id":"03-008","question":"專案的組織，是指若干部門之間的團隊組合，用以達成某種特定性的工作或為解決某項特殊問題，與執行特定任務時所結合的團隊或工作小組。關於它的優點，下列哪一項錯誤？","A":"人員工作性質變動","B":"資源可充分利用","C":"可增加各部門間的溝通機會","D":"專案成員易於發揮所長","ans":"A"},{"id":"03-009","question":"專案的組織，是指若干部門之間的團隊組合，用以達成某種特定性的工作或為解決某項特殊問題，與執行特定任務時所結合的團隊或工作小組。關於它的優點，下列哪一項正確？","A":"資源使用上的衝突","B":"任務目標明確","C":"部分人員產生雙重忠貞的問題","D":"原有單位的本位主義影響","ans":"B"},{"id":"03-010","question":"專案的組織，是指若干部門之間的團隊組合，用以達成某種特定性的工作或為解決某項特殊問題，與執行特定任務時所結合的團隊或工作小組。關於它的特性，下列哪些正確？（複選）","A":"臨時性的動態組織","B":"開放性的組織團體","C":"專案成員之間的互動頻繁","D":"為特殊目的而成立","ans":"ABCD"},{"id":"03-011","question":"下列哪一項專案組織文化特性，是強調工作導向及目標完成？","A":"發展式（Developing）","B":"市場式（Marketing）","C":"家族式（Family）","D":"官僚式（Bureaucrat）","ans":"B"},{"id":"03-012","question":"在專案經理（Project Manager）的領導風格中，決策領導權屬於下列哪一項類型？","A":"放任式（Noninterferent）領導","B":"民主式（Democratic）領導","C":"威權式（Authoritative）領導","D":"專案式（Projectized）領導","ans":"C"},{"id":"03-013","question":"下列哪一項是專案組織溝通的第一層級？","A":"技術性溝通","B":"人際間溝通","C":"個人內部溝通","D":"群體或組織間溝通","ans":"C"},{"id":"03-014","question":"關於衝突的基本原因，下列哪一項錯誤？","A":"目標衝突","B":"無限資源的爭奪","C":"角色衝突","D":"組織變革","ans":"B"},{"id":"03-015","question":"下列哪些會構成專案風險？（複選）","A":"事件之發生","B":"事件發生對結果的影響","C":"科技","D":"人員","ans":"AB"},{"id":"03-016","question":"關於風險評估的內容，下列哪一項錯誤？","A":"專案審查（Project Review）","B":"需求","C":"類比系統","D":"探索性研究","ans":"B"},{"id":"03-017","question":"關於風險的處理方式，下列哪一項錯誤？","A":"風險規避（Risk Avoidance）","B":"風險轉移（Risk Transfer）","C":"風險減輕（Risk Mitigation）與控制","D":"風險發展（Risk Development）","ans":"D"},{"id":"03-018","question":"專案的生命週期中，下列哪一階段之成本控制彈性最高？","A":"概念設計","B":"細部設計","C":"系統運作維持","D":"生產佈署","ans":"A"},{"id":"03-019","question":"下列哪一項在產品生命週期（Product Life Cycle）成本所佔的比率最低？","A":"生產","B":"系統獲得","C":"系統研發","D":"運作與維修","ans":"C"},{"id":"03-020","question":"發展專案管理計畫書（Develop Project Management Plan）的主要目的，下列哪一項正確？","A":"了解誰是利害關係人（Stakeholder）","B":"確認專案的成本","C":"定義專案如何執行、如何監督、控制及結束專案","D":"確保專案的品質","ans":"C"},{"id":"03-021","question":"定義範疇（Define Scope）的產出（Output）包含下列哪些？（複選）","A":"專案範疇說明書（Scope Statement）","B":"專案文件更新","C":"成本變更","D":"風險分析（Risk Analysis）","ans":"AB"},{"id":"03-022","question":"建立工作分解結構（Work Breakdown Structure, WBS）的投入（Input）包含下列哪些？（複選）","A":"組織流程資產（Organizational Process Assets）","B":"專案範疇說明書（Scope Statement）","C":"範疇管理計畫書（Scope Management Plan）","D":"需求文件（Requirements Documentation）","ans":"ABCD"},{"id":"03-023","question":"工作分解結構（Work Breakdown Structure, WBS）的最下層為下列哪一項？","A":"工作階層","B":"工作要件","C":"工作責任","D":"工作包（Work Package）","ans":"D"},{"id":"03-024","question":"專案品質管理（Project Quality Management）的知識領域中，主要有下列哪些流程？（複選）","A":"規劃品質管理（Plan Quality Management）","B":"專案管理計畫變更","C":"品質保證（Quality Assurance）","D":"品質控制（Quality Control）","ans":"ACD"},{"id":"03-025","question":"關於溝通管理的要件，下列哪一項錯誤？","A":"溝通的項目名稱","B":"溝通目的","C":"溝通頻率","D":"溝通資訊整合","ans":"D"},{"id":"03-026","question":"關於符合品質要求的效益，下列哪一項錯誤？","A":"專案利害關係人（Project Stakeholder）的滿意度增加","B":"較少重工（Rework）的過程","C":"較低的轉換率","D":"較高的生產力","ans":"C"},{"id":"03-027","question":"下列哪一項採用風險分析（Risk Analysis）的概念進行活動工期估算？","A":"計畫評核術（Program Evaluation and Review Technique, PERT）","B":"要徑法（Critical Path Method, CPM）","C":"魚骨圖（Fishbone Diagram）","D":"決策樹（Decision Tree）","ans":"A"},{"id":"03-028","question":"下列哪一項分析圖常用於顯示資料的敏感度（Sensitivity）？","A":"決策樹（Decision Tree）","B":"龍捲風圖（Tornado Diagram）","C":"散佈圖（Scatter Diagram）","D":"直方圖（Histogram）","ans":"B"},{"id":"03-029","question":"關於決策樹分析（Decision Tree Analysis），下列哪一項通常為決定因子？","A":"平均數（Average）","B":"極大值（Maximum）","C":"中間數（Mid-Value）","D":"期望貨幣值（Expected Monetary Value）","ans":"D"},{"id":"03-030","question":"在風險分析（Risk Analysis）中，運用數學模式將成本或時程變數執行多次，最後以變數的機率分布取代定值估算的方法稱為下列哪一項？","A":"德爾菲法（Delphi Technique）","B":"計畫評核術（Program Evaluation and Review Technique, PERT）","C":"蒙地卡羅模擬（Monte Carlo Simulation）","D":"迴歸分析法","ans":"C"},{"id":"03-031","question":"處理負面（Negative）風險的主要策略有下列哪些？（複選）","A":"風險減輕（Risk Mitigation）","B":"風險轉移（Risk Transfer）","C":"風險規避（Risk Avoidance）","D":"風險隱藏（Risk Concealment）","ans":"ABC"},{"id":"03-032","question":"你是一家公司的專案經理（Project Manager），發現所採用的管理資訊系統有幾個流程上的瑕疵，你想識別影響這些流程的因果關係，下列哪些工具（Tools）最適合？（複選）","A":"決策樹（Decision Tree）","B":"魚骨圖（Fishbone Diagram）","C":"影響圖（Influence Diagram）","D":"標竿圖（Benchmarking Diagram）","ans":"BC"},{"id":"03-033","question":"賣方針對提供的產品或服務設定一個特定的價格與買方達成協議的合約，下列哪一項正確？","A":"固定價格","B":"成本補償","C":"成本加獎勵費用","D":"時間與材料成本","ans":"A"},{"id":"03-034","question":"關於人力資源規劃（Human Resource Management）的敘述，下列哪一項錯誤？","A":"人力資源規劃涉及角色與責任決定","B":"人力資源規劃的產出（Output）包括專案組織圖（Project Organization Chart）","C":"流程所產生的人員管理計畫敘述資源如何及何時取得與釋出","D":"此流程所產生的責任指派矩陣（Responsibility Assignment Matrix, RAM）允許你看到被指派活動的各負責人","ans":"D"},{"id":"03-035","question":"下列哪些是制定專案範疇（Project Scope）管理計畫的敘述？（複選）","A":"根據專案工作說明書（Statement of Work, SOW）編制詳細專案範圍說明書的一個過程","B":"能夠根據詳細的專案範圍說明書製作工作分解結構（Work Breakdown Structure, WBS），並確定如何維持與批准該工作分解結構的一個過程","C":"規定如何正式核實與驗收專案已完成之交付標的（Deliverable）的一個過程","D":"規定專案人數限制的一個過程","ans":"ABC"},{"id":"03-036","question":"範疇說明書（Scope Statement）是下列哪一項的產出（Output）？","A":"規劃範疇（Plan Scope）","B":"驗證範疇（Verificate Scope）","C":"定義範疇（Define Scope）","D":"工作分解結構（Work Breakdown Structure, WBS）","ans":"C"},{"id":"03-037","question":"製作工作分解結構（Work Breakdown Structure, WBS）常用的工具與技術（Tools and Techniques）為下列哪一項？","A":"比較法","B":"成本效益分析法（Cost-Benefit Analysis）","C":"專案選擇法","D":"分解術（Decomposition）","ans":"D"},{"id":"03-038","question":"下列哪些是定義活動（Define Activities）的產出（Output）？（複選）","A":"活動清單（Activity List）","B":"活動屬性（Activity Attributes）","C":"請求的變更（Change Requests）","D":"里程碑清單（Milestone List）","ans":"ABD"},{"id":"03-039","question":"下列哪些流程是包含在專案管理規劃（Planning）流程群組（Process Groups）？（複選）","A":"定義活動（Define Activities）","B":"規劃範疇管理（Plan Scope Management）","C":"發展專案管理計畫書（Develop Project Management Plan）","D":"建立工作分解結構（Work Breakdown Structure, WBS）","ans":"ABCD"},{"id":"03-040","question":"下列哪一項是排序活動（Sequence Activities）的產出（Output）？","A":"定義活動（Define Activities）","B":"規劃風險管理（Plan Risk Management）","C":"專案時程網圖（Project Schedule Network Diagram）","D":"建立工作分解結構（Work Breakdown Structure, WBS）","ans":"C"},{"id":"03-041","question":"下列哪一項是規劃溝通管理（Plan Communication Management）的產出（Output）？","A":"範疇聲明（Scope Statement）","B":"專案管理計畫書（Project Management Plan）","C":"溝通管理計畫書（Communications Management Plan）","D":"專案時程網圖（Project Schedule Network Diagram）","ans":"C"},{"id":"03-042","question":"下列哪一項是規劃人力資源管理（Plan Human Resource Management）的產出（Output）？","A":"人力資源管理計畫書","B":"用人管理計畫書（Staffing Management Plan）","C":"專案時程網圖（Project Schedule Network Diagram）","D":"專案組織圖（Project Organization Chart）","ans":"A"},{"id":"03-043","question":"關於計畫評核術（Program Evaluation and Review Technique, PERT）與要徑法（Critical Path Method, CPM）的敘述，下列哪些正確？（複選）","A":"計畫評核術（Program Evaluation and Review Technique, PERT）一般用在複雜以及高不確定性專案","B":"要徑法（Critical Path Method, CPM）以經驗數據為基礎來確定各項工作的時間","C":"要徑法（Critical Path Method, CPM）只需要定義樂觀（Optimistic）時間和悲觀（Pessimistic）時間","D":"要徑法（Critical Path Method, CPM）比計畫評核術（Program Evaluation and Review Technique, PERT）來的準確","ans":"AB"},{"id":"03-044","question":"下列哪一項是估算活動資源（Estimate Activity Resources）的最佳敘述？","A":"估算完成各計畫活動所需工時單位數","B":"確定各計畫活動之間的依存關係","C":"估算完成各計畫活動所需資源的種類與數量","D":"確定為產生專案各種交付標的（Deliverable）而必須進行的具體計畫活動","ans":"C"},{"id":"03-045","question":"下列哪些是規劃品質管理（Plan Quality Management）的產出（Output）？（複選）","A":"品質管理計畫書（Quality Management Plan）","B":"品質檢核表（Quality Checklists）","C":"專案管理計畫書（Project Management plan）","D":"品質指標（Quality Metrics）","ans":"ABD"},{"id":"03-046","question":"關於規劃人力資源管理（Plan Human Resource Management）的敘述，下列哪一項正確？","A":"確定、記錄並分派專案角色、職責和請示彙報關係，制定人員組織管理計畫","B":"招募專案工作所需的人力資源","C":"培養團隊成員的能力與提高成員之間的交互作用，以提高專案績效","D":"追蹤團隊成員的績效、提供回饋、解決問題、協調變更事宜以提高專案績效","ans":"A"},{"id":"03-047","question":"專案進行的中途，你的團隊由三個人新增加兩個人，成為五個人的團隊，將增加多少溝通渠道？","A":"7","B":"5","C":"10","D":"3","ans":"A"},{"id":"03-048","question":"你是達威科技公司的行銷部經理，你的公司已開發出一種全新的防毒軟體。貴公司在防毒軟體市場已有23%的佔有率，在業界的排行為前三大公司。你被授命為一新產品行銷專案的負責人，你的行銷預算有8600萬元，你正為該專案發展一份專案管理計畫書（Project Management Plan），你應採取下列哪一項行動才能順利完成計畫書的工作？","A":"分析行銷預算，如何將其合理地分配在行銷專案的各個階段","B":"加強產品的競爭策略，以超越23%的市場佔有率的計畫","C":"召募專案團隊並指派規劃工作給專案團隊（Project Team）","D":"提出創新的行銷構想，取得專案發起人的認同","ans":"C"},{"id":"03-049","question":"發展專案管理計畫書（Develop Project Management Plan）是在下列哪一項流程群組（Process Groups）？","A":"起始（Initiating）","B":"規劃（Planning）","C":"執行（Executing）","D":"監視及控制（Monitoring and Controlling）","ans":"B"},{"id":"03-050","question":"下列哪些是規劃範疇管理（Plan Scope Management）的產出（Output）？（複選）","A":"專案章程（Project Charter）","B":"專案範疇聲明書（Project Scope Statement）","C":"範疇管理計畫書（Scope Management Plan）","D":"需求管理計畫書（Require Management Plan）","ans":"CD"},{"id":"03-051","question":"關於定義活動（Define Activities）的產出（Output），下列哪一項錯誤？","A":"活動清單（Activity List）","B":"活動屬性（Activity Attributes）","C":"里程碑清單（Milestone List）","D":"工作說明書（Statement of Work, SOW）","ans":"D"},{"id":"03-052","question":"下列哪一項是實施估算活動資源（Estimate Activity Resources）的主要目的？","A":"為確定專案預算，以便納入專案管理計畫書（Project Management Plan）","B":"為確定執行專案活動時，要使用何種資源、每一資源使用數量","C":"為確定專案進度，不受公司人力資源的影響","D":"為確定專案進度，不受公司財務資源的影響","ans":"B"},{"id":"03-053","question":"你剛從學校畢業踏入職場，因缺乏專案工作經驗，所以無法擔任專案經理（Project Manager）的工作。但因為在學校時你有舉辦活動的經驗，加上你的努力學習，你被公司主管指派到某項專案上協助時間管理的工作。因此你目前正對專案的某個活動進行估算活動期程（Estimate Activity Durations），下列哪一項是你可能會採用的工具與技術（Tools and Techniques）？","A":"腦力激盪法（Brainstorming）","B":"縮程法（Crashing）","C":"德爾菲法（Delphi Technique）","D":"類比估算法（Analogous Estimating）","ans":"D"},{"id":"03-054","question":"在進行專案發展時程（Develop Schedule）中常會用到要徑法（Critical Path Method, CPM）作為時程發展的工具與技術（Tools and Techniques），關於要徑法下列哪一項正確？","A":"所謂要徑法（Critical Path Method, CPM）就是找到專案所有的活動路徑，並加以管理","B":"要徑法（Critical Path Method, CPM）可以算出專案活動的最早開始時間，但不能算出最晚開始時間","C":"在正常進度下，要徑（Critical Path）上的活動均為零浮時（Float）","D":"要徑法（Critical Path Method, CPM）又稱三點估算法（Three-Point Estimate）","ans":"C"},{"id":"03-055","question":"你正擔任某項重大建築工程專案的經理，該項建築工程因施工地點位居特殊的地理環境中，而且將面臨不確定的天候因素，因此針對該專案的工期排程，你正思考要使用「要徑法（Critical Path Method, CPM）」還是「計畫評核術（Program Evaluation and Review Technique, PERT）」，針對此兩種方法的差異，下列哪一項最為正確？","A":"要徑法（Critical Path Method, CPM）使用「單時估算法」，較計畫評核術（Program Evaluation and Review Technique, PERT）使用「三時估算法（Three-Point Estimate）」為普遍","B":"要徑法（Critical Path Method, CPM）使用「三時估算法（Three-Point Estimate）」，較計畫評核術（Program Evaluation and Review Technique, PERT）使用「單時估算法」準確性高","C":"要徑法（Critical Path Method, CPM）適合用於風險性高及不確定性高的專案","D":"計畫評核術（Program Evaluation and Review Technique, PERT）適合用於風險性低及不確定性低的專案","ans":"A"},{"id":"03-056","question":"關於成本基準（Cost Baseline）的敘述，下列哪一項正確？","A":"成本基準是按時間分段的預算，用作衡量及監控專案整體預算的基準","B":"成本基準就是專案的實際支出成本（Actual Cost）","C":"成本基準就是專案每一項活動成本的預估值","D":"成本基準僅做成本估算參考，不能用來衡量專案績效","ans":"A"},{"id":"03-057","question":"下列哪一項不能做為決定預算（Determine Budget）的投入（Input）？","A":"範疇基準（Scope Baseline）","B":"專案時程（Project Schedule）","C":"成本管理計畫書","D":"產品說明書","ans":"D"},{"id":"03-058","question":"下列哪一項是規劃品質管理（Plan Quality Management）常用的工具與技術（Tools and Techniques）？","A":"魚骨圖（Fishbone Diagram）","B":"成本效益分析（Cost-Benefit Analysis）","C":"要因分析（Cause-Effect）","D":"流程圖（Flowchart）","ans":"B"},{"id":"03-059","question":"為專案進行人力資源規劃時，下列哪一項是應先考慮的行動？","A":"確定專案角色、職責、報告系統並制定人力管理計畫","B":"先行招募重要團隊成員，避免人力資源短缺","C":"與專案發起人協商，以免造成資源衝突","D":"專案的訓練與獎勵系統，以吸引人員加入","ans":"A"},{"id":"03-060","question":"在進行決定預算（Determine Budget）時，當考慮到專案時程（Project Schedule），下列哪一項敘述正確？","A":"確定專案生命週期（Project Life Cycle），以進行預算編列","B":"將成本按專案各階段進行分配","C":"做進度績效衡量的方法","D":"做成本績效衡量的方法","ans":"B"},{"id":"03-061","question":"下列哪一項不屬於定量風險分析（Quantitative Risk Analysis）常用的工具與技術（Tools and Techniques）？","A":"資料蒐集與呈現技術","B":"定量風險分析（Quantitative Risk Analysis）與建模技術","C":"專家判斷（Expert Judgment）","D":"市場調查分析（Marketing Investigation Analysis）","ans":"D"},{"id":"03-062","question":"由於團隊成員之間的衝突，使得你的專案已經落後於進度表。你已經解決了衝突，為了重新趕上進度，你應該優先考慮下列哪一項？","A":"向著進度趕工","B":"執行資源撫平（Resource Leveling）","C":"執行倒置的資源配置時序安排","D":"利用關鍵職位資源","ans":"A"},{"id":"03-063","question":"關於規劃（Planning）流程群組（Process Groups）的敘述，下列哪一項正確？","A":"初步定義或修正專案章程（Project Charter）","B":"監視及估計各專案基準（Baseline）不符、差異事件","C":"建立專案工作說明書（Statement of Work, SOW）","D":"發展專案團隊（Develop Project Team）、建立專案成員責任指派矩陣（Responsibility Assignment Matrix, RAM）","ans":"D"},{"id":"03-064","question":"專案執行時，發現某項工作分解結構（Work Breakdown Structure, WBS）工作項目成本超過基準時，意謂著在工作分解結構（Work Breakdown Structure, WBS）發展時發生下列哪一項情況？","A":"工作分解結構（Work Breakdown Structure, WBS）沒有更簡化層級","B":"專案成員對於顧客（買方）的需求仍未清楚及定義","C":"未採用生命週期法發展工作分解結構（Work Breakdown Structure, WBS）","D":"工作分解結構（Work Breakdown Structure, WBS）是由顧客（買方）提供","ans":"B"},{"id":"03-065","question":"專案中一工作項目相關規劃資料如下：最早開始日期（Early Start Date, ES）為6、最早完工日期（Early Finish Time, EF）為11、最晚完工日期（Late Finish Date, LF）為15，下列哪一項計算結果正確？","A":"工期=3","B":"浮時（Float）=4","C":"工期=6","D":"浮時（Float）<0","ans":"B"},{"id":"03-066","question":"在專案發展時程（Develop Schedule）中，為了解專案時程的關鍵性及適時調整性，可使用下列哪一項圖示技術（Techniques）？","A":"計畫評核術（Program Evaluation and Review Technique, PERT）","B":"專案時程網圖（Project Schedule Network Diagram）","C":"圖示評核術（Graphical Evaluation and Review Technique, GERT）","D":"要徑法（Critical Path Method, CPM）","ans":"D"},{"id":"03-067","question":"專案成本類別有許多不同模式，以「電腦主機及週邊設施租賃」為例，這是屬於下列哪一項成本？","A":"固定成本","B":"研發成本","C":"維護成本","D":"變動成本","ans":"A"},{"id":"03-068","question":"你的專案團隊（Project Team）成員未曾共事過，他們開始出現衝突，似乎每個人都很難溝通。你必須迅速地使這種狀況得到控制，首先應該採取的行動為下列哪一項？","A":"定期召開小組會議","B":"下次開會時，採用會議引導人協助會議順利進行","C":"小心地進行專案成員衝突管理計畫","D":"採用強制性的會議行為規則","ans":"C"},{"id":"03-069","question":"專案規劃時，對於辨識風險（Identify Risks）的資訊蒐集經常使用到不同技術（Techniques），下列哪一項不屬於這項技術（Techniques）範圍？","A":"文件審查","B":"風險評等矩陣（Risk Rating Matrix）","C":"假設事項分析（Assumption Analysis）","D":"優勢、劣勢、機會與威脅（Strengths, Weaknesses, Opportunities, and Threats, SWOT）分析","ans":"B"},{"id":"03-070","question":"軟體開發專案規劃時，對於辨識風險（Identify Risks）也深入探討，然而發現此專案原申請的預算被挪用後竟只能支持30個工作日，而且有資源中斷的可能性，這種風險類型就是下列哪一項？","A":"不確定（Uncertainty）","B":"專案管理","C":"預算","D":"組織","ans":"D"},{"id":"03-071","question":"專案涉及採購時，其採購合約均需詳細規劃以符合專案（買方）需求，下列哪一項錯誤？","A":"合約內容必須說明賣方交付標的（Deliverable）狀況、品質程度、成本或價格","B":"合約內容明訂書面文件如發票單據、變更請求、報告、清單、說明書、保固文件","C":"合約內容包括條款修訂、交付標的（Deliverable）修改、爭議或申訴、賠償或補償","D":"合約是強制賣方提供規定交付標的（Deliverable）給買方的一種協議","ans":"D"},{"id":"03-072","question":"下列哪些應該包含在專案管理計畫書（Project Management Plan）中？（複選）","A":"專案基準","B":"變更管理計畫書","C":"利害關係人（Stakeholder）之間溝通的需求與技術","D":"描述工作如何執行以達成專案目標","ans":"ABCD"},{"id":"03-073","question":"溝通管理計畫書（Communications Management Plan）包含下列哪些？（複選）","A":"利害關係人（Stakeholder）的溝通需求","B":"溝通的目的與頻率","C":"溝通格式與傳送的方法","D":"分發的時間範圍與負責分發資訊者","ans":"ABCD"},{"id":"03-074","question":"下列哪一項常用的工具與技術（Tools and Techniques）可以協助專案規劃時，用來顯示專案可能面對的問題與問題的原因和後果？","A":"決策樹圖（Decision Tree Diagram）","B":"魚骨圖（Fishbone Diagram）","C":"甘特圖（Gantt Chart）","D":"模擬圖（Simulation Diagram）","ans":"B"},{"id":"03-075","question":"關於定性風險分析（Qualitative Risk Analysis）的目的，下列哪些正確？（複選）","A":"判定已識別出的風險對專案有何影響","B":"風險發生的機率","C":"依據風險對專案的影響程度，來排定風險的優先順序","D":"指定給專案一個風險分數","ans":"ABCD"},{"id":"03-076","question":"關於風險管理計畫書（Risk Management Plan）之敘述，下列哪些正確？（複選）","A":"是規劃風險管理（Plan Risk Management）的產出（Output）","B":"包括對於觸發因子之風險回應的敘述","C":"包括門檻值、評分與解釋方法、負責人、預算","D":"是所有其餘規劃風險（Plan Risk）的投入（Input）","ans":"ACD"},{"id":"03-077","question":"下列哪一項流程會採用「統計機率值」來評估風險發生的可能性及它們的後果？","A":"定性風險分析（Qualitative Risk Analysis）","B":"定量風險分析（Quantitative Risk Analysis）","C":"核對清單分析（Item-Checking Analysis）","D":"風險分類分析（Risk Classification Analysis）","ans":"B"},{"id":"03-078","question":"關於人力資源規劃（Human Resources Planning）的敘述，下列哪一項錯誤？","A":"人力資源規劃流程記載個人或小組在各項專案要件中的角色與權力","B":"人力資源規劃有三項投入（Input）：企業環境因素（Enterprise Environmental Factors）、組織流程資產、專案管理計畫","C":"人力資源規劃的產出（Output）之一包括顯示專案報告關係的專案組織圖（Project Organization Chart）","D":"人力資源規劃有三項產出（Output）：角色與責任、專案組織圖（Project Organization Chart）、人員管理計畫","ans":"A"},{"id":"03-079","question":"關於人力資源規劃（Human Resources Planning）期間所會面臨的限制，下列哪一項錯誤？","A":"組織結構","B":"勞資談判協議","C":"經濟狀況","D":"技術介面","ans":"D"},{"id":"03-080","question":"關於定義活動（Define Activities）的產出（Output），下列哪一項錯誤？","A":"活動清單（Activity List）","B":"活動屬性（Activity Attributes）","C":"里程碑清單（Milestone List）","D":"專案管理計畫書（Project Management Plan）","ans":"D"},{"id":"03-081","question":"對買方而言，下列哪一項合約的風險是最小的？","A":"時間與材料","B":"成本加固定費用","C":"固定價格","D":"成本加獎勵","ans":"C"},{"id":"03-082","question":"關於估算活動期程（Estimate Activity Durations）常用的工具與技術（Tools and Techniques），下列哪一項錯誤？","A":"專家判斷（Expert Judgment）","B":"風險準備分析（Reserve Analysis）","C":"類比估算法（Analogous Estimating）","D":"活動清單（Activity List）","ans":"D"},{"id":"03-083","question":"關於估算成本（Estimate Costs）的敘述，下列哪些正確？（複選）","A":"每一項專案都有預算，且專案成功完成的認定，有一部分是要評估是否在核准的預算內完成專案","B":"成本管理計畫是在執行「專案管理計畫」流程時產生","C":"工作分解結構（Work Breakdown Structure, WBS）是決定正確成本估計的關鍵","D":"決定成本估計時，確定要包括整個專案生命週期（Project Life Cycle）的所有成本","ans":"ABCD"},{"id":"03-084","question":"為了提供更好的控制，將交付標的（Deliverable）分解成若干較小的、更可以管理的小部分。這種分解稱為下列哪一項？","A":"規劃範疇管理（Plan Scope Management）","B":"產生工作分解結構（Work Breakdown Structure, WBS）","C":"範疇基準（Scope Baseline）","D":"驗證範疇（Verificate Scope）","ans":"B"},{"id":"03-085","question":"在工作分解結構（Work Breakdown Structure, WBS）中，最底層的工作稱為下列哪一項？","A":"活動（Activity）","B":"任務（Task）","C":"工作包（Work Package）","D":"成本帳戶（Cost Account）","ans":"C"},{"id":"03-086","question":"專案經理（Project Manager）正在評審（Reviewing）專案WBS，專案的WBS代表下列哪一項？","A":"所有必須交付給顧客的實體項目","B":"所有必須完成的專案工作","C":"必須由專案團隊（Project Team）完成的工作","D":"所有專案的活動","ans":"D"},{"id":"03-087","question":"客戶要求專案經理（Project Manager）承諾專案完成日期，專案經理（Project Manager）必須先完成專案時程分析。專案經理（Project Manager）使用計畫評核術（Program Evaluation and Review Technique, PERT）分析專案時程，結果顯示可以承諾交付日期為6月30日，期望的交付日期為5月31日。若專案經理（Project Manager）可以接受的遲交風險為5%，代表6月30日以後才完成專案的風險。請問專案要徑（Critical Path）工期的時程標準差為下列哪一項？","A":"10天","B":"20天","C":"5天","D":"半個月","ans":"D"},{"id":"03-088","question":"專案經理（Project Manager）正在管理醫院的軟體發展專案，有新的電腦可以明顯地加速發展的進度，但新電腦成本需要$50,000，以包含運送、安裝與啟用。新電腦的效益，在1年後可以替專案節省$100,000。假設年利率是10%，請問1年後使用新電腦的淨現值（Net Present Value）為下列哪一項？","A":"$90,000","B":"$40,909","C":"$45,555","D":"$91,110","ans":"B"},{"id":"03-089","question":"專案正在規劃階段，專案經理（Project Manager）選擇使用前導網絡圖（Precedence Network Diagram）協助規劃專案時程。前導網絡圖除提供網絡圖形之外，最大的優點是提供下列哪一項？","A":"任務（Tasks）準時完成的機率","B":"時程中活動的邏輯關係","C":"活動的起始與結束日期","D":"活動的浮時（Float）","ans":"B"},{"id":"03-090","question":"專案經理（Project Manager）決定改進原先預定的專案完成時間，採用同時進行不同的活動（Activity），這些活動原本是前後相連結的順序排列，專案經理（Project Manager）使用改進的方法稱為下列哪一項？","A":"縮程法（Crashing）","B":"提高優先順序（Priority Precedence）","C":"緊急防禦（Emergent Defense）","D":"快速跟進（Fast Tracking）","ans":"D"},{"id":"03-091","question":"五項任務時程是以連續順序排列，每項任務都是以「結束-開始」方式連結後續的任務，每項任務都有一天的總浮時（Total Float）。迄今，前兩項任務都依照時程完成，則對後續剩下的任務而言，有多少天的浮時（Float），下列哪一項正確？","A":"一天","B":"二天","C":"三天","D":"四天","ans":"A"},{"id":"03-092","question":"學習曲線（Learning Curve）理論強調在生產大量產品時，下列哪一項正確？","A":"當生產率上升時，成本減少","B":"當生產數量增加時，平均單位成本降低","C":"當大量採購時，物料會便宜","D":"使用先進科技，員工生產力增加","ans":"B"},{"id":"03-093","question":"專案經理（Project Manager）決定使用類比估算法（Analogous Estimating）估算有關專案生命週期（Project Life Cycle）事項時，他不會擔心下列哪一項的估算準備？","A":"活動清單（Activity List）","B":"估算的規模","C":"估算的量化","D":"檔案所能提供的支援","ans":"A"},{"id":"03-094","question":"關於淨現值（NPV）的敘述，下列哪些正確？（複選）","A":"假設以資金成本重複投資","B":"為限制下的優化法","C":"應選擇NPV最大的專案","D":"假設以浮動利率重複投資","ans":"AC"},{"id":"03-095","question":"關於內部投資報酬率（IRR）的敘述，下列哪些正確？（複選）","A":"應選擇IRR最高的專案","B":"當淨現值為正時的折現率","C":"為限制下的優化法","D":"當淨現值為零時的折現率","ans":"AD"},{"id":"03-096","question":"下列哪一項敘述正確？","A":"折現的現金流量分析是最不精確的，因其不考慮金錢的時間價值","B":"淨現值的現金流量分析是最不精確的，因其假設以折現率做重複投資","C":"還本期的現金流量分析是最不精確的，因其不考慮金錢的時間價值","D":"內部投資報酬率的現金流量分析是最不精確的，因其假設以資金成本做重複投資","ans":"C"},{"id":"03-097","question":"假設你是健身俱樂部的經理，總公司要你決定在新竹或台南新開一家分店；已知評估結果如下：新竹店還本期為18個月、淨現值為-250，台南店還本期為24個月、淨現值為250，你會選擇下列哪一家店開業？","A":"新竹，因還本期短","B":"台南，因淨現值（NPV）為正","C":"新竹，因淨現值（NPV）為負","D":"台南，因還本期長","ans":"B"},{"id":"03-098","question":"假設你是爵士俱樂部的經理，總公司要你決定在新竹或台南新開一家分店，已知評估結果如下：新竹店還本期為27個月、投資報酬率為35%，台南店還本期為24個月、投資報酬率為32%，你會選擇下列哪一家店開業？","A":"新竹，因投資報酬率高","B":"台南，因投資報酬率低","C":"新竹，因還本期長","D":"台南，因還本期短","ans":"A"},{"id":"03-099","question":"假設你是專案經理（Project Manager），正考慮要推薦一個$575,000的專案，預估頭兩年每季會有$25,000的現金流入，其後每季則為$75,000，請問還本期多長，下列哪一項正確？","A":"40個月","B":"38個月","C":"39個月","D":"41個月","ans":"C"},{"id":"03-100","question":"專案的遴選方法包括下列哪些？（複選）","A":"成本效益分析（Cost-Benefit Analysis）","B":"限制條件（Constraints）下的優化法","C":"淨現值法（NPV）","D":"潛在市場佔有率","ans":"ABC"},{"id":"03-101","question":"遴選委員會正在辯論兩項專案：專案A還本期18個月，專案B成本是$125,000。第一年的現金流入為$50,000，之後為每季$25,000，你該如何選擇？","A":"專案A或專案B均可，因還本期相同","B":"專案A，因專案B還本期為21個月","C":"專案A，因專案B還本期為24個月","D":"專案A，因專案B還本期為20個月","ans":"B"},{"id":"03-102","question":"下列關於工作授權系統的說明哪一項錯誤？","A":"闡明並啟動每一個工作包（Work Package）的內容","B":"由組織定義後所寫出來的流程","C":"專案計畫執行的工具與技術（Tools and Techniques）","D":"專案計畫執行過程的產出（Output）","ans":"D"},{"id":"03-103","question":"下列哪些是專案範圍定義的原因？（複選）","A":"細分專案交付標的（Deliverable）","B":"評估專案範圍的穩定","C":"有助於成本及時間估計","D":"有助於工作分派","ans":"ACD"},{"id":"03-104","question":"關於工作分解結構（Work Breakdown Structure, WBS）的敘述，下列哪一項錯誤？","A":"確認交付標的（Deliverable）","B":"最上層的稱為工作包（Work Package）","C":"有助於成本及時間估量","D":"有助於工作分派","ans":"B"},{"id":"03-105","question":"關於工作包（Work Package）層級的敘述，下列哪一項錯誤？","A":"有助於資源分配","B":"是工作分解結構（Work Breakdown Structure, WBS）的最低層級","C":"確定同意過的交付標的（Deliverable）","D":"有助於成本及時間估計","ans":"C"},{"id":"03-106","question":"節點活動法（Activity-on-Node, AON）最常使用下列哪一項邏輯關係？","A":"開始-完成（Start-to-Finish, SF）","B":"開始-開始（Start-to-Start, SS）","C":"完成-完成（Finish-to-Finish, FF）","D":"完成-開始（Finish-to-Start, FS）","ans":"D"},{"id":"03-107","question":"假使專案的首要限制條件（Constraints）因素是成本，專案贊助者（Project Sponsor）希望估計得越精確越好，下列哪一項工具與技術（Tools and Techniques）最適合？","A":"類比估算法（Analogous Estimating）","B":"由下而上估算法（Bottom-Up Estimating）","C":"由上往下估算法（Top-Down Estimating）","D":"專家判斷（Expert Judgment）","ans":"B"},{"id":"03-108","question":"關於承包商向顧客協商之付款方式，下列哪一項錯誤？","A":"全部完成再付款","B":"專案一開始就立即付現","C":"根據工期每個月付款","D":"高付款頻率","ans":"A"},{"id":"03-109","question":"下列哪一項是專案績效量測及評估的第一步驟？","A":"採取行動","B":"測量進度及績效","C":"基準計畫的設立","D":"依照實際狀況的比較計畫","ans":"C"},{"id":"03-110","question":"某營建廠商為其新得標之專案投保工作標的物產物保險，此舉較符合風險管理中的下列哪一項概念？","A":"風險規避（Risk Avoidance）","B":"風險減輕（Risk Mitigation）","C":"風險轉移（Risk Transfer）","D":"風險消除（Risk Elimination）","ans":"C"},{"id":"03-111","question":"下列哪一項情況，業主（Owner）所承擔的風險較低？","A":"依經濟市場機制決定承作金額","B":"採分包方式，由業主統籌管理","C":"採專案實作實算的方式","D":"採用專案總價承攬","ans":"D"},{"id":"03-112","question":"如附圖所示，A與B工作項目之間的先後關係為下列哪一項？","A":"FS","B":"SS","C":"FF","D":"SF","ans":"D"},{"id":"03-113","question":"應用計畫評核術（Program Evaluation and Review Technique, PERT）估算時程（Duration）時，每個工作項目需先求取幾個預估完工時程？","A":"2","B":"3","C":"4","D":"5","ans":"B"},{"id":"03-114","question":"關於專案風險的三個特性，下列哪一項是正確？","A":"暫時性、獨特性、逐步完善","B":"暫時性、獨特性、影響性","C":"事件來源、發生機率、影響範圍","D":"發生何事、在誰身上、何時發生","ans":"C"},{"id":"03-115","question":"考慮為專案減少可能的風險，進而購買保險（Insurance），為下列哪一項範例？","A":"減輕（Mitigation）","B":"規避（Avoidance）","C":"轉移（Transfer）","D":"接受（Acceptance）","ans":"C"},{"id":"03-116","question":"組織流程資產由組織政策、程序和計畫等所組成，這項產出（Output）有三個要件與合約有關，下列哪一項錯誤？","A":"通信聯繫","B":"專案績效評估","C":"付款時程與請求","D":"賣方績效評估","ans":"B"},{"id":"03-117","question":"下列哪一項是確認範疇（Validate Scope）的例子？","A":"評審一個已經安裝好的軟體模組的績效","B":"管理專案進度表的改變","C":"將工作分解結構（Work Breakdown Structure,WBS）分解成工作包（Work Package）階段","D":"實行效益-成本（Cost-Effect）分析，以決定是否進行專案","ans":"A"},{"id":"03-118","question":"專案經理（Project Manager）評審專案範疇（Project Scope）與專案範疇基準（Scope Baseline）時，此項評審包括下列哪一項？","A":"初始（Initiating）的專案進度表（Schedule）、預算與範疇","B":"初始（Initiating）的專案敘述（Statement）與專案章程（Project Charter）","C":"專案的初始（Initiating）範疇與範疇改變的部分","D":"最新的專案預算","ans":"C"},{"id":"03-119","question":"變更管理計畫應該包含在下列哪一項？","A":"範疇管理計畫（Scope Management Plan）","B":"溝通管理計畫（Communication Management Plan）","C":"構型管理計畫（Configuration Management Plan）","D":"品質管理計畫（Quality Management Plan）","ans":"A"},{"id":"03-120","question":"關於要徑（Critical Path）的敘述，下列哪一項正確？","A":"是網路圖中期程（Duration）最長的路徑","B":"是最少的自由浮時（Free Float）的路徑","C":"活動的自由浮時（Free Float）不一定是零","D":"活動具有關鍵風險","ans":"A"},{"id":"03-121","question":"顧客要求專案進行部分改變，專案團隊（Project Team）已經估計此一改變需有$10,000的成本，顧客同意負擔費用。顧客瞭解將有50%機會，此改變會失敗並且稍晚被移除。在預算中，此改變會登列如下列哪一項？","A":"專案預算不應增加","B":"專案預算應增加$15,000","C":"專案預算應增加$10,000","D":"專案預算應增加$5,000","ans":"C"},{"id":"03-122","question":"若價值千萬美元專案的預算基線需要重估，下列哪一項是可以接受重估的理由？","A":"專案中某些商品的每月消費者物價指數上漲了1.6%，造成專案預算增加了46%","B":"顧客授權專案範疇（Project Scope）增加US $10,000","C":"合約公司設立一個品質計畫，並保證下半年度花費一百萬美元","D":"製圖部門生產力被高估了，需要額外的1,000小時，增加78%的預算","ans":"B"},{"id":"03-123","question":"下列哪一項過程可以評估風險的機率和後果，並指定整體的風險排名和產生風險的優先順序？","A":"定量風險分析（Quantitative Risk Analysis）","B":"風險辨識（Risk Identification）","C":"定性風險分析（Qualitative Risk Analysis）","D":"風險管理計畫（Risk Management Plan）","ans":"C"},{"id":"03-124","question":"假設根據氣象預報，因暴風雪可能造成已購設備無法準時抵達，你決定先向當地公司租賃，直到設備抵達為止。這是下列哪一項風險應對（Risk Response）的案例？","A":"轉移（Transfer）","B":"接受（Acceptance）","C":"減輕（Mitigation）","D":"規避（Avoidance）","ans":"C"},{"id":"03-125","question":"下列哪一項工具（Tools）可以顯示某一決策所造成的衝擊（Impact）與風險的機率和成本？","A":"模擬（Simulation）","B":"決策樹（Decision Tree）","C":"機率與衝擊矩陣（Probability and Impact Matrix）","D":"敏感度（Sensitivity）分析","ans":"B"},{"id":"03-126","question":"假設你為專案經理（Project Manager），決定與一家專精於客製軟體的公司簽約，你會選擇下列哪一項合約使公司的風險降到最低？","A":"固定價格加上佣金","B":"成本加上固定費用","C":"固定價格","D":"成本加上佣金","ans":"C"},{"id":"03-127","question":"專案計畫用於決定下列哪些項目？（複選）","A":"成本評估（Cost Evaluation）","B":"活動起始日（Activity Starting Date）","C":"浮時（Float）","D":"活動完成日（Activity Finishing Date）","ans":"BCD"},{"id":"03-128","question":"假若你是搬家公司的專案經理（Project Manager），你的部屬估計出該次活動的樂觀時間48日、悲觀時間72日、最可能時間60日，請問期望值（加權平均）為下列哪一項？","A":"54","B":"66","C":"60","D":"30","ans":"C"},{"id":"03-129","question":"假若你是搬家公司的專案經理（Project Manager），你的部屬估計出該次活動的樂觀時間48日、悲觀時間72日、最可能時間60日，請問標準差為下列哪一項？","A":"22","B":"20","C":"2","D":"4","ans":"D"},{"id":"03-130","question":"合約的條款和條件成為賣方許多關鍵依據。下列哪些是可能的投入（Input）？（複選）","A":"主要交付標的（Deliverable）","B":"效益分析法","C":"關鍵里程碑（Milestone）","D":"成本目標","ans":"ACD"}],"04":[{"id":"04-001","question":"關於解決團隊衝突的方法，下列哪一項錯誤？","A":"團隊成員應履行承諾、完成任務","B":"團隊成員應坦承表示哪些目標可以達成、哪些不能達成","C":"當問題發生時，團隊成員應先私底下解決，不宜公開討論問題","D":"公平獎勵、不偏袒任何一方","ans":"C"},{"id":"04-002","question":"一個企業的矩陣式組織（Matrix Organization）的特徵，下列哪一項錯誤？","A":"這些專案成員每天所接受的管理和督導仍然是直屬經理的權力","B":"專案經理（Project Manager）並沒有任何直接的直線職權","C":"專案經理（Project Manager）不是功能性角色","D":"專案經理（Project Manager）可由企業內指派","ans":"C"},{"id":"04-003","question":"在專案管理中，下列哪一項不合理？","A":"專案經理（Project Manager）外聘","B":"專案經理（Project Manager）是企業部門經理","C":"一個專案有多個專案經理（Project Manager）","D":"小公司不需專案管理","ans":"D"},{"id":"04-004","question":"下列哪一項組織是可以快速地適應其所處之爆炸性環境中所面臨的變革與不確定性？","A":"策略型組織（Strategic Organization）","B":"功能組織（Functional Organization）","C":"專案式組織（Projectized Organization）","D":"矩陣式組織（Matrix Organization）","ans":"C"},{"id":"04-005","question":"專案團隊（Project Team）發展有五個階段之模式，下列哪一項階段是團隊發展親密關係以及表現團隊精神的時期？","A":"組建（Forming）","B":"解散（Adjourning）","C":"風暴（Storming）","D":"正軌（Norming）","ans":"D"},{"id":"04-006","question":"專案經理（Project Manager）在專案執行時與承包商（Contractor）維持合作關係主要用意有下列哪些項目？（複選）","A":"問題的解決","B":"持續性改善","C":"聯合評估","D":"永續性的領導才能","ans":"ABC"},{"id":"04-007","question":"品質有不同的定義，下列哪一項定義包含了滿足需要的能力？","A":"製造者導向的定義","B":"產品導向的定義","C":"消費者導向的定義","D":"價值導向的定義","ans":"C"},{"id":"04-008","question":"品質有不同的定義，下列哪一項品質定義就是代表符合需求？","A":"行而上的定義","B":"製造者導向的定義","C":"消費者導向的定義","D":"價值導向的定義","ans":"B"},{"id":"04-009","question":"品質有不同的定義，下列哪一項定義品質就是使顧客覺得在使用與售價上是最佳的條件？","A":"製造者導向的定義","B":"產品導向的定義","C":"消費者導向的定義","D":"價值導向的定義","ans":"D"},{"id":"04-010","question":"下列哪些是執行專案應有的品質保證項目？（複選）","A":"品質審查","B":"基準測試","C":"流程圖（Flowchart）","D":"實驗設計","ans":"ABCD"},{"id":"04-011","question":"下列哪些是專案的授權（書面授權書）？（複選）","A":"特殊的合約文件","B":"客戶的訂購單","C":"高階管理階層發出的內部交易備忘錄","D":"RFP（Request for Proposal）","ans":"ABC"},{"id":"04-012","question":"關於採購的原則，下列哪一項錯誤？","A":"購買對象","B":"購買數量與時期","C":"主管同意","D":"決定供應商","ans":"C"},{"id":"04-013","question":"關於採購的方式，下列哪一項錯誤？","A":"公開投標方式","B":"集中採購方式","C":"分散採購方式","D":"購入品管理","ans":"D"},{"id":"04-014","question":"採購的第一步驟是下列哪一項？","A":"邀商（Request Seller Response）","B":"需求規格（Specification）化","C":"規劃採購管理（Plan Procurement Management）","D":"進度查催","ans":"C"},{"id":"04-015","question":"下列哪一項為執行品質保證（Perform Quality Assurance）的工具與技術（Tools and Techniques）？","A":"統計抽樣","B":"流程分析","C":"柏拉圖（Pareto Diagram）","D":"成本效益分析","ans":"B"},{"id":"04-016","question":"參與競爭的廠商提出技術與商業的工程計畫書中，下列哪些是專案委託者應注意之事項？（複選）","A":"合約書對專案的瞭解程度","B":"合約商參與專案人員的水準如何","C":"成本對照表是否清晰","D":"合約商所建議的方案，其可行性如何","ans":"ABD"},{"id":"04-017","question":"關於供應商管理的要點，下列哪一項錯誤？","A":"各採購品須有兩家以上的供應商","B":"交易對象以持久、穩定、忠實為主","C":"交易對象，應事先進行市場調查","D":"尋求潛在供應商","ans":"D"},{"id":"04-018","question":"下列哪一項流程彼此互為投入（Input）？","A":"起始（Initiating）與規劃（Planning）","B":"規劃（Planning）與執行（Executing）","C":"執行（Executing）與監視及控制（Monitoring and Controlling）","D":"監視及控制（Monitoring and Controlling）與結束（Closing）","ans":"C"},{"id":"04-019","question":"在執行採購（Conduct Procurements）中，有下列哪些投入（Input）？（複選）","A":"組織流程資產（Organization Process Asset）","B":"採購（Procurement）管理計畫","C":"採購（Procurement）文件","D":"專案品質（Quality）報告","ans":"ABC"},{"id":"04-020","question":"評估標準（Evaluation Criteria）為評比與評分（Scoring）建議書的一種方法，是挑選賣方流程中的下列哪一項？","A":"工具（Tools）","B":"技巧（Skill）","C":"策略（Strategy）","D":"投入（Input）","ans":"D"},{"id":"04-021","question":"關於管理專案團隊（Manage Project Team）常用的工具與技術（Tools and Techniques），下列哪一項錯誤？","A":"角色（Role）扮演","B":"觀察（Observation）與談話（Conversation）","C":"專案績效評估（Project Performance Estimating）","D":"衝突（Conflict）管理","ans":"A"},{"id":"04-022","question":"當專案團隊（Project Team）成員有衝突時，除由專案經理（Project Manager）涉入協助解決問題外，下列哪一項是最適合的管理方法？","A":"訴諸仲裁","B":"協議庭裁決","C":"私下處理","D":"由當事人彼此溝通協調","ans":"D"},{"id":"04-023","question":"在公告競標的佈告下，你被邀請投標並參加投標人會議，下列哪一項正確？","A":"投標人會議是挑選賣方流程的工具與技術（Tools and Techniques）","B":"投標人會議是挑選賣方流程的產出（Output）","C":"投標人會議是請求賣方回應流程的工具與技術（Tools and Techniques）","D":"投標人會議是請求賣方回應流程的產出（Output）","ans":"C"},{"id":"04-024","question":"下列哪些是執行採購（Conduct Procurements）常用的工具與技術（Tools and Techniques）？（複選）","A":"投標人（Bidder）會議","B":"資訊系統","C":"廣告（Advertisement）","D":"分析技術","ans":"ACD"},{"id":"04-025","question":"下列哪些是品質稽核（Quality Audits）的目的？（複選）","A":"為了決定哪個專案流程無效率或無效果","B":"為了檢視專案工作，及正式接受專案結果","C":"為改進流程與降低品質成本（Cost of Quality, COQ）","D":"為改進流程與增加產品或服務接受度的百分比","ans":"ACD"},{"id":"04-026","question":"下列哪一項是專案的主要溝通橋樑？","A":"專案經理（Project Manager）","B":"執行長","C":"業主（Owner）","D":"承包商（Contractor）","ans":"A"},{"id":"04-027","question":"一般專案執行過程中，執行品質保證（Perform Quality Assurance）的工具與技術（Tools and Techniques）有下列哪些？（複選）","A":"成本確認","B":"實獲值管理（Earned Value Management, EVM）","C":"品質稽核（Quality Audits）","D":"流程分析","ans":"CD"},{"id":"04-028","question":"下列哪一項是品質稽核（Quality Audits）的目的？","A":"是一種結構化且獨立的審查，以決定專案活動是否符合需求","B":"是根據改善計畫所摘要的步驟，從專案團隊（Project Team）及組織的立場辨識需求的改善","C":"涵蓋規劃、衡量與偵測過程的所有活動","D":"通常不採用抽樣評估的方式","ans":"A"},{"id":"04-029","question":"下列哪些是指導與管理專案執行（Direct and Manage Project Work）常用的工具與技術（Tools and Techniques）？（複選）","A":"專案管理計畫","B":"專家判斷（Expert Judgment）","C":"專案管理資訊系統（Project Management Information System, PMIS）","D":"範疇聲明（Scope Statement）","ans":"BC"},{"id":"04-030","question":"關於品質保證（Quality Assurance）的產出（Output），下列哪一項錯誤？","A":"工作分解結構（Work Breakdown Structure, WBS）","B":"變更申請","C":"組織流程資產（Organization Process Asset）更新","D":"專案管理計畫書（Project Management Plan）更新","ans":"A"},{"id":"04-031","question":"關於虛擬團隊（Virtual Team）的敘述，下列哪些正確？（複選）","A":"不可以把行動不便的人納入虛擬團隊","B":"不可以把在家辦公的員工納入虛擬團隊","C":"可以實施本來由於差旅成本過高而被忽略的專案","D":"可以組建一個在同一組織工作但工作地點十分分散的團隊","ans":"CD"},{"id":"04-032","question":"你是一個跨國企業的專案經理（Project Manager），老闆剛分派一個新的專案給你，你發現完成此專案需有來自不同分公司的專業人員的支援，並且專案的預算不高，不足以支付這些人員的差旅費用，下列哪一項是你可以做的？","A":"拒絕老闆","B":"縮小專案範圍","C":"組建虛擬團隊","D":"邊做邊看","ans":"C"},{"id":"04-033","question":"下列哪些是專案團隊（Project Team）發展的目的？（複選）","A":"提高專案團隊（Project Team）成員的技能，以便提高其完成專案活動的能力","B":"提高團隊成員之間的信任感和凝聚力，透過更多的團隊合作提高生產力","C":"可讓老闆更信任專案經理（Project Manager）","D":"可以縮小專案的範圍","ans":"AB"},{"id":"04-034","question":"你是公司的專案經理（Project Manager），目前專案處在採購（Procurement）管理的詢價階段，下列哪一項是你應完成的工作？","A":"制定工作分解結構（Work Breakdown Structure, WBS）","B":"回答潛在賣方（Seller）的問題","C":"合約結尾（Closing）","D":"合約變更（Change）管理","ans":"B"},{"id":"04-035","question":"下列哪些可以幫助發展專案團隊（Develop Project Team）？（複選）","A":"訓練","B":"集中作業","C":"獎勵與表彰","D":"使用專案式組織（Projectized Organization）架構","ans":"ABC"},{"id":"04-036","question":"下列哪些屬於資訊發布的工具與技術（Tools and Techniques）？（複選）","A":"溝通技能","B":"資訊收集和檢索系統","C":"資訊發布系統","D":"經驗學習（Lessons Learned）總結過程","ans":"ABCD"},{"id":"04-037","question":"專案管理的執行（Executing）階段，專案採購管理（Project Procurement Management）過程包含下列哪些？（複選）","A":"規劃採購管理（Plan Procurement Management）","B":"執行採購（Conduct Procurements）","C":"結束採購（Close Procurements）","D":"合約管理（Contract Management）","ans":"ABC"},{"id":"04-038","question":"團隊的績效改進可以來自多個管道，而且可多方面地影響專案績效，下列哪些正確？（複選）","A":"能力和情感方面的改進，從而促使團隊整體工作做得更好","B":"技能的改進從而使某人更有效地完成所分派的任務","C":"縮減專案的範圍","D":"團隊成員流動性降低","ans":"ABD"},{"id":"04-039","question":"下列哪些是執行採購（Conduct Procurements）的投入（Input）？（複選）","A":"組織流程資產（Organization Process Asset）","B":"採購管理計畫書","C":"採購文件","D":"專案範疇聲明書（Project Scope Statement）","ans":"ABC"},{"id":"04-040","question":"投標人會議（又稱承包商會議、供應商會議和投標前會議），下列哪一項是該會議的目的？","A":"確定專案範圍","B":"認識潛在的賣方","C":"尋找最便宜的賣方","D":"保證所有潛在賣方對本項採購目的（技術要求、合約要求等）都有清楚的共同理解","ans":"D"},{"id":"04-041","question":"你是公司的專案經理（Project Manager），因為公司內部一個新專案的專案經理（Project Manager）突然辭職，你被指派接手該專案，可是專案成員已經選擇完成。下列哪一項是你首先要了解的事項？","A":"每個團隊成員的家庭背景","B":"每個團隊成員的專案任務","C":"每個團隊成員的經驗","D":"每個團隊成員的專長","ans":"B"},{"id":"04-042","question":"下列哪些是執行採購（Conduct Procurements）的工具與技術（Tools and Techniques）？（複選）","A":"採購談判（Procurement Negotiations）","B":"專家判斷（Expert Judgment）","C":"建議書評估技術（Proposal Evaluation Techniques）","D":"獨立評估（Independent Estimates）","ans":"ABCD"},{"id":"04-043","question":"關於執行採購（Conduct Procurements）的成果，下列哪一項錯誤？","A":"合約","B":"專案管理計畫書（Project Management Plan）更新","C":"選定賣方","D":"最便宜的賣方","ans":"D"},{"id":"04-044","question":"當專案經理（Project Manager）與專案團隊在「指導與管理專案執行（Direct and Manage Project Work）」時，最主要與最直接地會受到下列哪一項因素的影響？","A":"專案管理知識（Project Management Knowledge）","B":"應用領域（Application Area）","C":"專案管理環境（Project Environment）","D":"人際技術（Soft Skills）","ans":"B"},{"id":"04-045","question":"你是新一代通訊技術研發專案的專案經理（Project Manager），為了讓這項專案能順利成功，公司已投了入5000萬資金，同時亦指派公司優秀的工程技術人員參與專案。目前該項專案管理計畫書（Project Management Plan）也已完成，緊接著是要指導與管理專案執行（Direct and Manage Project Work）的工作，下列哪一項工具與技術（Tools and Techniques）是身為專案經理（Project Manager）的你必須運用的？","A":"專案管理方法論（Methodology）及專案管理資訊系統（Project Management Information System, PMIS）","B":"專案管理方法論及工作授權（Authorization）系統","C":"時程（Time）管理與預算管理技術","D":"專案選擇方法與專家判斷（Expert Judgment）","ans":"A"},{"id":"04-046","question":"下列哪一項是「指導與管理專案執行（Direct and Manage Project Work）」的產出（Output）？","A":"交付標的（Deliverable）","B":"專案成功準則（Project Success Criteria）","C":"專案預算（Project Budget）","D":"專案時程（Project Schedule）","ans":"A"},{"id":"04-047","question":"下列哪一項紀錄了專案的品質目標，並用於衡量和報告品質績效？","A":"實獲值管理（Earned Value Management, EVM）","B":"品質基準（Quality Baseline）","C":"里程碑（Milestone）","D":"工作分解結構（Work Breakdown Structure, WBS）","ans":"B"},{"id":"04-048","question":"你的專案已獲得公司的核准通過，同時完成專案管理計畫書（Project Management Plan），但公司並沒有足夠的人力可以支援你在專案的執行工作，你應該採取下列哪一項行動才能夠滿足你在人力管理上的需要？","A":"人力資源規劃（Human Resources Planning）","B":"獲得專案團隊（Acquire Project Team）","C":"發展專案團隊（Develop Project Team）","D":"管理專案團隊（Manage Project Team）","ans":"B"},{"id":"04-049","question":"關於專案來說，暫時性意味著下列哪一項？","A":"專案期程（Duration）短","B":"每一個專案都有確定的開始和結束時間","C":"任務將在未來某個不確定的時間結束","D":"專案可在任何時候被取消","ans":"B"},{"id":"04-050","question":"企業環境因素（Enterprise Environment Factors）不包括下列哪一項？","A":"組織公司文化","B":"基礎設施與生產設備","C":"現有人力資源與人事管理","D":"專案管理計畫書（Project Management Plan）範本（Template）","ans":"D"},{"id":"04-051","question":"為確定及協助專案管理團隊能按照專案管理計畫進行監督與控制，可以使用的方法，下列哪一項不適用？","A":"專案管理方法論（Methodology）","B":"專案管理資訊系統（Project Management Information System, PMIS）","C":"實獲值管理（Earned Value Management, EVM）","D":"專案定期會議","ans":"D"},{"id":"04-052","question":"獲得專案團隊（Acquire Project Team）最主要的目的，為下列哪一項？","A":"完成專案管理計畫書（Project Management Plan）並執行實施","B":"獲取完成專案工作所需的人力資源","C":"集中團隊成員予以教育及訓練","D":"分配專案工作，以便按計畫實現專案績效","ans":"B"},{"id":"04-053","question":"你是力創軟體科技公司的專案經理（Project Manager），目前正負責一項軟體開發專案的執行。你的專案目前進行得並不順利，不僅成本超支、進度落後，專案品質也未盡理想。此時專案團隊（Project Team）的士氣有些低落，團隊成員互相推諉責任進而產生衝突，身為專案經理（Project Manager），你要採取下列哪一項方式來解決衝突較佳？","A":"面對問題，解決造成衝突的因素","B":"為了團隊合作，協調團隊成員各退一步","C":"為了趕上專案進度，嚴格要求團隊成員遵守新規定","D":"面對這種衝突，可採取解散舊團隊，重新再組一個新團隊","ans":"A"},{"id":"04-054","question":"專案溝通的方法有很多，下列哪一項方式「不是」屬於正式的口頭溝通？","A":"會議","B":"演講","C":"講座","D":"會談","ans":"D"},{"id":"04-055","question":"將團隊成員安排在同一地點工作，以提高專案團隊（Project Team）的整體工作能力，此種方法是發展專案團隊（Develop Project Team）的有效工具與技術（Tools and Techniques），它指的是下列哪一項活動？","A":"培訓（Training）","B":"教育（Education）","C":"集中作業（Colocation）","D":"團隊競賽（Competition）","ans":"C"},{"id":"04-056","question":"在發展專案團隊（Develop Project Team）時會有一產出物為資源日曆，試問該資源日曆若建立的不完善將會對下列哪一項造成影響？","A":"專案任務時程的估算","B":"專案成本的預算","C":"對任務資源分派的估算","D":"對事業環境因素造成損失","ans":"D"},{"id":"04-057","question":"下列哪一項是專案合約中提供產品或服務的敘述說明文件？","A":"專案管理計畫書（Project Management Plan）","B":"權利與義務","C":"工作說明書（Statement of Work, SOW）","D":"專案章程（Project Charter）","ans":"C"},{"id":"04-058","question":"在進行專案採購管理（Project Procurement Management）時，下列哪一項是屬於執行（Executing）流程群組（Process Groups）的管理程序？","A":"規劃採購管理（Plan Procurement Management）","B":"發包（Contract-Out）規劃","C":"執行採購（Conduct Procurements）","D":"履約管理","ans":"C"},{"id":"04-059","question":"關於三種主要的溝通方式，下列哪一項正確？","A":"書面（Written Form）、口頭（Verbal）、視訊（Video）","B":"書面（Written Form）、口頭（Verbal）、非口頭（Non-verbal）","C":"口頭（Verbal）、非口頭（Non-verbal）、電子化（Digitized）","D":"口頭（Verbal）、非口頭（Non-verbal）、圖像式（Graphical）","ans":"B"},{"id":"04-060","question":"下列哪一項「不是」工作說明書（Statement of Work, SOW）中會提及之事項？","A":"專案範疇（Project Scope）","B":"任務概要","C":"專案團隊（Project Team）要執行的項目","D":"團隊競賽規則","ans":"D"},{"id":"04-061","question":"關於工作說明書（Statement of Work, SOW）的敘述，下列哪一項正確？","A":"是對應專案所提供產品、服務或結果的文字說明","B":"是專案團隊（Project Team）的職務說明書","C":"是專案經理（Project Manager）的職務說明書","D":"是專案發起人對專案經理（Project Manager）的任務授權書","ans":"A"},{"id":"04-062","question":"下列哪一項工作不在專案執行流程（Executing Processes）中？","A":"依據專案基準（Project Baseline）評估績效差異","B":"依據專案計畫書採購相關物資","C":"依據專案計畫書進行溝通及協調","D":"依據專案計畫書整合相關資源","ans":"A"},{"id":"04-063","question":"專案中某項工作浮時（Float）=–5時，下列哪一項處置是最適宜的方式？","A":"使用資源撫平（Resource Leveling）技術","B":"立即採用新的技術","C":"當風險增高時再處置","D":"對此工作項目投入（Input）更多資源","ans":"D"},{"id":"04-064","question":"某項工作完成時間估計：最悲觀時間9日、最樂觀時間5日、最可能時間7日，依據計畫評核術（Program Evaluation and Review Technique, PERT）計算期望平均時間為下列哪一項？","A":"5.5日","B":"6.0日","C":"7.0日","D":"7.5日","ans":"C"},{"id":"04-065","question":"某項工作完成時間估計：最悲觀時間12日、最樂觀時間6日、最可能時間9日，依據計畫評核術（Program Evaluation and Review Technique, PERT）計算，本項工作預估完成機率95.5%時，其時間範圍是下列哪一項？","A":"7.0±1.33日","B":"7.5±0.67日","C":"8.0±1.0日","D":"9.0±2.0日","ans":"D"},{"id":"04-066","question":"專案被迫實施資源分派（Resource Allocation）作業時，此意謂遭遇下列哪一項狀況？","A":"時程可能縮短","B":"人力、資源需求過度集中在某階段","C":"人力、資源需求分布保持平穩狀況","D":"調整活動時程，將部分活動集中在某階段","ans":"B"},{"id":"04-067","question":"某專案實施資源撫平（Resource Leveling）作業時，下列哪一項選項「不是」正確的作為？","A":"專案時程（Project Schedule）可能延長","B":"將人力、資源需求分布保持平穩狀況","C":"調整活動時程，將相關者集中在某個區段中","D":"調整活動時程，將部分活動提前或延後","ans":"C"},{"id":"04-068","question":"關於專案執行品質保證（Perform Quality Assurance）的工作中，下列哪一項的投入（Input）錯誤？","A":"流程改善計畫書（Process Improvement Plan）","B":"組織流程資產（Organizational Process Assets）","C":"專案文件（Project Documents）","D":"品質管理計畫書（Quality Management Plan）","ans":"B"},{"id":"04-069","question":"專案團隊（Project Team）溝通時，對於「績效報告（Performance Report）」之類的資訊需求，是下列哪一方的利害關係人（Stakeholder）所關切？","A":"專案贊助者（Project Sponsor）、專案經理（Project Manager）","B":"專案經理（Project Manager）、專案團隊","C":"專案贊助者（Project Sponsor）、顧客","D":"專案經理（Project Manager）、決策階層","ans":"C"},{"id":"04-070","question":"規劃中的軟體開發專案團隊（Project Team）中，臺灣7位成員，印度5位成員，美國矽谷2位成員，但後續會陸續加入成員達21位，請問後續將增加多少溝通管道，下列哪一項正確？","A":"91","B":"210","C":"21","D":"119","ans":"D"},{"id":"04-071","question":"專案執行時除總公司原有15位成員外，三個分公司共增加10位成員、二處海外分公司增加12位成員，身為專案經理（Project Manager）首先應該重視下列哪一項狀況的發生？","A":"不同地區分公司間文化的差異","B":"文化的差異及衝突，可能增加溝通協調的困難度","C":"專案資訊的蒐集、彙整、發布及傳達時效不佳","D":"如何因應溝通管道急遽增加所產生之問題現象","ans":"D"},{"id":"04-072","question":"專案經理（Project Manager）注意到秘書人員提報執行現況資料成本績效指標（Cost Performance Index, CPI）CPI=1.18時，下列哪一項正確？","A":"代表進度落後18%","B":"代表成本落後118%","C":"代表成本執行績效良好","D":"代表進度執行績效良好","ans":"C"},{"id":"04-073","question":"一般而言，專案經理（Project Manager）耗費相當多的時間在溝通工作上，關於專案溝通工作的敘述，下列哪一項組合正確？（1）專案經理（Project Manager）要有溝通技能（2）專案經理（Project Manager）10%時間花在溝通（3）溝通管理計畫是必要的（4）最佳的溝通工具（Tools）是專案範疇聲明書（Project Scope Statement）（5）溝通方式包括書面及口頭（6）E-mail、備忘錄屬於正式溝通文件（7）電話是最佳的溝通工具（Tools）","A":"（1）（2）（3）（7）","B":"（3）（4）（5）（7）","C":"（1）（3）（5）","D":"（3）（5）（6）","ans":"C"},{"id":"04-074","question":"你是專案經理（Project Manager），專案執行中對於商源進行分析時，突然發現某項零件僅有單一商源供應，此零件又是專案產品的關鍵零件，身為專案經理（Project Manager）此時應優先關注的是下列哪一項事情？","A":"供應商承諾回應","B":"供應商合約內容","C":"供應商財務狀況","D":"供應商品質保證","ans":"C"},{"id":"04-075","question":"關於指導與管理專案執行（Direct and Manage Project Work）的敘述，下列哪一項錯誤？","A":"其目的是要去規劃（Planning）專案計畫，以便讓專案可以順利完成","B":"工作經授權（Authorization）後開始，且活動（Activity）也開始進行","C":"資源於這個階段投入（Input），並實行受指派的活動，以產生專案產品或服務","D":"資金花費下去，以完成專案目的","ans":"A"},{"id":"04-076","question":"關於指導與管理專案執行（Direct and Manage Project Work）的投入（Input），下列哪一項錯誤？","A":"專案管理計畫","B":"驗證過的缺失修復（Defect Repair）","C":"行政結案（Administrative Closure）程序","D":"工作績效資訊","ans":"D"},{"id":"04-077","question":"關於指導與管理專案執行（Direct and Manage Project Work）的產出（Output），下列哪一項錯誤？","A":"專案管理計畫","B":"交付標的（Deliverable）","C":"實施的缺失瑕疵修復","D":"請求變更","ans":"A"},{"id":"04-078","question":"工作績效資訊和蒐集、製成文件與記錄專案活動狀況有關，在此流程期間可能蒐集到的資訊有下列哪些？（複選）","A":"時程狀況與進展","B":"交付標的（Deliverable）完成狀況","C":"時程活動的進展與狀態","D":"時程活動完成百分比","ans":"ABCD"},{"id":"04-079","question":"關於執行品質保證（Perform Quality Assurance）的產出（Output），下列哪一項錯誤？","A":"請求變更（Change Requests）","B":"建議的矯正行動","C":"組織流程資產（Organizational Process Assets）更新","D":"品質管理計畫","ans":"D"},{"id":"04-080","question":"關於品質稽核（Quality Audits）的效益，下列哪一項錯誤？","A":"專案產品適用，且符合安全標準","B":"必要時會建議與實施矯正行動","C":"檢視專案工作及正式接受專案結果","D":"遵守專案品質計畫","ans":"C"},{"id":"04-081","question":"下列哪一項階段的工作是在考慮潛在團隊成員的個人興趣、特質，以及可利用時間等要件？","A":"「發展專案團隊（Develop Project Team）」流程的組織流程資產（Organization Process Asset）階段","B":"「發展專案團隊（Develop Project Team）」流程的人員管理計畫階段","C":"「獲得專案團隊（Acquire Project Team）」流程的企業環境因素（Enterprise Environmental Factors）階段","D":"「獲得專案團隊（Acquire Project Team）」流程的角色（Role）與責任階段","ans":"C"},{"id":"04-082","question":"下列哪一項階段是團隊展現出彼此的感情與熟悉，並共同做決策？","A":"發展專案團隊（Develop Project Team）的安撫（Smoothing）階段","B":"發展專案團隊（Develop Project Team）的正軌（Norming）階段","C":"發展專案團隊（Develop Project Team）的組建（Forming）階段","D":"發展專案團隊（Develop Project Team）的強迫（Forcing）階段","ans":"B"},{"id":"04-083","question":"當專案還在持續的進行中，此時若有新成員的加入，下列哪一項敘述正確？","A":"團隊將回到動盪（Unstable）階段","B":"團隊將可以更鞏固（Consolidate）執行力階段","C":"團隊將再度從組建（Forming）階段重新開始","D":"團隊將從正軌（Norming）階段開始","ans":"C"},{"id":"04-084","question":"下列哪一項權力（Power）是指對領導者的高度尊敬，致使屬下願意執行專案經理（Project Manager）所做的決策？","A":"領袖權力（Referent Power）","B":"專家權力（Expert Power）","C":"合法權力（Legitimate Power）","D":"獎勵權力（Reward Power）","ans":"A"},{"id":"04-085","question":"下列哪些是有效團隊的特性？（複選）","A":"更好的衝突解決","B":"高職務滿意度","C":"溝通不良","D":"對專案經理（Project Manager）缺乏尊敬與信任","ans":"AB"},{"id":"04-086","question":"在溝通模式中，接收者會透過下列哪些因素過濾他們的資訊？（複選）","A":"文化考量","B":"情感","C":"態度","D":"衝突","ans":"ABC"},{"id":"04-087","question":"溝通是交換資訊的過程，所有溝通都包含下列哪些要件？（複選）","A":"發送者","B":"訊息","C":"接收者","D":"地點","ans":"ABC"},{"id":"04-088","question":"當專案成員彼此意見不合而起了衝突，這時專案經理（Project Manager）應該進行下列哪一項處理？","A":"安撫（Smoothing）","B":"正軌（Norming）","C":"面對（Confronting）","D":"強迫（Forcing）","ans":"C"},{"id":"04-089","question":"執行採購流程與獲得潛在供應商（Supplier）的出價回應和建議書有關，此流程的投入（Input）下列哪一項錯誤？","A":"組織流程資產（Organization Process Asset）","B":"採購管理計畫書","C":"採購文件","D":"合格賣方清單（Qualified Sellers List）","ans":"D"},{"id":"04-090","question":"下列哪一項執行採購（Conduct Procurements）的技巧是被用來檢查建議定價的一種方法？","A":"加權評估系統（Weighting System）","B":"獨立估價（Independent Evaluation）","C":"篩選系統","D":"賣方評比系統","ans":"B"},{"id":"04-091","question":"管理利害關係人參與（Manage Stakeholder Engagement）的工具（Tools）中，下列哪一項錯誤？","A":"溝通方法","B":"專家判斷（Expert Judgment）","C":"人際關係技巧","D":"管理技巧","ans":"B"},{"id":"04-092","question":"在專案的生命中，專案會經歷幾個階段，起始（Initiating）、規劃（Planning）、執行（Executing）、監視及控制（Monitoring and Controlling）、結束（Closing）。下列哪一項階段將會產生最大的預算花費？","A":"執行（Executing）","B":"起始（Initiating）","C":"結束（Closing）","D":"規劃（Planning）","ans":"A"},{"id":"04-093","question":"專案經理（Project Manager）在選擇團隊成員時，他收集可能成員的履歷與過去績效評核，也與相關的功能經理（Functional Manager）討論。專案經理（Project Manager）選擇成員時使用的特性，下列哪一項錯誤？","A":"以前經驗","B":"個人特質","C":"個人興趣","D":"薪資","ans":"D"},{"id":"04-094","question":"當專案在執行（Executing）中，有團隊成員發生醫療保險賠償問題時，該成員向專案經理（Project Manager）報告並且說明。這件賠償問題應由下列哪一項負責？","A":"專案團隊（Project Team）","B":"專案經理（Project Manager）","C":"執行經理（Executing Manager）","D":"人力資源辦公室（Human Resources Office）","ans":"D"},{"id":"04-095","question":"團隊為了一個困難的設計問題，而發生了爭執。專案經理（Project Manager）尋找一個可以解決該爭執的方法，為確保專案能長期有效地執行，下列哪一項最適合？","A":"問題解決（Confronting）","B":"妥協（Compromising）","C":"退卻（Withdrawal）","D":"安撫（Smoothing）","ans":"A"},{"id":"04-096","question":"聆聽（Listening）技巧是除了聽聲音之外，好的聆聽者的特質為下列哪一項？","A":"全盤否認","B":"做好的紀錄","C":"重複一些對方已講的事情","D":"同意對方的敘述","ans":"C"},{"id":"04-097","question":"一間汽車機油更換工作站接到有關服務時間太長的抱怨，當在等候室裝設了咖啡機與電視後，抱怨減少了。這樣的處理方式是屬於下列哪一項？","A":"Smith-Carlisle方法","B":"創造性（Creative）的問題解決","C":"分析性（Analyzing）的問題解決","D":"決策樹（Decision Tree）","ans":"B"},{"id":"04-098","question":"專案經理（Project Manager）正在關心如何建立他的團隊，有一件必需做（Mandatory）的事情是建立好團隊的重點之一，應為下列哪一項？","A":"高階（High-Level）管理層的承諾（Commitment）","B":"團隊集中辦公（Co-Location）","C":"建立明確的談判（Negotiated）目標","D":"公開討論差勁的個人績效（Performance）","ans":"A"},{"id":"04-099","question":"專案經理（Project Manager）希望加強團隊工作的凝聚力，下列哪一項是最有效果的方法？","A":"同住在一起（Cohabitation）","B":"集中作業","C":"招募職員（Recruiting Staff）計畫","D":"工作分解結構（Work Breakdown Structure, WBS）","ans":"B"},{"id":"04-100","question":"專案經理（Project Manager）希望安排會議來討論問題的解決方法，但不依據他個人或單獨一位成員的意見。通常這樣的安排會產生下列哪一項結果？","A":"與單一個人的意見相比，會議需要較多的時間解決問題","B":"會議的解決方法比較不精確","C":"與單一個人的意見相比，會議需要較少的時間解決問題","D":"很難說，需要依據問題的特性","ans":"A"},{"id":"04-101","question":"專案經理（Project Manager）希望盡力發展他的團隊，下列哪一項是關鍵障礙？","A":"強矩陣（Strong Matrix）管理組織","B":"主要的問題是專案完成時間的延遲或預算目標","C":"團隊成員需同時向功能經理（Functional Manager）與專案經理（Project Manager）負責","D":"正式訓練計畫無法實施","ans":"C"},{"id":"04-102","question":"專案經理（Project Manager）希望一些團隊成員能夠在職訓練，專案團隊在一個平衡矩陣（Balanced Matrix）組織，通常這個訓練需要下列哪一項的認可？","A":"專案經理（Project Manager）","B":"執行經理（Executing Manager）","C":"人力資源經理（Human Resources Manager）","D":"功能經理（Functional Manager）","ans":"D"},{"id":"04-103","question":"功能經理（Functional Manager）希望能加強控制專案的批准（Sanctification）程序，他啟動了一個系統，需要透過文件的授權開始進行特定活動（Activity）或工作包（Work Package）的工作，這個系統稱為下列哪一項？","A":"專案章程（Project Charter）","B":"團隊核准證明（Project Team Charter）","C":"工作授權（Authorization）系統","D":"變更管理","ans":"C"},{"id":"04-104","question":"在矩陣式組織（Matrix Organization）中，溝通是非常困難的。下列哪一項能協助專案經理（Project Manager）較容易與其他團員溝通？","A":"甘特圖（Gantt Chart）","B":"專案章程（Project Charter）","C":"專案團隊名錄（Project Team Directory）","D":"職員配備（Staffing）計畫","ans":"C"},{"id":"04-105","question":"專案經理（Project Manager）發現部分的專案具有風險，於是將這些風險部分以固定價格合約外包給供應商。下列哪一項是專案經理（Project Manager）必須做的事情？","A":"確認專案團隊（Project Team）沒有將風險的事情透露給供應商，除非合約已經簽署了","B":"當簽約完成後，專案經理（Project Manager）需要想盡辦法讓供應商瞭解這些風險","C":"在簽約完成之前，專案經理（Project Manager）需要確認供應商瞭解這些風險","D":"專案經理（Project Manager）需要派遣一位專案成員去監督供應商的活動，以確認能適當地處理風險","ans":"C"},{"id":"04-106","question":"專案經理（Project Manager）用損益平衡點（Break Even Point）來辯護其專案，包括要購買的新機器之辯護。當專案經理（Project Manager）採用這種方法時，購買新機器會有下列哪一項風險？","A":"損益平衡點會指向買便宜與低品質的機器","B":"損益平衡點會指向買昂貴的機器","C":"公司不會有錢購買新機器","D":"因為這種辯護方法耗費太多時間，所以無法及時購買","ans":"A"},{"id":"04-107","question":"關於專案品質保證（Project Quality Assurance）的敘述，下列哪一項正確？","A":"確保專案實施滿足需求的所有必須過程","B":"經由專案績效評量，提供標準予專案團隊（Project Team）與利害關係人（Stakeholder）","C":"是一種管理過程，定義組織、設計、資源與品質管理目標","D":"提供專案信心去滿足相關的品質標準","ans":"A"},{"id":"04-108","question":"專案經理（Project Manager）發現部分的專案具有風險，於是將這些風險部分以固定價格合約外包（Outsource）給供應商（Supplier）。下列哪一項正確？","A":"在合約價格中，供應商將需要風險補貼","B":"依據合約，供應商將賠本","C":"若風險發生，專案經理（Project Manager）將會補貼供應商","D":"若風險發生，專案經理（Project Manager）的團隊將會協助供應商","ans":"A"},{"id":"04-109","question":"假設你已獲得專案範疇聲明書（Project Scope Statement）的簽署認可，利害關係人（Stakeholder）卻通知你範圍聲明中漏了一項交付標的（Deliverable），因其為關鍵成功要素，你該採取下列哪一項行動？","A":"通知利害關係人（Stakeholder）不在範圍聲明中的工作不屬於專案範圍","B":"更正範圍聲明以反應此交付標的（Deliverable）","C":"通知利害關係人（Stakeholder）此交付標的（Deliverable）移至下一次專案","D":"在收到利害關係人（Stakeholder）核准後的變更要求後即更正範圍聲明","ans":"D"},{"id":"04-110","question":"關於專案計畫執行（Executing）流程群組（Process Groups）常用的工具與技術（Tools and Techniques），下列哪一項錯誤？","A":"專案管理資訊系統（Project Management Information System, PMIS）","B":"工作授權（Authorization）系統","C":"組織政策（Organization Policy）","D":"溝通管理技巧","ans":"C"},{"id":"04-111","question":"你是有線電視公司的專案經理（Project Manager），你的團隊成員彼此相處融洽，並共同研擬專案政策，試問他們目前所處的階段為下列哪一項？","A":"安撫（Smoothing）階段","B":"風采（Performing）階段","C":"組建（Forming）階段","D":"強制（Forcing）階段","ans":"B"},{"id":"04-112","question":"你是有線電視公司的專案經理（Project Manager），你的團隊目前處在表現階段，但目前有位新成員被引介到團隊裡，下列對於團隊發展（Development）的敘述哪一項正確？","A":"會從風暴（Storming）階段重新來過","B":"會持續處在風采（Performing）階段","C":"會從組建（Forming）階段重新來過","D":"會從風暴（Storming）階段重新來過，但很快會進入風采（Performing）階段","ans":"C"},{"id":"04-113","question":"發展專案團隊（Develop Project Team）的產出（Output）為下列哪一項？","A":"團隊績效評估（Team Performance Assessment）","B":"績效評鑑的投入（Input）與表揚獎勵系統","C":"績效改善、績效評鑑的投入（Input）與績效報告（Performance Report）","D":"工作成果、績效評鑑的投入（Input）與績效報告（Performance Report）","ans":"A"},{"id":"04-114","question":"假設專案團隊（Project Team）成員共計七人，他們彼此有幾個溝通管道，下列哪一項正確？","A":"24","B":"21","C":"28","D":"20","ans":"B"},{"id":"04-115","question":"關於Y理論，下列哪些正確？（複選）","A":"人只能用金錢、權力、地位來鼓勵","B":"人需給予適度的激勵和期望","C":"人被預期是勤奮且自動自發的","D":"經理常需嚴格地監控部屬去履行職責","ans":"BC"},{"id":"04-116","question":"關於X理論，下列哪些正確？（複選）","A":"人不需要被持續監督","B":"人沒有能力自主管理","C":"人被預期是勤奮且自動自發的","D":"經理常需嚴格地監控部屬去履行職責","ans":"BD"},{"id":"04-117","question":"專案經理（Project Manager）為了確保客戶及利害關係人（Stakeholder）的滿意度，最重要的活動為下列哪一項？","A":"記錄需求","B":"記錄績效評量","C":"報告變更及更新專案計畫","D":"按時規律的報告專案情況","ans":"A"},{"id":"04-118","question":"合約管理（Contract Administration）的工具與技術（Tools and Techniques）為下列哪一項？","A":"合約改變控制（Change Control）系統、付款（Payment）系統與付款請求（Request）","B":"合約改變控制系統、合約協商（Negotiation）與付款系統","C":"合約改變控制系統、合約協商與合約變更（Change）","D":"合約改變控制系統、績效報告（Performance Report）與付款系統","ans":"D"},{"id":"04-119","question":"關於績效報告（Performance Report）常用的工具與技術（Tools and Techniques），下列哪一項錯誤？","A":"變異分析（Variance Analysis）","B":"績效報告（Performance Report）","C":"資訊散布（Information Distribution）","D":"績效評估（Performance Evaluation）","ans":"B"},{"id":"04-120","question":"下列哪一位學者認為85%的品質成本（Cost of Quality, COQ），皆由管理問題所造成的？","A":"Deming","B":"Kaizen","C":"Juran","D":"Crosby","ans":"A"},{"id":"04-121","question":"Crosby及Juran分別提出下列哪一項品質理論？","A":"品質等級、適合使用（Fitness for Use）","B":"適合使用（Fitness for Use）、零缺陷（Zero Defect）","C":"零缺陷（Zero Defect）、適合使用（Fitness for Use）","D":"品質成本（Cost of Quality, COQ）、零缺陷（Zero Defect）","ans":"C"},{"id":"04-122","question":"品質稽核（Quality Audits）的目的，不包括下列哪一項？","A":"檢查專案工作並正式接受工作成果","B":"決定專案如何進行與更正錯誤","C":"確認學習經驗","D":"審查品質活動","ans":"A"},{"id":"04-123","question":"在資訊系統發展專案期間，下列哪一項是不會改變的原因？","A":"變更界面","B":"變更報告內容","C":"變更資料庫結構","D":"變更成本","ans":"D"},{"id":"04-124","question":"在一次專案會議中，該團隊成員對於A與B兩種解決方案爭論不休，身為資深專案經理（Project Manager）的你，了解如此爭吵下去不會有任何的結論，所以你決定使用A的解決方案，下列哪一項是你解決這次衝突的方法？","A":"安撫（Smoothing）","B":"妥協（Compromise）","C":"強制（Forcing）","D":"擱置（Withdrawal）","ans":"C"},{"id":"04-125","question":"下列哪些是管理利害關係人參與（Manage Stakeholder Engagement）常用的工具與技術（Tools and Techniques）？（複選）","A":"溝通方法","B":"人際關係技能","C":"人力資源規劃（Human Resources Planning）","D":"專案管理資訊系統（Project Management Information System, PMIS）","ans":"AB"},{"id":"04-126","question":"管理專案團隊（Manage Project Team）和追蹤與報告個別團隊成員績效有關，下列哪一項「不是」這個流程的投入（Input）？","A":"專案管理計畫變更","B":"組織流程資產（Organization Process Asset）","C":"團隊績效評估","D":"專案人力派遣","ans":"A"},{"id":"04-127","question":"關於管理專案團隊（Manage Project Team）常用的工具與技術（Tools and Techniques），下列哪一項錯誤？","A":"觀察與談話","B":"衝突管理","C":"人際關係技能","D":"專案人員指派","ans":"D"},{"id":"04-128","question":"在專案進行的過程中，必須將專案的進度分送相關的利害關係人（Stakeholder），下列哪一項屬於利害關係人（Stakeholders）需要的報告？","A":"利害關係人（Stakeholder）可以藉此去評審專案的績效","B":"小型專案不適用此類報告","C":"需要實獲值（Earned Value）的內容","D":"必須由專案經理（Project Manager）產生的報告","ans":"A"},{"id":"04-129","question":"若您的專案團隊（Project Team）成員有部分來自國外，為確保文化差異不會成為影響專案成功與否的因素，下列哪一項正確？","A":"提供多元化的訓練","B":"讓團隊成員共處一地","C":"實施團隊練習","D":"將組織規定及標準告知團隊成員","ans":"A"},{"id":"04-130","question":"在專案進行中有時為了專案的獨特性聘請臨時性的專案成員，專案經理（Project Manager）可透過下列哪些方式縮短彼此間的磨合，以讓專案順利進行？（複選）","A":"電子郵件","B":"定期會議","C":"即時通訊軟體","D":"紙條敘述","ans":"ABC"}],"05":[{"id":"05-001","question":"下列哪一項指的是工作結果的滿意度確認？","A":"控制品質（Control Quality）","B":"確認範疇（Validate Scope）","C":"控制成本（Control Costs）","D":"控制風險（Control Risks）","ans":"B"},{"id":"05-002","question":"關於專案監視及控制（Monitoring and Controlling）中，確認範疇（Validate Scope）的投入（Input），下列哪一項錯誤？","A":"工作分解結構（Work Breakdown Structure, WBS）辭典","B":"交付標的（Deliverable）","C":"工作包（Work Package）","D":"範疇聲明（Scope Statement）","ans":"C"},{"id":"05-003","question":"關於控制時程（Control Schedule），需包含下列哪些步驟？（複選）","A":"分析時程以決定是否採行校正行動","B":"決定所要採行的特定校正行動","C":"修正計畫並併入校正行動中","D":"重新計算成本以評估校正行動的效能","ans":"ABCD"},{"id":"05-004","question":"關於專案監視及控制（Monitoring and Controlling）流程群組（Process Groups）包括之程序，下列哪一項錯誤？","A":"定期收集資料","B":"實際執行與計畫互做比較","C":"落後進度時採取校正行動","D":"比較工具軟體","ans":"D"},{"id":"05-005","question":"下列哪一項是較佳之專案報告週期？","A":"較短的報告週期","B":"較長的報告週期","C":"中程的報告週期","D":"有需要才報告","ans":"A"},{"id":"05-006","question":"下列哪一項不會影響專案時程（Project Schedule）？","A":"顧客在專案早期提出的改變","B":"專案團隊（Project Team）在專案早期提出的改變","C":"無法預料的情況","D":"軟體變更","ans":"D"},{"id":"05-007","question":"關於控制時程（Control Schedule）的步驟，下列哪一項錯誤？","A":"分析時程以決定是否採行校正行動","B":"修正計畫並併入校正行動中","C":"更換專案團隊（Project Team）","D":"重新計算時程以評估校正行動的效能","ans":"C"},{"id":"05-008","question":"關於控制成本（Control Costs）的項目，下列哪一項錯誤？","A":"分析成本績效，以決定工作包（Work Package）是否要採取校正行動","B":"更換軟體","C":"決定所要採取的特定校正行動","D":"變更專案計畫","ans":"B"},{"id":"05-009","question":"在專案的執行過程中常遭遇到範疇潛變（Scope Creep），所以下列哪一項最為重要？","A":"確認（Validate）與控制（Control）範疇","B":"規劃範疇管理（Plan Scope Management）","C":"控制時程（Control Schedule）","D":"控制成本（Control Costs）","ans":"A"},{"id":"05-010","question":"實獲值管理（Earned Value Management, EVM）發展起源於下列哪一項？","A":"美國空軍","B":"美國海軍","C":"美國國防部","D":"美國太空總署","ans":"B"},{"id":"05-011","question":"實獲值管理（Earned Value Management, EVM）分析中，時間變異的單位為下列哪一項？","A":"月","B":"星期","C":"天","D":"貨幣值","ans":"D"},{"id":"05-012","question":"關於實獲值管理（Earned Value Management, EVM）的敘述，下列哪一項錯誤？","A":"計畫值（Planned Value, PV）是指目前為止有多少工作應完成","B":"實獲值（Earned Value, EV）是指目前多少工作已完成","C":"實際成本（Actual Cost, AC）是指原計畫的總成本應為多少","D":"完工成本預估值（Estimate at Completion, EAC）是指預估工作總成本為多少","ans":"C"},{"id":"05-013","question":"80%問題的產生可歸責於20%的缺失原因，此原理稱為下列哪一項？","A":"大數法則（Law of Large Numbers）","B":"柏拉圖（Pareto）法則","C":"常態（Normal）法則","D":"雨果（Hugo）法則","ans":"B"},{"id":"05-014","question":"關於績效報告（Performance Report）常用的工具與技術（Tools and Techniques），下列哪一項錯誤？","A":"績效評估（Performance Evaluation）","B":"成本報告系統","C":"資訊呈現","D":"時間報告系統","ans":"A"},{"id":"05-015","question":"關於確認範疇（Validate Scope）的投入（Input），下列哪些正確？（複選）","A":"專案管理計畫書（Project Management Plan）","B":"交付標的（Deliverable）","C":"需求追溯矩陣","D":"工作績效資料","ans":"ABCD"},{"id":"05-016","question":"關於執行整合變更控制（Perform Integrated Change Control），下列哪些敘述正確？（複選）","A":"規定專案所有變更所應遵循的手續","B":"屬於整體變更控制過程的一部分","C":"包括書面申請、追蹤系統以及核准變更的審批級別","D":"不屬於整體變更控制過程的一部分","ans":"ABC"},{"id":"05-017","question":"下列哪些是控制品質（Control Quality）的工具與技術（Tools and Techniques）？（複選）","A":"流程圖（Flowchart）","B":"網路圖（Network Diagram）","C":"獲准之變更申請審查","D":"查檢表","ans":"ACD"},{"id":"05-018","question":"關於縮程法（Crashing）與快速跟進（Fast Tracking），下列哪些敘述正確？（複選）","A":"快速跟進（Fast Tracking）通常需要增加成本","B":"縮程法（Crashing）通常需要增加成本","C":"快速跟進（Fast Tracking）常會有重工（Rework）的情況發生","D":"縮程法（Crashing）常會有重工（Rework）的情況發生","ans":"BC"},{"id":"05-019","question":"關於控制風險（Control Risks）的敘述，下列哪一項正確？","A":"判斷哪些風險會影響專案，並以書面形式記錄其特點","B":"在整個專案生命週期（Project Life Cycle）中，追蹤已識別的風險、監測殘餘風險、識別新風險，實施風險應對計畫，並對其有效性進行評估","C":"決定如何進行、規劃和實施專案風險管理活動","D":"針對專案目標制定提高機會、降低威脅的方案和行動","ans":"B"},{"id":"05-020","question":"你在軟體開發專案執行期間，發生了一項技術性的風險，其對該專案的影響超出了預期的程度。身為專案經理（Project Manager），下列哪一項是你首先應做的事？","A":"罷工","B":"進行風險的轉移","C":"增加專案預算","D":"進行額外的風險應對計畫","ans":"D"},{"id":"05-021","question":"構型管理（Configuration Management）是用於下列哪一項管理的技術（Techniques）？","A":"整合變更控制（Integrated Change Control）","B":"範疇定義（Scope Definition）","C":"控制品質（Control Quality）","D":"控制風險（Control Risk）","ans":"A"},{"id":"05-022","question":"關於確認範疇（Validate Scope）的目的，下列哪一項正確？","A":"進行績效報告（Performance Report），幫助了解專案績效","B":"驗證專案交付標的（Deliverable），讓利害關係人（Stakeholder）正式接受工作成果","C":"進行範疇變更請求的確認","D":"對專案產品進行階段式的品質保証與改善","ans":"B"},{"id":"05-023","question":"你是力創軟體科技公司的專案經理（Project Manager），目前正負責一項軟體開發專案的執行。你的專案目前進行得並不順利，不僅成本超支、進度落後，專案品質也未盡理想。從績效報告（Performance Report）顯示進度落後較為嚴重，因此你希望能加強時程控制，所以你必需進行下列哪一項關鍵性工作？","A":"進行專案風險規劃","B":"進行人力資源規劃","C":"進行偏差分析（Deviation Analysis）","D":"調整時程基準（Schedule Baseline）","ans":"C"},{"id":"05-024","question":"你是BTL公司負責新建廠計畫的專案經理（Project Manager），你的專案已進行了8個月。透過績效報告（Performance Report）顯示，目前你的計畫值（Planned Value, PV）為5,700萬元，實獲值（Earned Value, EV）為5,200萬元，實際成本（Actual Cost, AC）為5,500萬元。請問現階段你的成本變異（Cost Variance, CV）為下列哪一項？","A":"正200萬元","B":"負200萬元","C":"正300萬元","D":"負300萬元","ans":"D"},{"id":"05-025","question":"關於衡量專案績效的有效方法，下列哪一項最適合？","A":"實獲值管理（Earned Value Management, EVM）","B":"統計抽樣（Statistic Sampling）","C":"要徑法（Critical Path Method, CPM）","D":"計畫評核術（Program Evaluation and Review Technique, PERT）","ans":"A"},{"id":"05-026","question":"在專案績效報告（Performance Report）的工具與技術（Tools and Techniques）中，下列哪一項是結合時間及成本資訊來呈現專案績效的方法？","A":"偏差分析（Deviation Analysis）","B":"趨勢分析（Trend Analysis）","C":"實獲值（Earned Value, EV）分析","D":"要徑分析（Critical Path Analysis）","ans":"C"},{"id":"05-027","question":"專案成本控制中，使用實獲值管理（Earned Value Management, EVM）是一項有用的方法，如果要了解專案的成本績效指標（Cost Performance Index, CPI），應採用下列哪一項計算方式？","A":"EV/AC","B":"EV/PV","C":"AC/EV","D":"AC/PV","ans":"A"},{"id":"05-028","question":"在專案執行時，常常有變更需求的提出，而其來源、目的各不相同，且隨專案進行亦趨複雜，但是身為專案經理（Project Manager）處理這些事務有其必要性，下列哪一項「不是」關切事項？","A":"影響產生變更因素","B":"設法消除變更因素","C":"確認變更已經發生","D":"管理已經發生的變更","ans":"B"},{"id":"05-029","question":"你的專案即將結案，在一次與客戶的會議中發現，完成產品的規格（Specification）與客戶當初所提的需求有落差，下列哪些是你在執行專案時最可能沒有做好的流程？（複選）","A":"控制品質（Control Quality）","B":"規劃品質管理（Plan Quality Management）","C":"實施品質保證（Perform Quality Assurance）","D":"控制成本（Control Costs）","ans":"ABC"},{"id":"05-030","question":"專案績效報告（Performance Report）中包括許多內容，但與專案基準（Project Baseline）比較時，其差異分析著重於下列哪一項？","A":"問題分析與實際解決","B":"現況分析與未來預測","C":"成本差異及時程差異","D":"無法預測未來趨勢","ans":"C"},{"id":"05-031","question":"專案經理（Project Manager）及團隊若要分析開發產品測試失敗原因，可採用下列哪些流程圖（Flowchart）進行分析？（複選）","A":"柏拉圖（Pareto Diagram）","B":"魚骨圖（Fishbone Diagram）","C":"管制圖（Control Chart）","D":"因果圖（Cause and Effect Diagram）","ans":"BD"},{"id":"05-032","question":"專案風險是不可避免，而且也不可輕忽，專案經理（Project Manager）時時審視風險狀況，然而天不盡人意，有時也會出現未預期風險，這時專案經理（Project Manager）應進行下列哪些因應措施？（複選）","A":"檢查風險清單","B":"未辨識風險衝擊影響大於原風險預估時，主動採取額外的風險因應規劃","C":"採行繞道規劃（Walk Around Plans），被動式接受風險時的臨時措施","D":"檢討專案會議為何沒有發現此未辨識風險","ans":"BC"},{"id":"05-033","question":"在下列哪一項狀況下，專案基準（Project Baseline）可以修訂與變更？","A":"在專案稽核會議（Project Review Meeting）結議之前","B":"在專案稽核會議（Project Review Meeting）結議後","C":"在專案協調會議（Project Coordination Meeting）結議後","D":"在專案變更控制委員會（Change Control Board, CCB）通過後","ans":"D"},{"id":"05-034","question":"專案進度審查會議即將召開，部分團隊成員因疏失而確實遭受利害關係人（Stakeholder）抱怨及不滿，若你是專案經理（Project Manager），已經了解實際狀況，下列哪一項檢討內容最不適宜出現於此專案進度審查會中？","A":"檢討專案團隊（Project Team）專業能力、溝通系統良窳","B":"檢討其他管理階層是否改變了需求進而影響到專案目標","C":"檢討專案執行不力、業務過失或抗拒者之懲處事項","D":"檢討是否有風險先兆狀況，將會影響專案進行及應變計畫之準備","ans":"C"},{"id":"05-035","question":"專案執行至期中階段，顧客突然提出「因遭遇財務問題」而要求修正合約執行方式，內部決策階層認為專案單位未做好顧客管理，要求專案團隊（Project Team）針對此事況提出分析報告，這份報告將涉及單位與顧客關係的發展，此份報告應該定位於下列哪一項類型？","A":"專案績效報告（Project Performance Report）","B":"因果關係報告（Cause and Effect Diagram Report）","C":"報告風險回應（Risk Response Report）","D":"特殊分析報告（Special Report）","ans":"D"},{"id":"05-036","question":"關於監視及控制（Monitoring and Controlling）專案工作流程的投入（Input），下列哪一項錯誤？","A":"專案管理計畫","B":"工作績效（Performance）資訊","C":"遭拒絕的變更請求（Change Request）","D":"建議的矯正措施（Corrective Action）","ans":"D"},{"id":"05-037","question":"關於績效報告（Performance Report）的投入（Input），下列哪一項錯誤？","A":"工作績效資訊","B":"績效衡量","C":"預測完成","D":"績效報告（Performance Report）","ans":"D"},{"id":"05-038","question":"關於時程變異（Schedule Variance, SV）的敘述，下列哪一項正確？","A":"並非所有時程差異都會影響時程","B":"時程差異影響範疇，而範疇影響時程","C":"時程差異一定會影響時程","D":"時程差異對於時程不會有任何影響","ans":"A"},{"id":"05-039","question":"關於控制時程（Control Schedule）的投入（Input），下列哪一項錯誤？","A":"時程管理計畫","B":"時程基準（Baseline）","C":"建議的矯正措施（Corrective Action）","D":"績效報告（Performance Report）","ans":"C"},{"id":"05-040","question":"關於成本控制（Cost Control）的投入（Input），下列哪一項錯誤？","A":"成本基準（Baseline）","B":"專案資金要求（Request）","C":"績效報告（Performance Report）","D":"成本估計更新","ans":"D"},{"id":"05-041","question":"關於成本控制（Cost Control）的產出（Output），下列哪一項錯誤？","A":"成本估計更新","B":"績效衡量","C":"專案資金要求（Capital Request）","D":"預測完成","ans":"C"},{"id":"05-042","question":"關於構型管理（Configuration Management）的敘述，下列哪一項正確？","A":"一種說明可以確認專案產品是正確與完整","B":"工作分解結構（Work Breakdown Structure,WBS）的建立","C":"一組程序（Procedures）以確定專案設計標準與契合","D":"一個機制（Mechanism）以追蹤預算與進度的變異","ans":"C"},{"id":"05-043","question":"專案團隊（Project Team）已經完成了專案工作分解結構（Work Breakdown Structure, WBS），公司的資深管理階層與所有利害關係人（Stakeholder）也批准了該WBS。但之後，客戶要求修改該專案，並且會增加可觀的成本，且客戶表示公司的業務人員在簽約之前，已經承諾這項可能變更，下列哪一方應該負責這項變更的成本？","A":"客戶","B":"專案所屬的公司","C":"客戶與專案所屬的公司共同負責","D":"忽略這項變更要求","ans":"A"},{"id":"05-044","question":"一項任務需要2個人的2週全時間去完成，但專案經理（Project Manager）只能派1個人去做這項任務。2週後，該項任務完成了75%，請問成本績效指標（Cost Performance Index, CPI）為下列哪一項？","A":"0.75","B":"1.5","C":"1.33","D":"0.5","ans":"B"},{"id":"05-045","question":"下列哪一項可以改善專案的未來績效，並且依照專案計畫整合需求？","A":"預算更新","B":"修改的成本估計","C":"修正活動","D":"應急（Contingency）規劃","ans":"C"},{"id":"05-046","question":"下列哪些是降低或控制風險的工具與技術（Tools and Techniques）？（複選）","A":"減輕（Mitigation）","B":"模擬（Simulation）","C":"規避（Avoidance）","D":"接受（Acceptance）","ans":"ACD"},{"id":"05-047","question":"下列哪些是專案過程發展（Project Process Development）的工具與技術（Tools and Techniques）？（複選）","A":"要徑法（Critical Path Method, CPM）","B":"實獲值管理（Earned Value Management, EVM）","C":"圖示評核術（Graphical Evaluation and Review Technique, GERT）","D":"計畫評核術（Program Evaluation and Review Technique, PERT）","ans":"ACD"},{"id":"05-048","question":"下列哪一項「不是」控制成本（Control Costs）流程的目的？","A":"採取校正措施，將成本風險降低","B":"將專案成本的估算進行確認","C":"監控專案狀態來更新專案成本","D":"提供方法識別與計畫的差異","ans":"B"},{"id":"05-049","question":"你是一位專案經理（Project Manager），可以透過下列哪一項工具（Tools），協助進行專案控制時程？","A":"甘特圖（Gantt Chart）","B":"樹狀圖（Tree Diagram）","C":"矩陣圖（Matrix diagram）","D":"心智圖（Mind Mapping）","ans":"A"},{"id":"05-050","question":"有效的溝通是專案成功最重要的因素之一，下列哪些是在控制溝通（Control Comminication）重要的投入（Input）項目之一？（複選）","A":"議題記錄（Issue log）","B":"專案至今所有的會議記錄","C":"專案管理計畫書（Project Management Plan）","D":"工作績效資訊（Work Performance Data）","ans":"ACD"},{"id":"05-051","question":"你的專案執行到一半，有三個未在風險登錄表（Risk Register）的新風險發生，為了避免後續專案有更多新風險發生，導致應變不及而失敗，下列哪一項是你應該要做的？","A":"辨識風險（Identify Risk）","B":"風險稽核（Risk Audits）","C":"風險準備分析（Reserve Analysis）","D":"在風險登錄表（Risk Register）登入新風險","ans":"C"},{"id":"05-052","question":"一個國家型的大型專案，同時具有許多的供應商來源，為了保障買賣雙方的權益，下列哪一項是專案執行過程中，為控制採購（Control Procurements）中重要的依據？","A":"合約（Contract）","B":"議題記錄（Issue log）","C":"甘特圖（Gantt Chart）","D":"風險登錄表（Risk Register）","ans":"A"},{"id":"05-053","question":"下列哪些是控制利害關係人參與（Control Stakeholder Engagement）的重要工具與技術（Tools and Techniques）？（複選）","A":"資訊管理系統（Information Management System）","B":"合約（Contract）","C":"專家判斷（Expert Judgment）","D":"會議（Meeting）","ans":"ACD"},{"id":"05-054","question":"當專案經理（Project Manager）發現，專案利害關係人參與活動的效能與效率逐漸降低，專案的進度逐漸被影響而導致落後，專案經理（Project Manager）應該特別著重哪一個子流程的管理？","A":"控制時程（Control Schedule）","B":"控制成本（Control Costs）流程","C":"管理利害關係人參與（Manage Stakeholder Engagement）","D":"控制利害關係人參與（Control Stakeholder Engagement）","ans":"D"},{"id":"05-055","question":"專案實際進行與當初計畫不同時，需要提出變更申請（Change Request），下列哪些可能包含在內？（複選）","A":"矯正措施（Corrective action）","B":"預防行動（Preventive Action）","C":"缺點改正（Defect repair）","D":"風險分析（Risk Analysis）","ans":"ABC"},{"id":"05-056","question":"你是一個繪圖軟體開發的專案經理（Project Manager），你上網發現有一個新的技術，可以更快的完成軟體的需求規格（Specification），下列哪一項是你目前應該做的？","A":"直接採用新的技術","B":"根據專案所訂的變更程序，進行變更申請確認","C":"與專案團隊（Project Team）討論新技術","D":"尋求專案團隊（Project Team）與客戶的支持","ans":"B"},{"id":"05-057","question":"關於變更控制委員會（Change Control Board, CCB），下列哪些敘述正確？（複選）","A":"變更控制委員會（Change Control Board, CCB）的組成人員是由專案利害關係人（Project Stakeholder）組成","B":"變更控制委員會（Change Control Board, CCB）進行專案所有的變更管理，決議的內容不需要與客戶達成共識","C":"專案的任何變更，都應該透過變更控制委員會（Change Control Board, CCB）的審核","D":"變更控制委員會（Change Control Board, CCB）應該將所有的專案團隊（Project Team）成員都納入","ans":"AC"},{"id":"05-058","question":"下列哪一項「不是」實施整合變更控制（Perform Integrated Change Control）的投入（Input）？","A":"專案管理計畫書（Project Management Plan）","B":"工作績效報告（Work Performance Reports）","C":"變更申請（Change Request）","D":"專家判斷（Expert Judgment）","ans":"D"},{"id":"05-059","question":"關於確認範疇（Validate Scope）與控制品質（Control Quality）兩者的差別，下列哪些敘述正確？（複選）","A":"一般來說，控制品質（Control Quality）發生在確認範疇（Validate Scope）之前","B":"兩者可以同時並行","C":"確認範疇（Validate Scope）主要著重於交付物之可接受性","D":"控制品質（Control Quality）主要著重於交付物之正確性","ans":"ABCD"},{"id":"05-060","question":"下列哪一項是控制範疇（Control Scope）主要的工具與技術（Tools and Techniques）？","A":"專家判斷（Expert Judgment）","B":"變更申請（Change Request）","C":"工作績效報告（Work Performance Reports）","D":"變異分析（Variance Analysis）","ans":"D"}],"06":[{"id":"06-001","question":"結案專案時會做的事，下列哪一項錯誤？","A":"專案責任移轉","B":"可行性分析","C":"工作重分派","D":"解散專案團隊（Project Team）","ans":"B"},{"id":"06-002","question":"下列哪些工作是結束專案或階段（Close Project or Phase）的工作內容？（複選）","A":"依專案結案作業檢查清單進行查核","B":"立即支付所有採購債務及帳單","C":"設備（施）、剩餘材料規劃建檔、繳庫或移轉","D":"結案報告、相關文件等均完成準備","ans":"ACD"},{"id":"06-003","question":"專案結案後，通常會進行文件歸檔，因此初期於文件管理時便需建立檔案編號，下列哪一項編碼為「依作業性質編碼方式」？","A":"專案編號-WBS碼-文件名稱-版本","B":"專案編號-大綱編號-細目序號-版本","C":"專案編號-產品編號-產品序號-大綱-細目","D":"專案編號-流水序號-細目","ans":"B"},{"id":"06-004","question":"文件資料經檔案管理後儲存為資訊供日後參考，經由科學方法系統性分析後，便可轉化為下列哪些項目？（複選）","A":"公司無形資產","B":"知識","C":"一堆數據","D":"無用的文件","ans":"AB"},{"id":"06-005","question":"關於專案結案，下列哪一項敘述是最佳且完整？","A":"完成工作分解結構（Work Breakdown Structure, WBS）","B":"最終完成所有專案管理過程的所有活動，正式結束專案或專案階段","C":"達到客戶的要求","D":"所有的工作都做完了","ans":"B"},{"id":"06-006","question":"下列哪些屬於結束專案或階段（Close Project or Phase）的產出（Output）？（複選）","A":"專案管理計畫書（Project Management Plan）","B":"企業環境因素（Enterprise Environmental Factors）","C":"組織流程資產（Organizational Process Assets）更新","D":"最後的產品、服務或成果移轉","ans":"CD"},{"id":"06-007","question":"某位利害關係人（Stakeholder）擬在結案會議中準備「大放厥詞」，身為專案經理（Project Manager）認為下列哪一項可能是其所不滿？","A":"專案整理目標達成狀況","B":"對專案進行最終審查及結案作業之決議","C":"專案計畫與實際執行的差異及改進","D":"專案採購時未指定特殊關係廠商及相關規格（Specification）或價格","ans":"D"},{"id":"06-008","question":"軟體專案的工作範疇已經完成，但是由於公司需要，客戶希望請專案團隊（Project Team）完成額外功能模組。鑒於上述情況，身為專案經理（Project Manager），下列哪一項是你要做的？","A":"拒絕客戶，因為專案不鍍金","B":"重新定義專案範圍","C":"開始合約收尾，並就額外功能模組簽訂新合約","D":"向客戶追加預算","ans":"C"},{"id":"06-009","question":"下列哪些是屬於管理結束（Administrative Closure）程序？（複選）","A":"收集專案記錄","B":"建置工作分解結構（Work Breakdown Structure, WBS）","C":"收集吸取的教訓","D":"分析專案成敗","ans":"ACD"},{"id":"06-010","question":"下列哪一項情況下，賣方會認為合約結束程序（Contract Closure）？","A":"收到尾款","B":"工作完成","C":"專案團隊（Project Team）解散","D":"組織流程資產（Organizational Process Assets）更新","ans":"A"},{"id":"06-011","question":"安能軟體公司是一家開發設計遊戲軟體的公司，由於你所負責新一代遊戲軟體開發專案已告一段落，產品也已經被客戶正式驗證接收，因為你在本專案管理上的成功，客戶對這一次的軟體開發專案結果相當滿意。為了順利結案，你除了運用專案管理的手法以及請到相關專家來協助制定與實施結束流程，你還可能運用到下列哪一項工具與技術（Tools and Techniques），來進行結案作業？","A":"要徑法（Critical Path Method, CPM）","B":"計畫評核術（Program Evaluation And Review Technique, PERT）","C":"專案管理資訊系統（Project Management Information System, PMIS）","D":"實獲值管理（Earned Value Management, EVM）","ans":"C"},{"id":"06-012","question":"衡量一個專案是否真正成功的條件，下列哪一項要素最為關鍵？","A":"如時、如質、如預算地完成專案","B":"比預期中的時間還短、成本還少，以及品質更好","C":"避開風險，沒有產生意外","D":"顧客的滿意","ans":"D"},{"id":"06-013","question":"關於當買賣雙方某一方無法履行部分或全部合約的義務時，下列哪一項正確？","A":"放棄（Abandon）義務","B":"終止（Closure）合約","C":"部分履行（Partial Fulfillment）","D":"違反（Violation）合約","ans":"D"},{"id":"06-014","question":"某一公共工程承包廠商自認執行完畢，要求進行驗收工作以利結案，但是驗收人員及接收人員此時反對如此結案，這意謂發生了下列哪一項狀況？","A":"專案人員盡心負責確保公共工程品質","B":"承包廠商過於自信，片面決定合約結束程序","C":"驗收人員及接收人員欠缺溝通","D":"未建立專案結案共識","ans":"D"},{"id":"06-015","question":"關於結束專案或階段（Close Project or Phase）的敘述，下列哪一項錯誤？","A":"與贊助者（Sponsor）、顧客、專案團隊（Project Team）等共同檢討專案程序與成果","B":"完成及提報專案結案報告","C":"建立專案獨享式的經驗學習（Lessons Learned）及紀錄文件","D":"以文件方式正式接受專案的結果","ans":"C"},{"id":"06-016","question":"關於結束專案或階段（Close Project or Phase）流程的投入（Input），下列哪一項正確？","A":"專案章程（Project Charter）","B":"專家判斷（Expert Judgment）","C":"工作分解結構（Work Breakdown Structure, WBS）","D":"已接受的交付標的（Deliverable）","ans":"D"},{"id":"06-017","question":"關於結束採購（Close Procurement）流程的產出（Output），下列哪一項正確？","A":"組織流程資產（Organizational Process Assets）更新","B":"專案管理計畫書（Project Management Plan）","C":"採購文件","D":"正式接受","ans":"A"},{"id":"06-018","question":"提早終止買賣合約是結束採購（Close Procurement）的特殊狀況，下列哪些是可能導致發生的原因？（複選）","A":"雙方達成協議","B":"在專案的過程中買方或賣方違反合約內容","C":"因為未預期的天災讓專案無法繼續","D":"專案經理（Project Manager）不喜歡合約的買賣項目","ans":"ABC"},{"id":"06-019","question":"你剛完成了一個重大的採購專案，本次採購專案涉及與三間不同的供應商，然而在專案過程中與最後決標的供應商合作並不順利，為了不要重蹈覆轍，下列哪一項是未來專案需要列入的作業？","A":"透過合約的管理來進行調整","B":"進行採購稽核","C":"專家判斷（Expert Judgment）","D":"將該供應商列入黑名單","ans":"B"},{"id":"06-020","question":"專案結案後和顧客舉行內部會議，下列哪一種人員最不可能參加？","A":"專案經理（Project Manager）","B":"技術廠商代表","C":"顧客組織中參與專案的代表人","D":"專案團隊（Project Team）的重要成員","ans":"B"}]}
+;
 
-    const formatTime = (totalSeconds) => {
-      const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-      const s = (totalSeconds % 60).toString().padStart(2, '0');
-      return `${m}:${s}`;
-    };
+const CH_NAMES = {
+  '01': '第一章：專案管理概論',
+  '02': '第二章：專案起始',
+  '03': '第三章：專案規劃',
+  '04': '第四章：專案執行',
+  '05': '第五章：監視與控制',
+  '06': '第六章：專案結束'
+};
 
-    const extractChapters = (questions) => {
-      const chapters = new Set();
-      questions.forEach(q => {
-        const match = q.q.match(/^(\d+)[-.]/);
-        if (match) {
-          chapters.add(parseInt(match[1]));
-        }
-      });
-      return Array.from(chapters).sort((a, b) => a - b);
-    };
+const BATCH = 30;
+let currentCh = null, allQ = [], batch = [], batchIdx = 0;
+let selected = [], answered = false, wrongs = [];
 
-    const THEMES = {
-      test: {
-        gradient: "from-violet-600 to-indigo-600",
-        bgGradient: "from-violet-50 to-indigo-50",
-        text: "text-indigo-600",
-        button: "bg-indigo-600 active:bg-indigo-700",
-        accent: "bg-indigo-500",
-        border: "border-indigo-200"
-      },
-      read: {
-        gradient: "from-emerald-500 to-teal-600", // 綠色系代表閱讀/輕鬆
-        bgGradient: "from-emerald-50 to-teal-50",
-        text: "text-teal-700",
-        button: "bg-teal-600 active:bg-teal-700",
-        accent: "bg-teal-500",
-        border: "border-teal-200"
-      }
-    };
+// Build home
+const grid = document.getElementById('chapters-grid');
+Object.keys(CH_NAMES).forEach(ch => {
+  const qs = QUESTIONS[ch] || [];
+  const batches = Math.ceil(qs.length / BATCH);
+  const card = document.createElement('div');
+  card.className = 'ch-card';
+  card.innerHTML = `
+    <div class="ch-num">Chapter ${ch}</div>
+    <div class="ch-name">${CH_NAMES[ch]}</div>
+    <div class="ch-count">${qs.length} 題</div>
+    <div class="ch-badge">每次 ${qs.length >= BATCH ? BATCH : qs.length} 題・共 ${batches} 輪</div>
+  `;
+  card.onclick = () => startChapter(ch);
+  grid.appendChild(card);
+});
 
-    // --- COMPONENTS ---
+function startChapter(ch) {
+  currentCh = ch;
+  allQ = shuffle([...(QUESTIONS[ch] || [])]);
+  batchIdx = 0;
+  wrongs = [];
+  nextBatch();
+}
 
-    // [New] 閱覽模式的題目卡片
-    const BrowseCard = ({ question, index }) => {
-      return (
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm mb-4 break-inside-avoid">
-          <div className="flex items-start gap-3 mb-4">
-            <span className="bg-slate-100 text-slate-500 text-xs font-bold px-2 py-1 rounded flex-shrink-0 mt-0.5">
-              #{index + 1}
-            </span>
-            <h3 className="text-lg font-bold text-slate-800 leading-relaxed" dangerouslySetInnerHTML={{ __html: question.q }}></h3>
-          </div>
+function nextBatch() {
+  const start = batchIdx * BATCH;
+  batch = allQ.slice(start, start + BATCH);
+  if (batch.length === 0) { showResult(); return; }
+  batchIdx++;
+  startQuiz();
+}
 
-          <div className="space-y-2">
-            {question.o.map((opt, i) => {
-              const isCorrect = question.a.includes(i);
-              return (
-                <div 
-                  key={i} 
-                  className={`relative p-3 rounded-lg border flex items-start transition-colors ${
-                    isCorrect 
-                      ? "bg-emerald-50 border-emerald-500 text-emerald-900" 
-                      : "bg-white border-slate-100 text-slate-500 opacity-80"
-                  }`}
-                >
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 ${
-                    isCorrect ? "bg-emerald-200 text-emerald-800" : "bg-slate-100 text-slate-400"
-                  }`}>
-                    {String.fromCharCode(65 + i)}
-                  </div>
-                  <span className={`text-sm ${isCorrect ? 'font-bold' : ''}`}>{opt}</span>
-                  
-                  {isCorrect && (
-                    <div className="absolute right-3 top-3">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-emerald-600" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      );
-    };
+let qIdx = 0, batchWrongs = [];
 
-    // [New] 閱覽模式主畫面
-    const BrowseScreen = ({ bank, chapter, onBack }) => {
-      const theme = THEMES.read;
-      
-      // 篩選題目
-      const questions = useMemo(() => {
-        if (chapter === 'all') return bank.questions;
-        return bank.questions.filter(q => q.q.startsWith(`${chapter}-`) || q.q.startsWith(`${chapter}.`));
-      }, [bank, chapter]);
+function startQuiz() {
+  qIdx = 0;
+  batchWrongs = [];
+  showPage('quiz');
+  document.getElementById('quiz-title').textContent = CH_NAMES[currentCh] || currentCh;
+  showQuestion();
+}
 
-      // 回到頂部按鈕邏輯
-      const [showTopBtn, setShowTopBtn] = useState(false);
-      useEffect(() => {
-        const handleScroll = () => {
-          setShowTopBtn(window.scrollY > 300);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-      }, []);
+function showQuestion() {
+  const q = batch[qIdx];
+  const isMulti = q.ans.length > 1;
+  selected = [];
+  answered = false;
 
-      const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('q-counter').textContent = `第 ${qIdx+1} / ${batch.length} 題`;
+  const pct = ((qIdx) / batch.length * 100).toFixed(1);
+  document.getElementById('progress-bar').style.width = pct + '%';
 
-      return (
-        <div className="min-h-screen bg-slate-50 pb-20 animate-fade-in-up">
-          {/* Header */}
-          <div className="sticky top-0 z-30 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm px-4 py-3 flex items-center justify-between">
-             <button onClick={onBack} className="p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 active:scale-95 transition-all flex items-center gap-1 pr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
-                <span className="text-sm font-bold">返回</span>
-             </button>
-             <div className="flex flex-col items-center">
-                <span className="text-base font-black text-slate-800 tracking-tight">
-                    {chapter === 'all' ? '全範圍瀏覽' : `第 ${chapter} 章`}
-                </span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    共 {questions.length} 題
-                </span>
-             </div>
-             <div className="w-10"></div> {/* Spacer */}
-          </div>
+  document.getElementById('question-text').innerHTML =
+    escHtml(q.question) + (isMulti ? '<span class="multi-badge">複選</span>' : '');
 
-          <div className="max-w-3xl mx-auto px-4 py-6">
-            {questions.length === 0 ? (
-              <div className="text-center py-20 text-slate-400">
-                <p>本章節尚無題目資料</p>
-              </div>
-            ) : (
-              questions.map((q, idx) => (
-                <BrowseCard key={idx} question={q} index={idx} />
-              ))
-            )}
-          </div>
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  ['A','B','C','D'].forEach(key => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.dataset.key = key;
+    btn.innerHTML = `<span class="opt-label">${key}</span><span>${escHtml(q[key])}</span>`;
+    btn.onclick = () => toggleOpt(key, isMulti);
+    opts.appendChild(btn);
+  });
 
-          {showTopBtn && (
-            <button 
-              onClick={scrollToTop}
-              className={`fixed bottom-6 right-6 p-4 rounded-full shadow-lg ${theme.button} text-white transition-all transform hover:scale-110 active:scale-95 z-40`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-              </svg>
-            </button>
-          )}
-        </div>
-      );
-    };
+  document.getElementById('feedback').innerHTML = '';
+  const row = document.getElementById('action-row');
+  if (isMulti) {
+    row.innerHTML = `<button class="btn btn-primary" id="confirm-btn" onclick="confirmMulti()" disabled>確認答案</button>`;
+  } else {
+    row.innerHTML = '';
+  }
+}
 
-    // Quiz Mode Components (OptionButton, ResultScreen, QuizGame)
-    const OptionButton = ({ text, index, isSelected, isSubmitted, isCorrect, isMissed, isWrong, theme, onClick }) => {
-      let baseClasses = "w-full text-left p-4 rounded-xl border transition-all duration-200 mb-3 flex items-start group relative active:scale-[0.99] select-none ";
-      
-      if (isSubmitted) {
-        if (isCorrect) baseClasses += "border-emerald-500 bg-emerald-50 text-emerald-900 font-bold ";
-        else if (isWrong) baseClasses += "border-rose-500 bg-rose-50 text-rose-900 font-medium ";
-        else if (isMissed) baseClasses += "border-emerald-400 bg-white text-emerald-700 border-dashed ";
-        else baseClasses += "border-slate-100 bg-slate-50 text-slate-400 opacity-60 ";
-      } else {
-        if (isSelected) baseClasses += `border-transparent ${theme.text} bg-white shadow-md ring-2 ring-indigo-200 z-10 font-medium `;
-        else baseClasses += "border-slate-200 bg-white text-slate-700 ";
-      }
+function toggleOpt(key, isMulti) {
+  if (answered) return;
+  const btn = document.querySelector(`.opt-btn[data-key="${key}"]`);
+  if (!isMulti) {
+    selected = [key];
+    document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    checkAnswer();
+  } else {
+    const idx = selected.indexOf(key);
+    if (idx >= 0) { selected.splice(idx, 1); btn.classList.remove('selected'); }
+    else { selected.push(key); btn.classList.add('selected'); }
+    document.getElementById('confirm-btn').disabled = selected.length === 0;
+  }
+}
 
-      const letter = String.fromCharCode(65 + index);
-      return (
-        <button onClick={onClick} disabled={isSubmitted} className={baseClasses}>
-          <span className={`flex items-center justify-center w-7 h-7 rounded-full mr-3 text-sm font-bold flex-shrink-0 transition-colors ${
-            isSubmitted 
-              ? (isCorrect || isMissed ? 'bg-emerald-200 text-emerald-800' : (isWrong ? 'bg-rose-200 text-rose-800' : 'bg-slate-200 text-slate-500'))
-              : (isSelected ? `${theme.accent} text-white` : 'bg-slate-100 text-slate-500')
-          }`}>
-            {letter}
-          </span>
-          <span className="mt-0.5 leading-relaxed text-base break-words w-full">{text}</span>
-        </button>
-      );
-    };
+function confirmMulti() {
+  if (answered || selected.length === 0) return;
+  checkAnswer();
+}
 
-    const ResultScreen = ({ score, total, timeSpent, wrongList, theme, onRestart, onHome }) => {
-      const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
-      let gradeColor = theme.text;
-      if (percentage >= 90) gradeColor = 'text-emerald-600';
-      else if (percentage < 60) gradeColor = 'text-rose-600';
+function checkAnswer() {
+  answered = true;
+  const q = batch[qIdx];
+  const correct = q.ans.split('').sort().join('');
+  const userAns = selected.sort().join('');
+  const isCorrect = userAns === correct;
+  const opts = document.querySelectorAll('.opt-btn');
 
-      const radius = 40;
-      const circumference = 2 * Math.PI * radius;
-      const strokeDashoffset = circumference - (percentage / 100) * circumference;
+  opts.forEach(b => {
+    b.disabled = true;
+    const k = b.dataset.key;
+    if (correct.includes(k)) b.classList.add('show-correct');
+  });
+  selected.forEach(k => {
+    const b = document.querySelector(`.opt-btn[data-key="${k}"]`);
+    if (correct.includes(k)) b.classList.add('correct');
+    else b.classList.add('wrong');
+  });
 
-      return (
-        <div className="w-full max-w-xl mx-auto animate-fade-in-up px-4 pb-20 pt-4">
-          <div className="bg-white rounded-3xl shadow-lg overflow-hidden mb-6 border border-slate-100">
-            <div className={`p-6 text-center text-white relative overflow-hidden bg-gradient-to-br ${theme.gradient}`}>
-              <h2 className="text-2xl font-bold mb-1 relative z-10">測驗結果</h2>
-            </div>
+  const fb = document.getElementById('feedback');
+  if (isCorrect) {
+    fb.innerHTML = '<div class="feedback correct">✓ 答對了！</div>';
+  } else {
+    fb.innerHTML = `<div class="feedback wrong">✗ 答錯了。正確答案：<strong>${correct}</strong></div>`;
+    batchWrongs.push({ q, userAns, correct });
+    wrongs.push({ q, userAns, correct });
+  }
 
-            <div className="p-5">
-              <div className="flex items-center justify-center gap-6 mb-6">
-                <div className="relative w-32 h-32 flex items-center justify-center">
-                   <svg className="w-full h-full transform -rotate-90 drop-shadow-md" viewBox="0 0 100 100">
-                     <circle cx="50" cy="50" r={radius} fill="none" stroke="#f1f5f9" strokeWidth="8" />
-                     <circle cx="50" cy="50" r={radius} fill="none" stroke="currentColor" strokeWidth="8" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} className={`${gradeColor} transition-all duration-1000 ease-out`} strokeLinecap="round" />
-                   </svg>
-                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className={`text-4xl font-black ${gradeColor}`}>{score}</span>
-                      <span className="text-xs text-slate-400 font-bold">/ {total}</span>
-                   </div>
-                </div>
-                
-                <div className="flex flex-col gap-3">
-                   <div className="text-left">
-                      <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Time</span>
-                      <div className="text-lg font-bold text-slate-700">{formatTime(timeSpent)}</div>
-                   </div>
-                   <div className="text-left">
-                      <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Rate</span>
-                      <div className={`text-lg font-bold ${gradeColor}`}>{percentage}%</div>
-                   </div>
-                </div>
-              </div>
+  const row = document.getElementById('action-row');
+  const isLast = qIdx >= batch.length - 1;
+  row.innerHTML = isLast
+    ? `<button class="btn btn-primary" onclick="endBatch()">查看結果</button>`
+    : `<button class="btn btn-primary" onclick="nextQ()">下一題 →</button>`;
+}
 
-              <div className="grid grid-cols-2 gap-3">
-                <button onClick={onRestart} className={`py-3 ${theme.button} text-white font-bold rounded-xl shadow-md active:scale-95 transition-all text-sm flex items-center justify-center gap-1`}>
-                  再次挑戰
-                </button>
-                <button onClick={onHome} className="py-3 bg-slate-100 text-slate-600 font-bold rounded-xl active:scale-95 transition-all text-sm flex items-center justify-center gap-1">
-                  回主選單
-                </button>
-              </div>
-            </div>
-          </div>
+function nextQ() { qIdx++; showQuestion(); }
 
-          {wrongList.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 px-1">
-                 <h3 className="text-base font-bold text-slate-700">錯題檢討 <span className="bg-rose-100 text-rose-600 text-xs px-2 py-0.5 rounded-full ml-1">{wrongList.length}</span></h3>
-              </div>
-              {wrongList.map((item, idx) => (
-                <div key={idx} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-                  <div className="flex items-center mb-3 gap-2">
-                     <span className="bg-slate-100 text-slate-500 text-xs font-bold px-2 py-1 rounded">Q{item.originalIndex + 1}</span>
-                  </div>
-                  <div className="text-slate-800 font-bold mb-4 leading-relaxed text-lg" dangerouslySetInnerHTML={{ __html: item.question.q }} />
-                  
-                  <div className="space-y-2 mb-2">
-                    <div className="bg-rose-50/50 rounded-xl p-3 border border-rose-100">
-                      <span className="text-[10px] font-bold text-rose-500 uppercase block mb-1">你的回答</span>
-                      {item.userSelected.length > 0 ? item.userSelected.map(selIdx => (
-                        <div key={selIdx} className="flex items-start text-rose-800 text-base">
-                          <span className="font-bold mr-1.5">{String.fromCharCode(65 + selIdx)}.</span>
-                          {item.question.o[selIdx]}
-                        </div>
-                      )) : <span className="text-rose-400 text-base italic">未作答</span>}
-                    </div>
-                    <div className="bg-emerald-50/50 rounded-xl p-3 border border-emerald-100">
-                      <span className="text-[10px] font-bold text-emerald-500 uppercase block mb-1">正確答案</span>
-                       {item.question.a.map(ansIdx => (
-                        <div key={ansIdx} className="flex items-start text-emerald-800 text-base">
-                          <span className="font-bold mr-1.5">{String.fromCharCode(65 + ansIdx)}.</span>
-                          {item.question.o[ansIdx]}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      );
-    };
+function endBatch() { showResult(); }
 
-    const QuizGame = ({ bank, chapter, onExit }) => {
-      const questions = useMemo(() => {
-        let filtered = bank.questions;
-        if (chapter !== 'all') {
-          filtered = bank.questions.filter(q => q.q.startsWith(`${chapter}-`) || q.q.startsWith(`${chapter}.`));
-          return shuffleArray(filtered); 
-        }
-        const shuffled = shuffleArray(filtered);
-        const safeLimit = Math.min(bank.limit, shuffled.length);
-        return shuffled.slice(0, safeLimit);
-      }, [bank, chapter]);
+function showResult() {
+  showPage('result');
+  const total = batch.length || allQ.length;
+  const correctCount = total - wrongs.length;
+  const pct = Math.round(correctCount / total * 100);
 
-      const [currentIndex, setCurrentIndex] = useState(0);
-      const [score, setScore] = useState(0);
-      const [selectedIndices, setSelectedIndices] = useState([]);
-      const [wrongList, setWrongList] = useState([]);
-      const [isSubmitted, setIsSubmitted] = useState(false);
-      const [isQuizEnded, setIsQuizEnded] = useState(false);
-      const [timeSpent, setTimeSpent] = useState(0);
-      
-      const timerRef = useRef(null);
-      const theme = THEMES[bank.icon];
+  document.getElementById('score-num').textContent = pct + '%';
+  document.getElementById('score-circle').style.setProperty('--pct', pct + '%');
+  document.getElementById('result-title').textContent = pct >= 80 ? '🎉 太棒了！' : pct >= 60 ? '💪 繼續加油！' : '📚 多加練習！';
+  document.getElementById('result-sub').textContent = `本輪 ${total} 題測驗完成`;
+  document.getElementById('stat-correct').textContent = correctCount;
+  document.getElementById('stat-wrong').textContent = wrongs.length;
+  document.getElementById('stat-total').textContent = total;
 
-      useEffect(() => {
-        timerRef.current = setInterval(() => setTimeSpent(prev => prev + 1), 1000);
-        return () => { if (timerRef.current) clearInterval(timerRef.current); };
-      }, []);
+  document.getElementById('retry-btn').onclick = () => currentCh === 'exam' ? startExam() : startChapter(currentCh);
 
-      const stopTimer = () => { if (timerRef.current) clearInterval(timerRef.current); };
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+  if (wrongs.length === 0) {
+    list.innerHTML = '<div style="color:var(--correct);text-align:center;padding:1.5rem;">全部答對！</div>';
+  } else {
+    wrongs.forEach(w => {
+      const div = document.createElement('div');
+      div.className = 'review-item r-wrong';
+      const correctText = w.correct.split('').map(k => `${k}. ${escHtml(w.q[k])}`).join('　');
+      const userText = w.userAns ? w.userAns.split('').map(k => `${k}. ${escHtml(w.q[k])}`).join('　') : '未作答';
+      div.innerHTML = `<div class="review-q">${escHtml(w.q.question)}</div>
+        <div class="review-ans">你的答案：<span class="bad">${userText}</span></div>
+        <div class="review-ans" style="margin-top:0.35rem">正確答案：<span class="ok">${correctText}</span></div>`;
+      list.appendChild(div);
+    });
+  }
+}
 
-      const currentQuestion = questions[currentIndex];
-      const isMulti = currentQuestion ? currentQuestion.a.length > 1 : false;
-      const progress = questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0;
+function goHome() { showPage('home'); currentCh = null; wrongs = []; }
+function showChapters() { showPage('chapter-select'); }
 
-      const handleOptionClick = (index) => {
-        if (isSubmitted) return;
-        if (isMulti) {
-          if (selectedIndices.includes(index)) setSelectedIndices(selectedIndices.filter(i => i !== index));
-          else setSelectedIndices([...selectedIndices, index]);
-        } else {
-          setSelectedIndices([index]);
-        }
-      };
+let browseCh = '01';
+function showBrowse() {
+  showPage('browse');
+  // build tabs
+  const tabs = document.getElementById('browse-ch-tabs');
+  tabs.innerHTML = '';
+  Object.keys(CH_NAMES).forEach(ch => {
+    const t = document.createElement('button');
+    t.className = 'ch-tab' + (ch === browseCh ? ' active' : '');
+    t.textContent = `Ch.${ch} (${(QUESTIONS[ch]||[]).length}題)`;
+    t.onclick = () => { browseCh = ch; renderBrowse(); document.querySelectorAll('.ch-tab').forEach(x => x.classList.remove('active')); t.classList.add('active'); };
+    tabs.appendChild(t);
+  });
+  renderBrowse();
+}
 
-      const handleSubmit = () => {
-        if (selectedIndices.length === 0) { alert("請至少選擇一個答案！"); return; }
-        setIsSubmitted(true);
-        const sortedSelected = [...selectedIndices].sort((a, b) => a - b);
-        const sortedCorrect = [...currentQuestion.a].sort((a, b) => a - b);
-        const isCorrect = JSON.stringify(sortedSelected) === JSON.stringify(sortedCorrect);
-        
-        if (isCorrect) setScore(prev => prev + 1);
-        else setWrongList(prev => [...prev, { question: currentQuestion, userSelected: selectedIndices, originalIndex: currentIndex }]);
-        
-        setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
-      };
-
-      const handleNext = () => {
-        if (currentIndex < questions.length - 1) {
-          setCurrentIndex(prev => prev + 1);
-          setSelectedIndices([]);
-          setIsSubmitted(false);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-          stopTimer();
-          setIsQuizEnded(true);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-      };
-
-      if (!currentQuestion && !isQuizEnded) return <div className="p-10 text-center">此章節沒有題目</div>;
-
-      if (isQuizEnded) return (
-        <div className={`min-h-screen bg-slate-50`}>
-          <ResultScreen 
-            score={score} 
-            total={questions.length} 
-            timeSpent={timeSpent} 
-            wrongList={wrongList} 
-            theme={theme} 
-            onRestart={() => window.location.reload()} 
-            onHome={onExit} 
-          />
-        </div>
-      );
-
-      return (
-        <div className={`min-h-screen bg-slate-50 pb-20 flex flex-col items-center animate-fade-in-up`}>
-          <div className="sticky top-0 z-30 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm px-4 py-3 flex items-center justify-between">
-             <button onClick={onExit} className="p-2 rounded-full bg-slate-100 text-slate-500 active:scale-95 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
-             </button>
-             <div className="flex flex-col items-center">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    QUIZ MODE
-                </span>
-                <span className="text-base font-black text-slate-800 tracking-tight leading-none">{formatTime(timeSpent)}</span>
-             </div>
-             <div className={`flex items-baseline gap-0.5 ${theme.text}`}>
-                 <span className="text-xl font-black">{currentIndex + 1}</span>
-                 <span className="text-xs font-bold opacity-60">/{questions.length}</span>
-             </div>
-          </div>
-
-          <div className="w-full h-1 bg-slate-200 sticky top-[60px] z-20">
-             <div className={`h-full transition-all duration-500 ease-out bg-gradient-to-r ${theme.gradient}`} style={{ width: `${progress}%` }}></div>
-          </div>
-
-          <div className="w-full max-w-xl px-4 py-6 flex-grow">
-             <div className="bg-white rounded-3xl shadow-lg shadow-slate-200/50 overflow-hidden relative border border-white">
-                <div className="p-5">
-                   <div className="mb-6">
-                     <div className="flex items-center gap-2 mb-3">
-                        {isMulti ? (
-                            <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded border border-amber-200">複選題</span>
-                        ) : (
-                            <span className="bg-slate-100 text-slate-500 text-xs font-bold px-2 py-0.5 rounded border border-slate-200">單選題</span>
-                        )}
-                     </div>
-                     <h2 className="text-lg md:text-xl font-bold text-slate-800 leading-snug tracking-tight" dangerouslySetInnerHTML={{ __html: currentQuestion.q }} />
-                   </div>
-
-                   <div className="space-y-3 mb-6">
-                     {currentQuestion.o.map((opt, idx) => {
-                       const isCorrect = currentQuestion.a.includes(idx);
-                       const isSelected = selectedIndices.includes(idx);
-                       let displayCorrect = false, displayWrong = false, displayMissed = false;
-                       if (isSubmitted) {
-                         if (isCorrect && isSelected) displayCorrect = true;
-                         else if (!isCorrect && isSelected) displayWrong = true;
-                         else if (isCorrect && !isSelected) displayMissed = true;
-                       }
-                       return <OptionButton key={idx} index={idx} text={opt} isSelected={isSelected} isSubmitted={isSubmitted} isCorrect={displayCorrect} isWrong={displayWrong} isMissed={displayMissed} theme={theme} onClick={() => handleOptionClick(idx)} />;
-                     })}
-                   </div>
-
-                   <div className="pt-2">
-                     {!isSubmitted ? (
-                       <button onClick={handleSubmit} className={`w-full py-4 px-6 rounded-xl ${theme.button} text-white font-bold text-lg shadow-md transition-all duration-200 transform active:scale-[0.98] flex items-center justify-center gap-2`}>
-                          送出答案
-                       </button>
-                     ) : (
-                       <button onClick={handleNext} className="w-full py-4 px-6 rounded-xl bg-slate-800 text-white font-bold text-lg shadow-md transition-all duration-200 transform active:scale-[0.98] flex items-center justify-center gap-2">
-                          {currentIndex === questions.length - 1 ? '查看成績' : '下一題'}
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                       </button>
-                     )}
-                   </div>
-                </div>
-             </div>
-          </div>
-        </div>
-      );
-    };
-
-    const ChapterSelectScreen = ({ bank, onSelectChapter, onBack }) => {
-      const theme = THEMES[bank.icon];
-      const chapters = useMemo(() => extractChapters(bank.questions), [bank]);
-
-      return (
-        <div className="min-h-screen bg-slate-50 flex flex-col items-center p-4 animate-fade-in-up">
-          <div className="w-full max-w-md">
-            <button onClick={onBack} className="mb-6 flex items-center text-slate-500 hover:text-slate-800 transition-colors">
-               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-               返回主選單
-            </button>
-
-            <div className={`bg-white rounded-3xl shadow-lg overflow-hidden border border-white mb-6`}>
-               <div className={`bg-gradient-to-r ${theme.gradient} p-6 text-white`}>
-                  <h1 className="text-2xl font-bold mb-1">{bank.title}</h1>
-                  <p className="opacity-90 text-sm">{bank.description}</p>
-               </div>
-               
-               <div className="p-6 grid grid-cols-1 gap-4">
-                  {/* 全範圍按鈕 - 根據模式顯示不同文字 */}
-                  <button 
-                    onClick={() => onSelectChapter('all')}
-                    className={`w-full p-4 rounded-xl border-2 border-dashed ${theme.border} bg-white hover:bg-slate-50 transition-all flex items-center justify-between group active:scale-95`}
-                  >
-                     <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-full ${theme.bgGradient} flex items-center justify-center text-xl`}>
-                            {bank.mode === 'quiz' ? '🎲' : '📚'}
-                        </div>
-                        <div className="text-left">
-                           <div className="font-bold text-slate-800">全範圍{bank.mode === 'quiz' ? '隨機測驗' : '瀏覽'}</div>
-                           <div className="text-xs text-slate-500">
-                             {bank.mode === 'quiz' ? `隨機抽取 ${bank.limit} 題` : `閱覽全部 ${bank.questions.length} 題`}
-                           </div>
-                        </div>
-                     </div>
-                     <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${theme.text} opacity-0 group-hover:opacity-100 transition-opacity`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                  </button>
-
-                  <div className="relative flex py-2 items-center">
-                      <div className="flex-grow border-t border-slate-200"></div>
-                      <span className="flex-shrink-0 mx-4 text-slate-400 text-xs">或選擇單一章節</span>
-                      <div className="flex-grow border-t border-slate-200"></div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    {chapters.map(chap => {
-                      const count = bank.questions.filter(q => q.q.startsWith(`${chap}-`) || q.q.startsWith(`${chap}.`)).length;
-                      return (
-                        <button
-                          key={chap}
-                          onClick={() => onSelectChapter(chap)}
-                          className={`p-4 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all active:scale-95 flex flex-col items-center justify-center gap-2 h-32`}
-                        >
-                           <span className={`text-3xl font-black ${theme.text} opacity-20`}>{chap}</span>
-                           <span className="font-bold text-slate-700">第 {chap} 章</span>
-                           <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500">
-                             {count} 題
-                           </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-               </div>
-            </div>
-          </div>
-        </div>
-      );
-    };
-
-    const App = () => {
-      const [view, setView] = useState('home'); // home, chapters, quiz, browse
-      const [activeBank, setActiveBank] = useState(null);
-      const [activeChapter, setActiveChapter] = useState(null);
-
-      const handleSelectBank = (bank) => {
-        setActiveBank(bank);
-        setView('chapters'); // 點選任何模式都先進入章節選擇
-      };
-
-      const handleSelectChapter = (chapter) => {
-         setActiveChapter(chapter);
-         // 根據 Bank 的 mode 決定進入 測驗介面(quiz) 還是 閱覽介面(browse)
-         if (activeBank.mode === 'quiz') {
-            setView('quiz');
-         } else {
-            setView('browse');
-         }
-      };
-
-      const handleHome = () => {
-         setView('home');
-         setActiveBank(null);
-         setActiveChapter(null);
-      };
-
-      return (
-        <div className="antialiased text-slate-900 min-h-screen font-sans selection:bg-indigo-100 selection:text-indigo-700">
-          
-          {/* 測驗模式 */}
-          {view === 'quiz' && activeBank && (
-            <QuizGame bank={activeBank} chapter={activeChapter} onExit={handleHome} />
-          )}
-
-          {/* 閱覽模式 (純看題) */}
-          {view === 'browse' && activeBank && (
-            <BrowseScreen bank={activeBank} chapter={activeChapter} onBack={() => setView('chapters')} />
-          )}
-
-          {/* 章節選擇 */}
-          {view === 'chapters' && activeBank && (
-            <ChapterSelectScreen 
-               bank={activeBank} 
-               onSelectChapter={handleSelectChapter} 
-               onBack={handleHome} 
-            />
-          )}
-
-          {/* 首頁 */}
-          {view === 'home' && (
-            <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-5 py-12">
-              <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-2xl opacity-30 animate-blob"></div>
-              <div className="absolute top-0 -right-4 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-2xl opacity-30 animate-blob animation-delay-2000"></div>
-              <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-2xl opacity-30 animate-blob animation-delay-4000"></div>
-
-              <div className="relative z-10 w-full max-w-md">
-                <div className="text-center mb-10 animate-fade-in-up">
-                  <div className="inline-block p-2 rounded-xl bg-white/60 backdrop-blur-sm shadow-sm mb-3 border border-white">
-                      <span className="text-xs font-bold text-slate-500 tracking-wider uppercase px-2">By. HSIN-I CHEN</span>
-                  </div>
-                  <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-3 leading-tight">
-                    考前衝刺<br/>
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-600">題庫系統</span>
-                  </h1>
-                  <p className="text-slate-500 font-medium text-sm">請選擇測驗或複習模式</p>
-                </div>
-
-                <div className="grid gap-4 w-full">
-                  {QUESTION_BANKS.map((bank, idx) => {
-                     const theme = THEMES[bank.icon];
-                     return (
-                      <button
-                        key={bank.id}
-                        onClick={() => handleSelectBank(bank)}
-                        className={`group relative w-full bg-white/80 backdrop-blur-md rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-white text-left overflow-hidden animate-fade-in-up flex items-center gap-5`}
-                        style={{ animationDelay: `${idx * 100}ms` }}
-                      >
-                        <div className={`absolute right-0 top-0 w-24 h-24 bg-gradient-to-bl ${theme.bgGradient} opacity-50 rounded-bl-[80px] transition-all group-hover:scale-110`}></div>
-                        
-                        <div className={`relative z-10 w-14 h-14 rounded-2xl ${theme.bgGradient} flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-300 shrink-0`}>
-                           <span className="text-3xl">
-                               {bank.icon === 'test' ? '💻' : '📖'}
-                           </span>
-                        </div>
-                        
-                        <div className="relative z-10 flex-1 min-w-0">
-                          <h2 className="text-lg font-bold text-slate-800 mb-1 group-hover:text-black transition-colors">{bank.title}</h2>
-                          <p className="text-slate-500 text-xs leading-relaxed truncate">{bank.description}</p>
-                        </div>
-                        
-                        <div className="relative z-10">
-                            <div className={`w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:bg-slate-50 transition-colors`}>
-                                <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${theme.text}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
-                            </div>
-                        </div>
-                      </button>
-                     );
-                  })}
-                </div>
-                
-                <footer className="mt-12 text-center text-slate-400 text-xs font-medium">
-                    ©可以讓我pass嗎 感覺要暴斃了 
-                </footer>
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    };
-
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
+function renderBrowse() {
+  const list = document.getElementById('browse-list');
+  const qs = QUESTIONS[browseCh] || [];
+  list.innerHTML = qs.map((q, i) => {
+    const opts = ['A','B','C','D'].map(k => {
+      const isCorrect = q.ans.includes(k);
+      return `<div class="b-opt${isCorrect ? ' b-correct' : ''}"><span class="b-opt-label">${k}.</span><span>${escHtml(q[k])}</span></div>`;
+    }).join('');
+    return `<div class="b-item">
+      <div class="b-qnum">${q.id}&nbsp;&nbsp;第 ${i+1} 題<span class="b-ans-badge">✓ ${q.ans}</span></div>
+      <div class="b-question">${escHtml(q.question)}</div>
+      <div class="b-opts">${opts}</div>
+    </div>`;
+  }).join('');
+}
+function startExam() {
+  currentCh = 'exam';
+  const all = Object.values(QUESTIONS).flat();
+  allQ = shuffle([...all]).slice(0, 50);
+  batchIdx = 0; wrongs = [];
+  batch = allQ;
+  batchIdx = 1;
+  qIdx = 0; batchWrongs = [];
+  showPage('quiz');
+  document.getElementById('quiz-title').textContent = '正式考照測驗（50題）';
+  showQuestion();
+}
+function showPage(p) {
+  ['home','chapter-select','browse','quiz','result'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  const target = document.getElementById(p);
+  if (target) target.style.display = (p==='home'||p==='chapter-select') ? 'flex' : 'block';
+}
+function shuffle(arr) { for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr; }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
 </body>
 </html>
