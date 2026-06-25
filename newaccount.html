@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>我的帳戶 | 色彩鑑定</title>
+  <meta name="description" content="管理您的個人資料與色彩鑑定紀錄">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600&family=Noto+Serif+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <link rel="stylesheet" href="css/style.css?v=7">
+  <style>
+    /* 極光頭像光圈 */
+    .avatar-wrapper { position: relative; margin-bottom: 20px; }
+    .avatar {
+      width: 96px; height: 96px; border-radius: 50%;
+      background: rgba(255,255,255,0.9);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      border: 3px solid rgba(255,255,255,0.9);
+      display: flex; justify-content: center; align-items: center;
+      font-size: 34px; color: var(--text-dark);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative; z-index: 2;
+    }
+    /* 內容卡片升級 */
+    .profile-card {
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(24px) saturate(160%);
+      border: 1px solid rgba(255,255,255,0.8);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
+    }
+  </style>
+</head>
+<body data-season="spring">
+
+  <!-- 手機版側邊欄漢堡按鈕 -->
+  <button class="fixed-hamburger mobile-ui-only" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="sidebar-overlay mobile-ui-only" id="sidebarOverlay" onclick="toggleMenu()"></div>
+  <aside class="sidebar mobile-ui-only" id="sidebar">
+    <div class="sidebar-header">
+      <h2>功能選單</h2>
+      <button class="close-btn" onclick="toggleMenu()">×</button>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="index.html#main-app">首頁</a></li>
+      <li><a href="destiny-color.html">我的命定色</a></li>
+      <li><a href="makeup-test.html">彩妝品顏色檢測</a></li>
+      <li><a href="color-match.html">顏色搭配推薦</a></li>
+      <li><a href="hair-color.html">髮色推薦</a></li>
+      <li><a href="newaccount.html" class="active">我的帳戶</a></li>
+    </ul>
+  </aside>
+
+  <!-- 電腦版頂部選單 -->
+  <header class="main-header">
+    <div class="header-container">
+      <div class="logo">色彩鑑定</div>
+      <nav class="desktop-nav desktop-ui-only">
+        <a href="index.html#main-app">首頁</a>
+        <a href="destiny-color.html">我的命定色</a>
+        <a href="makeup-test.html">彩妝品顏色檢測</a>
+        <a href="color-match.html">顏色搭配推薦</a>
+        <a href="hair-color.html">髮色推薦</a>
+        <a href="newaccount.html" class="active">我的帳戶</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="dashboard-layout fade-in delay-1">
+    
+    <!-- 左側 Sidebar (Profile) -->
+    <aside class="profile-sidebar dash-card">
+      <div class="avatar-large">
+        <span id="displayAvatarChar">A</span>
+      </div>
+      <button class="btn-pink-pill" style="margin-bottom: 8px;">更換大頭貼</button>
+      
+      <!-- 開發模擬：大頭貼切換 -->
+      <select id="mockAvatarSelector" onchange="mockAvatar(this.value)" style="padding: 4px; border-radius: 6px; border: 1px solid #ccc; width: 100%; font-size: 12px; margin-bottom: 16px;">
+        <option value="" disabled selected>※ 開發模擬：切換頭貼</option>
+        <option value="female">👧 開心女孩</option>
+        <option value="male">👦 開心男孩</option>
+        <option value="neutral">👤 可愛中性</option>
+      </select>
+
+      <div class="profile-name" id="displayUserName">載入中...</div>
+      <div class="profile-email" id="displayUserEmail"></div>
+      
+      <!-- 個人基本資訊標籤 -->
+      <div style="display:flex; gap:8px; margin-top:16px; justify-content:center; flex-wrap:wrap;">
+        <span id="displayGender" style="background:#f0f9ff; color:#0369a1; padding:4px 12px; border-radius:100px; font-size:12px; border:1px solid #bae6fd;">載入中...</span>
+        <span id="displayBirthday" style="background:#fdf2f8; color:#be185d; padding:4px 12px; border-radius:100px; font-size:12px; border:1px solid #fbcfe8;">載入中...</span>
+      </div>
+
+      <a href="logout.php" class="logout-btn fade-in delay-4" style="margin-top: 30px; width: 100%;">登出帳號</a>
+    </aside>
+
+    <!-- 右側主內容 -->
+    <main class="dashboard-main">
+      
+      <div class="dash-header">
+        <h1 class="dash-title">My Style Dashboard</h1>
+        <p class="dash-subtitle">歡迎回來！以下是您的專屬色彩檔案與穿搭數據。</p>
+      </div>
+
+      <!-- 第一排：核心數據卡片 -->
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:32px;">
+        
+        <!-- 命定色卡 -->
+        <div class="dash-card result-display-card" style="margin-bottom:0; padding:24px;">
+          <span class="result-label">目前命定色類型</span>
+          <h2 class="result-season-title" id="profileSeasonTitle" style="font-size:32px; margin-bottom:12px;">暖春型</h2>
+          <p class="result-desc-text" id="profileSeasonDesc" style="font-size:14px; margin-bottom:20px; line-height:1.6;">
+            您適合明亮、溫嫩、清透的色彩，穿上暖色系會讓整體氣色更自然。
+          </p>
+          <div class="swatches-row" id="profileSwatches" style="margin-bottom:0;">
+            <div class="swatch-circle swatch-1"></div>
+            <div class="swatch-2"></div>
+            <div class="swatch-3"></div>
+            <div class="swatch-4"></div>
+          </div>
+        </div>
+
+        <!-- 穿搭統計卡 (開發模擬) -->
+        <div class="dash-card" style="padding:24px; background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);">
+          <span class="result-label">風格統計數據</span>
+          <div style="margin-top:16px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+              <span style="font-size:14px; color:#666;">穿搭日記總數</span>
+              <span style="font-weight:600; color:#f28482;" id="displayOutfitCount">12 篇</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+              <span style="font-size:14px; color:#666;">命定色契合度</span>
+              <span style="font-weight:600; color:#84a59d;" id="displayMatchRate">85%</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span style="font-size:14px; color:#666;">常用色系</span>
+              <span style="font-weight:600; color:#333;" id="displayCommonColors">粉橘、米白</span>
+            </div>
+            
+            <div style="width:100%; height:6px; background:#eee; border-radius:10px; margin-top:20px; overflow:hidden;">
+              <div id="matchRateBar" style="width:85%; height:100%; background:var(--accent-main); transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);"></div>
+            </div>
+            <p style="font-size:11px; color:#999; margin-top:8px;">※ 根據您的穿搭紀錄自動分析 (開發模擬中)</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 開發模擬選項 -->
+      <div class="test-controls fade-in delay-1" style="background: rgba(255,255,255,0.7); padding: 12px 20px; border-radius: 12px; display: inline-flex; flex-direction: column; gap: 8px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); font-size: 14px; width:100%;">
+        <label for="mockApiSelector">※ 開發模擬：切換當下會員身份來更新推薦色卡</label>
+        <select id="mockApiSelector" onchange="updateProfileColor(this.value, true)">
+          <optgroup label="Spring 春季型">
+            <option value="light-spring">Light Spring 亮春型</option>
+            <option value="warm-spring" selected>Warm Spring 暖春型</option>
+            <option value="bright-spring">Bright Spring 豔春型</option>
+          </optgroup>
+          <optgroup label="Summer 夏季型">
+            <option value="light-summer">Light Summer 亮夏型</option>
+            <option value="cool-summer">Cool Summer 冷夏型</option>
+            <option value="soft-summer">Soft Summer 柔夏型</option>
+          </optgroup>
+          <optgroup label="Autumn 秋季型">
+            <option value="soft-autumn">Soft Autumn 柔秋型</option>
+            <option value="warm-autumn">Warm Autumn 暖秋型</option>
+            <option value="deep-autumn">Deep Autumn 深秋型</option>
+          </optgroup>
+          <optgroup label="Winter 冬季型">
+            <option value="bright-winter">Bright Winter 豔冬型</option>
+            <option value="cool-winter">Cool Winter 冷冬型</option>
+            <option value="deep-winter">Deep Winter 深冬型</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <!-- 下方三個小卡片 -->
+      <div class="dash-bottom-grid">
+        <div class="dash-card bottom-card">
+          <h3 class="bottom-card-title">穿搭日記</h3>
+          <div class="outfit-upload-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2" style="margin-bottom: 12px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            <button class="btn-pink-pill" style="margin-bottom: 0;">選擇照片</button>
+          </div>
+          <textarea id="outfitTextInput" class="outfit-input" rows="3" placeholder="寫下今天的穿搭心情..."></textarea>
+          <button class="btn-pink-pill" style="width: 100%; margin-top: 12px; padding: 10px;" onclick="mockSubmitOutfit()">發布日記 (開發模擬)</button>
+        </div>
+
+        <div class="dash-card bottom-card">
+          <h3 class="bottom-card-title">色彩分析紀錄</h3>
+          <ul class="history-list" id="analysisHistoryList"></ul>
+        </div>
+
+        <div class="dash-card bottom-card">
+          <h3 class="bottom-card-title">穿搭回憶日記</h3>
+          <div id="outfitHistoryList" style="display: flex; flex-direction: column; gap: 10px;">
+            <div class="empty-state">尚未有穿搭紀錄</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer class="main-footer">
+    &copy; 2026 色彩鑑定. All Rights Reserved.
+  </footer>
+
+  <script>
+    function toggleMenu() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+
+    // 讀取後端資料與本地儲存
+    window.addEventListener('DOMContentLoaded', () => {
+      fetch('api_user.php')
+      .then(res => res.json())
+      .then(data => {
+        if(data.status === 'success' || data.logged_in === true) {
+          const user = data.user;
+          const name = user.name || user.username || 'User';
+          document.getElementById('displayUserName').textContent = name;
+          document.getElementById('displayUserEmail').textContent = user.email || '';
+          
+          const genderElem = document.getElementById('displayGender');
+          const birthdayElem = document.getElementById('displayBirthday');
+          if(genderElem) {
+            genderElem.textContent = user.gender === 'male' ? '♂ 男生' : (user.gender === 'female' ? '♀ 女生' : '未知');
+          }
+          if(birthdayElem) {
+            birthdayElem.textContent = user.birthday ? `🎂 ${user.birthday}` : '尚未設定生日';
+          }
+
+          if (user.avatar) {
+            const avatarContainer = document.querySelector('.avatar-large');
+            if(avatarContainer) avatarContainer.innerHTML = `<img src="${user.avatar}" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover; background-color:#fff;">`;
+          } else {
+            const charElem = document.getElementById('displayAvatarChar');
+            if(charElem) charElem.textContent = name.charAt(0).toUpperCase();
+          }
+        } else {
+          window.location.href = 'newlogin.html';
+        }
+      })
+      .catch(err => console.error('Fetch error:', err));
+
+      renderHistory();
+      renderOutfitHistory();
+    });
+
+    // ================= 動態色彩分析結果渲染 (開發模擬用) =================
+    const apiDataMock = {
+      "light-spring": { title: "亮春型", desc: "適合高明度的馬卡龍色，如蜜桃粉或薄荷綠。", colors: ["#FFC5B3", "#A8E6CF", "#FFF1B0", "#BBE5F1"], stats: { rate: 92, colors: "蜜桃粉、薄荷綠" } },
+      "warm-spring": { title: "暖春型", desc: "適合黃色基調明顯、飽和度中上的色彩，如珊瑚橘。", colors: ["#FA9F7A", "#FDF4CD", "#F7D060", "#B4D661"], stats: { rate: 85, colors: "粉橘、米白" } },
+      "bright-spring": { title: "豔春型", desc: "關鍵在於「對比」。適合清脆色彩，如亮星黃、康乃馨粉。", colors: ["#FCEE21", "#F98BBB", "#6EEB83", "#4E8DF5"], stats: { rate: 78, colors: "亮黃、桃紅" } },
+      "light-summer": { title: "亮夏型", desc: "適合粉質、帶冷調的淡色，如嬰兒藍。", colors: ["#ADD8E6", "#E0BBE4", "#F5C6D6", "#C3ECD0"], stats: { rate: 88, colors: "天空藍、淡紫" } },
+      "cool-summer": { title: "冷夏型", desc: "適合純粹的冷色，如天藍、冰粉紅。", colors: ["#7EB6FF", "#F0BEE3", "#9CE1D9", "#BEA9DE"], stats: { rate: 82, colors: "寶石藍、冷粉" } },
+      "soft-summer": { title: "柔夏型", desc: "最具莫蘭迪感。適合煙灰粉、鼠尾草綠。", colors: ["#CCACB1", "#9EAF9B", "#8E9EAB", "#9D96A8"], stats: { rate: 75, colors: "煙燻粉、灰藍" } },
+      "soft-autumn": { title: "柔秋型", desc: "適合大地色，如藕荷色、卡其色。", colors: ["#C4B1A7", "#C2B280", "#BD8D84", "#9F9A7B"], stats: { rate: 80, colors: "卡其、藕粉" } },
+      "warm-autumn": { title: "暖秋型", desc: "適合楓葉紅、芥末黃、鐵鏽橘。", colors: ["#B45B4B", "#D7A643", "#B9663B", "#7A8143"], stats: { rate: 90, colors: "楓葉紅、芥末黃" } },
+      "deep-autumn": { title: "深秋型", desc: "適合濃郁色彩，如森林綠、巧克力色。", colors: ["#385E3A", "#5B3C31", "#6A2C31", "#975A28"], stats: { rate: 84, colors: "森林綠、深咖" } },
+      "bright-winter": { title: "豔冬型", desc: "適合皇家藍、檸檬黃。", colors: ["#2752E1", "#EDEF3D", "#E32148", "#08B46C"], stats: { rate: 86, colors: "鮮紅、亮藍" } },
+      "cool-winter": { title: "冷冬型", desc: "極致冷色，如寶石藍、純白。", colors: ["#1A4EB1", "#7D2894", "#D43962", "#FFFFFF"], stats: { rate: 95, colors: "純白、深紫" } },
+      "deep-winter": { title: "深冬型", desc: "適合酒紅、午夜藍。", colors: ["#420D09", "#191970", "#301934", "#E5E4E2"], stats: { rate: 82, colors: "酒紅、深藍" } }
+    };
+
+    function updateProfileColor(typeId, isNewTest = false) {
+      if (!typeId || !apiDataMock[typeId]) return;
+      const colorData = apiDataMock[typeId];
+      document.getElementById('profileSeasonTitle').textContent = colorData.title;
+      document.getElementById('profileSeasonDesc').textContent = colorData.desc;
+      
+      if(colorData.stats) {
+        document.getElementById('displayMatchRate').textContent = colorData.stats.rate + '%';
+        document.getElementById('displayCommonColors').textContent = colorData.stats.colors;
+        document.getElementById('matchRateBar').style.width = colorData.stats.rate + '%';
+      }
+
+      const swatchesContainer = document.getElementById('profileSwatches');
+      swatchesContainer.innerHTML = '';
+      colorData.colors.forEach(hexColor => {
+        const circle = document.createElement('div');
+        circle.className = 'swatch-circle';
+        circle.style.backgroundColor = hexColor;
+        swatchesContainer.appendChild(circle);
+      });
+
+      localStorage.setItem('userColorType', typeId);
+      if (isNewTest) {
+        const today = new Date();
+        const dateString = `${today.getFullYear()}/${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getDate()).padStart(2, '0')}`;
+        let savedHistory = JSON.parse(localStorage.getItem('appColorHistory') || '[]');
+        savedHistory.unshift({ date: dateString, title: colorData.title });
+        if(savedHistory.length > 10) savedHistory.pop();
+        localStorage.setItem('appColorHistory', JSON.stringify(savedHistory));
+        renderHistory();
+      }
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('analysisHistoryList');
+      if(!container) return;
+      const history = JSON.parse(localStorage.getItem('appColorHistory') || '[]');
+      if(history.length === 0) {
+        container.innerHTML = '<li style="justify-content:center; color:#aaa;">尚未有分析紀錄</li>';
+        return;
+      }
+      container.innerHTML = history.map(item => `<li class="history-item-row"><span>${item.date} - ${item.title}</span></li>`).join('');
+    }
+
+    function renderOutfitHistory() {
+      const container = document.getElementById('outfitHistoryList');
+      if(!container) return;
+      const history = JSON.parse(localStorage.getItem('appOutfitHistory') || '[]');
+      
+      const countElem = document.getElementById('displayOutfitCount');
+      if(countElem) {
+        countElem.textContent = (history.length > 0 ? history.length : 12) + ' 篇';
+      }
+
+      if(history.length === 0) {
+        container.innerHTML = '<div class="empty-state">尚未有穿搭紀錄</div>';
+        return;
+      }
+      container.innerHTML = history.map(item => `
+        <div style="background:rgba(255,255,255,0.6); padding:12px; border-radius:8px; font-size:14px; box-shadow:0 2px 8px rgba(0,0,0,0.02); margin-bottom:10px;">
+          <div style="color:var(--text-color); font-weight:500; margin-bottom:4px;">${item.date}</div>
+          <div style="color:#666; line-height:1.4;">${item.text}</div>
+        </div>
+      `).join('');
+    }
+
+    function mockSubmitOutfit() {
+      const input = document.getElementById('outfitTextInput');
+      const text = input.value.trim();
+      if(!text) return alert("請輸入內容");
+      const today = new Date();
+      const dateString = `${today.getFullYear()}/${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getDate()).padStart(2, '0')}`;
+      let history = JSON.parse(localStorage.getItem('appOutfitHistory') || '[]');
+      history.unshift({ date: dateString, text: text });
+      if(history.length > 5) history.pop();
+      localStorage.setItem('appOutfitHistory', JSON.stringify(history));
+      input.value = '';
+      renderOutfitHistory();
+    }
+
+    function mockAvatar(type) {
+      const avatarContainer = document.querySelector('.avatar-large');
+      if (!avatarContainer) return;
+      let seed = type === 'female' ? 'Lily' : (type === 'male' ? 'Jack' : 'Alex');
+      const url = `https://api.dicebear.com/7.x/notionists/svg?seed=${seed}`;
+      avatarContainer.innerHTML = `<img src="${url}" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover; background-color:#fff;">`;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedType = localStorage.getItem('userColorType');
+      if (savedType && apiDataMock[savedType]) {
+        updateProfileColor(savedType, false);
+        const selector = document.getElementById('mockApiSelector');
+        if(selector) selector.value = savedType;
+      }
+    });
+  </script>
+  <script src="js/three-bg.js"></script>
+</body>
+</html>

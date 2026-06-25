@@ -1,0 +1,275 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>色彩分析鏡頭 - 個人色彩鑑定 App</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css?v=6">
+  <style>
+    /* 覆蓋 body 確保相機為深色沉浸式體驗 */
+    body {
+      background-color: #1a1a1a;
+      overflow: hidden; /* 防止滾動 */
+    }
+
+    /* 頂部導航列回覆深色系，隱藏非必要元件 */
+    .camera-header {
+      position: fixed;
+      top: 0; left: 0; width: 100%;
+      padding: 20px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      z-index: 100;
+    }
+    
+    .btn-close {
+      width: 44px; height: 44px;
+      background: rgba(0,0,0,0.5); border-radius: 50%;
+      display: flex; justify-content: center; align-items: center;
+      color: #fff; font-size: 24px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px); transition: all 0.3s; text-decoration: none;
+    }
+    .btn-close:hover { background: rgba(255,255,255,0.2); transform: scale(1.05); }
+
+    .camera-title {
+      color: #fff; font-size: 16px; letter-spacing: 0.15em; font-weight: 500;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    /* 相機主畫面 */
+    .camera-view-container {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100dvh;
+      overflow: hidden; display: flex; justify-content: center; align-items: center;
+    }
+
+    #webcam {
+      width: 100%; height: 100%; object-fit: cover;
+      transform: scaleX(-1); /* 鏡像顯示 */
+      opacity: 0; transition: opacity 0.5s ease;
+    }
+
+    /* 模糊霧面遮罩 (Cutout) */
+    .blur-overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 12, 10, 0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      /* 利用遮罩挖空臉部區域 */
+      mask-image: radial-gradient(ellipse 130px 180px at 50% 42%, transparent 99%, black 100%);
+      -webkit-mask-image: radial-gradient(ellipse 130px 180px at 50% 42%, transparent 99%, black 100%);
+      z-index: 10;
+    }
+
+    /* 虛線導引框 */
+    .face-guide {
+      position: absolute; top: 42%; left: 50%; transform: translate(-50%, -50%);
+      width: 260px; height: 360px; border-radius: 50%;
+      border: 1.5px dashed rgba(255, 255, 255, 0.6);
+      z-index: 15; transition: all 0.5s ease;
+    }
+    .face-guide.good-light { border-color: #6EEB83; box-shadow: 0 0 20px rgba(110, 235, 131, 0.3) inset; }
+    .face-guide.scanning {
+      border-color: var(--accent-main);
+      box-shadow: 0 0 30px rgba(242, 132, 130, 0.5); border-style: solid;
+      animation: pulseFrame 1.5s infinite alternate;
+    }
+
+    @keyframes pulseFrame {
+      0% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 10px rgba(242, 132, 130, 0.2); }
+      100% { transform: translate(-50%, -50%) scale(1.02); box-shadow: 0 0 40px rgba(242, 132, 130, 0.8); }
+    }
+
+    /* AI 掃描光束 */
+    .scan-beam {
+      position: absolute; top: 0; left: 0; width: 100%; height: 50px;
+      background: linear-gradient(to bottom, transparent, rgba(242, 132, 130, 0.8), transparent);
+      z-index: 16; opacity: 0; 
+      /* 動畫會在 JS 中套用 */
+    }
+    @keyframes scanMotion {
+      0% { top: 0; }
+      100% { top: calc(100% - 50px); }
+    }
+
+    /* 底部操作區 */
+    .camera-footer {
+      position: absolute; bottom: 0; left: 0; width: 100%;
+      padding: 30px 24px 60px 24px;
+      display: flex; flex-direction: column; align-items: center; gap: 32px;
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+      z-index: 20;
+    }
+
+    /* 動態狀態列 */
+    .status-bar {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      padding: 12px 24px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.1);
+      color: #fff; font-size: 14px; letter-spacing: 0.1em; transition: all 0.4s ease;
+      /* Glowing effect for specific statuses */
+    }
+    .status-bar.analyzing { background: var(--accent-main); border-color: transparent; }
+
+    /* 高質感快門鈕 */
+    .shutter-wrapper { position: relative; width: 76px; height: 76px; display: flex; justify-content: center; align-items: center; }
+    .shutter-ring {
+      position: absolute; inset: 0; border: 3px solid #fff; border-radius: 50%; opacity: 0.8; transition: all 0.3s;
+    }
+    .shutter-btn {
+      width: 60px; height: 60px; background: #fff; border-radius: 50%; border: none; cursor: pointer; transition: all 0.3s;
+    }
+    .shutter-wrapper:hover .shutter-btn { transform: scale(0.95); }
+    .shutter-wrapper:hover .shutter-ring { transform: scale(1.05); }
+    .shutter-btn:disabled { opacity: 0.5; pointer-events: none; }
+
+    /* 假閃光燈 */
+    #flash {
+      position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 999;
+    }
+    @keyframes flashFx {
+      0% { opacity: 0.8; }
+      100% { opacity: 0; }
+    }
+    .flash-active { animation: flashFx 0.8s ease-out; }
+
+  </style>
+</head>
+<body>
+
+  <!-- 頂部按鈕 -->
+  <header class="camera-header fade-in">
+    <a href="index.html#main-app" class="btn-close">×</a>
+    <div class="camera-title">色彩鑑定</div>
+    <div style="width: 44px;"></div> <!-- 排版用空間佔位 -->
+  </header>
+
+  <!-- 相機與疊加 UI -->
+  <div class="camera-view-container">
+    <video id="webcam" autoplay playsinline></video>
+    <div class="blur-overlay"></div>
+    
+    <div class="face-guide" id="faceGuide">
+      <div class="scan-beam" id="scanBeam"></div>
+    </div>
+
+    <!-- 底部控制 -->
+    <div class="camera-footer fade-in delay-1">
+      <div class="status-bar" id="statusBar">
+        <span id="statusIcon">⚙️</span>
+        <span id="statusText">正在啟動鏡頭...</span>
+      </div>
+
+      <div class="shutter-wrapper" id="shutterContainer">
+        <div class="shutter-ring"></div>
+        <button class="shutter-btn" id="shutterBtn" onclick="startAnalysis()" disabled></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="flash"></div>
+
+  <script>
+    const webcamFile = document.getElementById('webcam');
+    const statusBar = document.getElementById('statusBar');
+    const statusText = document.getElementById('statusText');
+    const statusIcon = document.getElementById('statusIcon');
+    const shutterBtn = document.getElementById('shutterBtn');
+    const faceGuide = document.getElementById('faceGuide');
+    const scanBeam = document.getElementById('scanBeam');
+    const flash = document.getElementById('flash');
+
+    // 啟動相機
+    async function initCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user" }, // 前鏡頭
+          audio: false
+        });
+        webcamFile.srcObject = stream;
+        
+        webcamFile.onloadedmetadata = () => {
+          webcamFile.style.opacity = '1';
+          // 模擬 AI 光線偵測中
+          statusIcon.textContent = '✨';
+          statusText.textContent = '正在偵測光線環境...';
+          
+          setTimeout(() => {
+            statusIcon.textContent = '🎯';
+            statusText.textContent = '請將臉部對準虛線框';
+            faceGuide.classList.add('good-light'); // 變綠色或發光
+            shutterBtn.disabled = false;
+          }, 1500);
+        };
+      } catch (err) {
+        console.error("相機存取失敗", err);
+        statusIcon.textContent = '⚠️';
+        statusText.textContent = '無法存取相機，請檢查權限';
+      }
+    }
+
+    initCamera();
+
+    // 高級感分析動畫流程
+    function startAnalysis() {
+      // 1. 禁用快門並閃光
+      shutterBtn.disabled = true;
+      document.querySelector('.shutter-ring').style.display = 'none';
+      shutterBtn.style.transform = 'scale(0.5)';
+      shutterBtn.style.opacity = '0';
+      flash.classList.add('flash-active');
+      
+      // 凍結影像 (模擬拍照)
+      webcamFile.pause();
+
+      // 2. 狀態更新與掃描動畫
+      faceGuide.classList.remove('good-light');
+      faceGuide.classList.add('scanning');
+      scanBeam.style.opacity = '1';
+      scanBeam.style.animation = 'scanMotion 1s linear infinite alternate';
+      
+      statusBar.classList.add('analyzing');
+      statusIcon.textContent = '🔍';
+      statusText.textContent = '擷取 YCbCr 膚色特徵...';
+
+      // 3. 模擬專業分析步驟
+      setTimeout(() => {
+        statusText.textContent = '對映 Lab 色彩空間...';
+      }, 1500);
+
+      setTimeout(() => {
+        statusIcon.textContent = '📊';
+        statusText.textContent = '計算最佳提亮度與修飾色...';
+      }, 3000);
+
+      setTimeout(() => {
+        statusIcon.textContent = '✨';
+        statusText.textContent = '比對 12 型命定色資料庫...';
+      }, 4500);
+
+      // 4. 分析完成，跳轉結果頁
+      setTimeout(() => {
+        // 從我們建立的 12 種組合中隨機挑選一個
+        const types = [
+          "light-spring", "warm-spring", "bright-spring",
+          "light-summer", "cool-summer", "soft-summer",
+          "soft-autumn", "warm-autumn", "deep-autumn",
+          "bright-winter", "cool-winter", "deep-winter"
+        ];
+        const randomResult = types[Math.floor(Math.random() * types.length)];
+        
+        // 釋放相機資源
+        const tracks = webcamFile.srcObject.getTracks();
+        tracks.forEach(track => track.stop());
+
+        // 導向帶參數的命定色頁面
+        window.location.href = `destiny-color.html?type=${randomResult}`;
+      }, 6000);
+    }
+  </script>
+</body>
+</html>
+

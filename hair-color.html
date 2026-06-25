@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>專屬髮色推薦 - 個人色彩鑑定 App</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <link rel="stylesheet" href="css/style.css?v=6">
+  <style>
+    /* 主背景 */
+    body {
+      /* 移除硬編碼顏色，使用全域 style.css */
+    }
+
+    .editor-wrapper {
+      width: 100%;
+      display: flex; flex-direction: column; position: relative;
+    }
+
+    /* 頂部控制列 */
+    .editor-header {
+      padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; z-index: 10;
+    }
+    .btn-back {
+      width: 40px; height: 40px; background: #fff; border-radius: 50%;
+      display: flex; justify-content: center; align-items: center; color: var(--text-dark);
+      text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: all 0.3s;
+    }
+    .btn-reupload {
+      background: #fff; color: var(--text-dark); padding: 8px 16px; border-radius: 100px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05); font-size: 13px; font-weight: 500; cursor: pointer;
+      border: none; display: flex; align-items: center; gap: 6px; transition: all 0.3s;
+    }
+    .btn-reupload:hover, .btn-back:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+    .header-title { text-align: center; font-size: 16px; color: var(--text-dark); font-weight: 500; letter-spacing: 0.1em; }
+
+    /* 相片主視圖 (3:4) */
+    .photo-area {
+      flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 20px 20px 20px;
+    }
+    .photo-frame {
+      width: 100%; max-width: 400px; aspect-ratio: 3/4; background: #eee;
+      border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      position: relative; overflow: hidden; border: 6px solid #fff;
+    }
+
+    /* 預設照片載入 */
+    .user-image {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background-image: url('https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=600&q=80');
+      background-size: cover; background-position: center; transition: all 0.5s ease;
+    }
+
+    /* SVG 髮色面罩 */
+    .hair-mask-layer {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 5; pointer-events: none; mix-blend-mode: soft-light; transition: opacity 0.5s ease;
+    }
+    .hair-mask-dye { fill: #3D3A3F; transition: fill 0.3s ease; }
+
+    /* 重載特效 */
+    .scan-overlay {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 10;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      color: #fff; font-size: 14px; letter-spacing: 0.1em; opacity: 0; pointer-events: none; transition: 0.3s;
+    }
+    .scan-overlay.active { opacity: 1; }
+    .scan-line {
+      width: 100%; height: 4px; background: var(--accent-main); box-shadow: 0 0 10px var(--accent-main);
+      position: absolute; top: 0; left: 0; animation: scanPan 1s infinite alternate ease-in-out;
+    }
+    @keyframes scanPan { 0% { top: 0%; } 100% { top: 100%; } }
+
+    /* Three.js 粒子畫布 */
+    #threeCanvas {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      z-index: -1; pointer-events: none;
+    }
+    .editor-wrapper { position: relative; z-index: 1; }
+
+    /* 底部選色器 — Glassmorphism Pro */
+    .editor-footer {
+      background: rgba(255,255,255,0.72);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border-radius: 32px 32px 0 0;
+      padding: 28px 0 44px 0;
+      box-shadow: 0 -2px 40px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+      border-top: 1px solid rgba(255,255,255,0.6);
+      display: flex; flex-direction: column; align-items: center; z-index: 20;
+    }
+    .season-tag {
+      background: linear-gradient(135deg, rgba(242,132,130,0.15), rgba(255,182,160,0.2));
+      color: var(--accent-main);
+      padding: 7px 20px; border-radius: 100px; font-size: 13px;
+      letter-spacing: 0.12em; font-weight: 600; margin-bottom: 22px;
+      border: 1px solid rgba(242,132,130,0.25);
+      box-shadow: 0 4px 16px rgba(242,132,130,0.12);
+    }
+
+    /* 色系標題列 */
+    .palette-section-title {
+      font-size: 10px; letter-spacing: 0.25em; color: #b0a8a8;
+      text-transform: uppercase; margin: 4px 0 12px 0; width: 100%;
+      text-align: center;
+    }
+
+    .color-carousel {
+      width: 100%; display: flex; flex-wrap: wrap;
+      justify-content: center; gap: 14px 16px; padding: 0 20px 16px 20px;
+      align-items: flex-end;
+    }
+
+    /* 3D Glass Sphere 色票 */
+    .color-item {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 7px; cursor: pointer; flex-shrink: 0;
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .color-swatch {
+      width: 52px; height: 52px; border-radius: 50%;
+      position: relative; border: 2.5px solid rgba(255,255,255,0.9);
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow:
+        0 4px 12px rgba(0,0,0,0.15),
+        inset 0 -4px 8px rgba(0,0,0,0.15),
+        inset 0 4px 8px rgba(255,255,255,0.35);
+    }
+    /* 球型高光 */
+    .color-swatch::before {
+      content: ''; position: absolute;
+      top: 8px; left: 10px;
+      width: 40%; height: 35%;
+      background: radial-gradient(ellipse, rgba(255,255,255,0.7) 0%, transparent 80%);
+      border-radius: 50%; pointer-events: none;
+    }
+    .color-item.active .color-swatch {
+      transform: translateY(-10px) scale(1.18);
+      box-shadow:
+        0 16px 32px rgba(0,0,0,0.2),
+        inset 0 -4px 10px rgba(0,0,0,0.2),
+        inset 0 4px 10px rgba(255,255,255,0.4),
+        0 0 0 3px var(--accent-main);
+    }
+    .color-item.active .color-swatch::after {
+      content: '✓'; position: absolute;
+      top: -6px; right: -6px;
+      background: linear-gradient(135deg, var(--accent-main), #f87171);
+      color: #fff; font-size: 9px; font-weight: 700;
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; justify-content: center; align-items: center;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 8px rgba(242,132,130,0.5);
+    }
+    .color-name {
+      font-size: 11px; color: #9a9090;
+      font-weight: 400; letter-spacing: 0.06em;
+      transition: all 0.3s; white-space: nowrap;
+      font-family: 'Noto Serif TC', serif;
+    }
+    .color-item.active .color-name {
+      color: var(--text-dark); font-weight: 600;
+      transform: translateY(-4px);
+      font-size: 12px;
+    }
+
+    /* 自訂調色鈕 — 彩虹漩渦 */
+    .custom-color-btn .color-swatch {
+      background: conic-gradient(
+        hsl(0,80%,65%), hsl(40,80%,65%), hsl(80,70%,60%),
+        hsl(160,70%,55%), hsl(200,75%,60%), hsl(260,75%,65%),
+        hsl(310,75%,65%), hsl(360,80%,65%)
+      );
+      animation: spinHue 4s linear infinite;
+    }
+    @keyframes spinHue {
+      from { filter: hue-rotate(0deg); }
+      to   { filter: hue-rotate(360deg); }
+    }
+    #nativeColorPicker {
+      position: absolute; opacity: 0; width: 100%; height: 100%; top: 0; left: 0; cursor: pointer;
+    }
+
+    /* 分隔線 */
+    .palette-divider {
+      width: calc(100% - 48px); height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,0,0,0.07), transparent);
+      margin: 8px 0;
+    }
+
+    /* 開發者切換 */
+    .dev-controls {
+      background: #f8f8f8; border: 1px dashed var(--accent-main); border-radius: 12px;
+      padding: 12px; margin: 0 24px 20px 24px; display: flex; flex-direction: column; gap: 6px;
+    }
+    .dev-controls label { font-size: 12px; color: var(--accent-main); }
+    .dev-controls select { padding: 8px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); }
+
+    /* === 真實相機 Modal === */
+    .camera-modal {
+      position: fixed; inset: 0; background: #000; z-index: 999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: 0.4s ease;
+    }
+    .camera-modal.active { opacity: 1; pointer-events: auto; }
+    
+    #live-webcam {
+      width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);
+    }
+    .cam-close {
+      position: absolute; top: 30px; left: 30px; width: 44px; height: 44px;
+      background: rgba(0,0,0,0.5); border-radius: 50%; color: #fff; font-size: 24px;
+      display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10;
+    }
+    
+    /* 臉部導引框 */
+    .cam-guide {
+      position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
+      width: 250px; height: 320px; border-radius: 50%; border: 2px dashed rgba(255,255,255,0.7);
+      box-shadow: 0 0 0 2000px rgba(0,0,0,0.4); pointer-events: none;
+    }
+    .cam-guide-text {
+      position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%);
+      color: #fff; font-size: 15px; letter-spacing: 0.1em; text-align: center; white-space: nowrap;
+    }
+
+    .shutter-wrapper {
+      position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
+      width: 80px; height: 80px; border: 3px solid #fff; border-radius: 50%;
+      display: flex; justify-content: center; align-items: center; cursor: pointer;
+    }
+    .shutter-btn {
+      width: 64px; height: 64px; background: #fff; border-radius: 50%; transition: 0.2s;
+    }
+    .shutter-wrapper:active .shutter-btn { transform: scale(0.9); }
+    
+    .flash-fx {
+      position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 1000;
+    }
+    .flash-fx.show { animation: cameraFlash 0.6s ease-out; }
+    @keyframes cameraFlash { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+    /* ========================================
+       🆕 新功能一：跨頁面智慧導航提示條
+    ======================================== */
+    .smart-nav-banner {
+      display: none;
+      background: linear-gradient(135deg, #FFF9F3 0%, #FFF0E1 100%);
+      border: 1px solid rgba(224, 169, 109, 0.4);
+      border-radius: 16px;
+      padding: 16px 22px;
+      font-size: 13.5px;
+      color: #7A5230;
+      line-height: 1.6;
+      margin: 0 24px 20px 24px;
+      box-shadow: 0 4px 20px rgba(224, 169, 109, 0.12);
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+      animation: bannerSlideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .smart-nav-banner.show {
+      display: block;
+    }
+    .smart-nav-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle, rgba(255, 200, 120, 0.2) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .smart-nav-banner .banner-icon {
+      font-size: 18px;
+      margin-right: 6px;
+    }
+    .smart-nav-banner .banner-title {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: #5A3A1A;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .smart-nav-banner .banner-body {
+      font-size: 13px;
+      color: #8B6040;
+      line-height: 1.6;
+    }
+    .smart-nav-banner .banner-highlight {
+      font-weight: 700;
+      color: #C0652A;
+      background: rgba(192, 101, 42, 0.08);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+    .smart-nav-banner .banner-close {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.05);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #A07050;
+      transition: all 0.2s;
+    }
+    .smart-nav-banner .banner-close:hover {
+      background: rgba(0,0,0,0.1);
+      transform: scale(1.1);
+    }
+    @keyframes bannerSlideIn {
+      from { opacity: 0; transform: translateY(-12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ========================================
+       🆕 新功能二：專屬染髮提案與護色小卡
+    ======================================== */
+    .proposal-card {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-radius: 24px;
+      padding: 28px 26px;
+      margin: 24px 24px 0 24px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      font-family: 'Noto Serif TC', serif;
+      color: #2A2525;
+      text-align: left;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .proposal-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .proposal-card .proposal-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 22px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+    .proposal-card .proposal-color-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 3px solid #FFF;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.12),
+                  inset 0 -2px 4px rgba(0,0,0,0.1),
+                  inset 0 2px 4px rgba(255,255,255,0.3);
+      transition: background-color 0.4s ease;
+      flex-shrink: 0;
+    }
+    .proposal-card .proposal-title-area h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: #1A1A1A;
+      letter-spacing: 0.04em;
+    }
+    .proposal-card .proposal-title-area .proposal-hex {
+      font-size: 11px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: #9A8E8E;
+      margin-top: 3px;
+      letter-spacing: 0.05em;
+    }
+    .proposal-card .proposal-content {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .proposal-card .proposal-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .proposal-card .proposal-row-icon {
+      font-size: 18px;
+      margin-top: 1px;
+      width: 24px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .proposal-card .proposal-row-label {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #A09090;
+      margin-bottom: 4px;
+      letter-spacing: 0.08em;
+    }
+    .proposal-card .proposal-row-value {
+      font-size: 14px;
+      color: #4A4040;
+      line-height: 1.65;
+      transition: opacity 0.3s ease;
+    }
+    .proposal-card .proposal-empty-hint {
+      text-align: center;
+      color: #B8A8A8;
+      font-size: 13px;
+      padding: 20px 0;
+      letter-spacing: 0.06em;
+    }
+
+    /* 新功能區塊分隔標題 */
+    .new-feature-divider {
+      width: calc(100% - 48px);
+      margin: 30px auto 20px auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .new-feature-divider::before,
+    .new-feature-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(200, 150, 100, 0.3), transparent);
+    }
+    .new-feature-divider .divider-label {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      color: #C0956B;
+      font-weight: 500;
+      white-space: nowrap;
+      font-family: 'Noto Serif TC', serif;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Three.js 粒子背景 -->
+  <canvas id="threeCanvas"></canvas>
+
+  <button class="fixed-hamburger mobile-ui-only" onclick="toggleMenu()">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <div class="sidebar-overlay mobile-ui-only" id="sidebarOverlay" onclick="toggleMenu()"></div>
+  <aside class="sidebar mobile-ui-only" id="sidebar">
+    <div class="sidebar-header">
+      <h2>功能選單</h2>
+      <button class="close-btn" onclick="toggleMenu()">×</button>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="index.html#main-app">首頁</a></li>
+      <li><a href="destiny-color.html">我的命定色</a></li>
+      <li><a href="makeup-test.html">彩妝品顏色檢測</a></li>
+      <li><a href="color-match.html">顏色搭配推薦</a></li>
+      <li><a href="hair-color.html">髮色推薦</a></li>
+      <li><a href="newaccount.html">我的帳戶</a></li>
+    </ul>
+  </aside>
+
+  <!-- 電腦版頂部選單 (與 destiny-color 一致) -->
+  <header class="main-header">
+    <div class="header-container">
+      <div class="logo">色彩鑑定</div>
+      <nav class="desktop-nav desktop-ui-only">
+        <a href="index.html#main-app">首頁</a>
+        <a href="destiny-color.html">我的命定色</a>
+        <a href="makeup-test.html">彩妝品顏色檢測</a>
+        <a href="color-match.html">顏色搭配推薦</a>
+        <a href="hair-color.html" class="active">髮色推薦</a>
+        <a href="newaccount.html">我的帳戶</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="app-container">
+    <div class="content-wrapper">
+      <h1 class="page-title fade-in delay-1">專屬髮色渲染推薦</h1>
+      
+      <div style="display:flex; gap: 12px; margin-bottom: 24px; width: 100%; justify-content: center;">
+        <button class="btn-pink-pill" style="margin-bottom:0;" onclick="openCamera()">📷 拍攝</button>
+        <button class="btn-pink-pill" style="margin-bottom:0; background:#84a59d;" onclick="triggerUpload()">📁 上傳照片</button>
+        <input type="file" id="fileUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+      </div>
+
+      <!-- 🆕 新功能一：跨頁面智慧導航提示條 -->
+      <div class="smart-nav-banner" id="smartNavBanner">
+        <button class="banner-close" onclick="dismissSmartBanner()">×</button>
+        <div class="banner-title">
+          <span class="banner-icon">✨</span>
+          <span>智慧偵測結果</span>
+        </div>
+        <div class="banner-body" id="smartNavBody">
+          <!-- 動態填入 -->
+        </div>
+      </div>
+
+      <div class="dev-controls fade-in delay-1">
+        <label>※ 開發模擬：切換當下會員身份來更新推薦色卡</label>
+        <select id="seasonSelector" onchange="renderCarousel(this.value)">
+          <option value="spring">春季型會員 (預設)</option>
+          <option value="summer">夏季型會員</option>
+          <option value="autumn">秋季型會員</option>
+          <option value="winter">冬季型會員</option>
+        </select>
+      </div>
+
+    <div class="photo-area fade-in delay-2">
+      <div class="photo-frame">
+        <div class="user-image" id="userPhoto"></div>
+        
+        <svg class="hair-mask-layer" id="hairOverlay" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice">
+          <!-- AI 智能框選模擬 -->
+          <path class="hair-mask-dye" id="hairDye" d="M150,0 C60,0 20,120 0,250 L0,400 L80,400 C80,300 100,200 150,180 C200,200 220,300 220,400 L300,400 L300,250 C280,120 240,0 150,0 Z" />
+        </svg>
+
+        <div class="scan-overlay" id="scanUI">
+          <div class="scan-line"></div>
+          <div style="font-size:32px; margin-bottom:12px;">🔍</div>
+          <div>正在分析相片膚色特徵...</div>
+          <div style="font-size:12px; opacity:0.7; margin-top:8px;">重新提取頭髮邊界邊緣</div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="editor-footer fade-in delay-3">
+      <div class="season-tag" id="seasonTag">✨ 春季型 命定推薦髮色</div>
+
+      <div class="color-carousel" id="colorCarousel">
+        <!-- 動態色盤 -->
+      </div>
+    </footer>
+
+    <!-- 🆕 新功能二：專屬染髮提案與護色小卡 -->
+    <div class="new-feature-divider">
+      <span class="divider-label">✦ 專屬染髮提案報告 ✦</span>
+    </div>
+
+    <div class="proposal-card" id="proposalCard">
+      <div class="proposal-header">
+        <div class="proposal-color-dot" id="proposalDot" style="background-color: #9A6A46;"></div>
+        <div class="proposal-title-area">
+          <h3 id="proposalName">焦糖瑪奇朵</h3>
+          <div class="proposal-hex" id="proposalHex">#9A6A46</div>
+        </div>
+      </div>
+      <div class="proposal-content">
+        <div class="proposal-row">
+          <div class="proposal-row-icon">🧪</div>
+          <div>
+            <div class="proposal-row-label">推薦染膏配比方向</div>
+            <div class="proposal-row-value" id="proposalFormula">以 8 度的溫潤金黃栗色為基底，調入 15% 溫和焦糖橙調，展現輕盈絲滑的高級暖光質感。</div>
+          </div>
+        </div>
+        <div class="proposal-row">
+          <div class="proposal-row-icon">💄</div>
+          <div>
+            <div class="proposal-row-label">適合的妝容搭配</div>
+            <div class="proposal-row-value" id="proposalMakeup">適合搭配蜜桃色、杏色系腮紅，眼妝可使用暖金色微光亮粉，唇部抹上透亮肉桂奶茶色。</div>
+          </div>
+        </div>
+        <div class="proposal-row">
+          <div class="proposal-row-icon">🧴</div>
+          <div>
+            <div class="proposal-row-label">專屬護色洗髮精建議</div>
+            <div class="proposal-row-value" id="proposalShampoo">建議使用含有溫和植物精油的暖色調補色洗髮精，維持髮絲內部的焦糖金黃麥芽光澤。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    </div>
+  </main>
+
+  <!-- 真實相機介面 -->
+  <div class="camera-modal" id="cameraModal">
+    <div class="cam-close" onclick="closeCamera()">×</div>
+    <video id="live-webcam" autoplay playsinline></video>
+    
+    <div class="cam-guide">
+      <div class="cam-guide-text">請將頭部與頭髮對準虛線區域內<br><span style="font-size:12px; opacity:0.8;">拍攝後將自動為照片上色</span></div>
+    </div>
+
+    <div class="shutter-wrapper" onclick="takePhoto()">
+      <div class="shutter-btn"></div>
+    </div>
+
+    <div class="flash-fx" id="flashFx"></div>
+  </div>
+
+  <!-- 用於處理照片的隱藏畫布 -->
+  <canvas id="snapshotCanvas" style="display:none;"></canvas>
+
+  <script>
+    function toggleMenu() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+
+    // === 色彩管理邏輯 ===
+    const hairColorData = {
+      spring: {
+        tag: "🌷 春季型 命定髮色",
+        accent: "#C8956B",
+        particleColor: 0xf5c8a0,
+        groups: [
+          { title: "✦ 奶茶系", colors: [
+            { name: "焦糖瑪奇朵", hex: "#9A6A46" },
+            { name: "蜜茶棕",     hex: "#A67B5B" },
+            { name: "亞麻奶茶",   hex: "#C4A882" },
+            { name: "燕麥拿鐵",   hex: "#D4C0A0" }
+          ]},
+          { title: "✦ 暖金系", colors: [
+            { name: "琥珀金棕",   hex: "#B8782A" },
+            { name: "暖銅橘",     hex: "#C4724A" },
+            { name: "杏桃棕",     hex: "#C8956B" },
+            { name: "日落栗",     hex: "#8F5830" }
+          ]}
+        ]
+      },
+      summer: {
+        tag: "🌸 夏季型 命定髮色",
+        accent: "#8B9DC3",
+        particleColor: 0xc8d8f0,
+        groups: [
+          { title: "✦ 霧感冷棕", colors: [
+            { name: "霧灰棕",   hex: "#8A7F79" },
+            { name: "冷萃茶棕", hex: "#6B6065" },
+            { name: "薰衣草灰", hex: "#9B95A8" },
+            { name: "珠光霧棕", hex: "#A09298" }
+          ]},
+          { title: "✦ 煙燻深色", colors: [
+            { name: "煙燻奶茶", hex: "#7A6A65" },
+            { name: "冷調藍黑", hex: "#3D3D4F" },
+            { name: "霧夜黑",   hex: "#3A3640" },
+            { name: "深邃可可", hex: "#5A4E58" }
+          ]}
+        ]
+      },
+      autumn: {
+        tag: "🍁 秋季型 命定髮色",
+        accent: "#A05A2C",
+        particleColor: 0xe8a870,
+        groups: [
+          { title: "✦ 深秋大地", colors: [
+            { name: "巧克力棕", hex: "#4A3326" },
+            { name: "摩卡棕",   hex: "#6A4535" },
+            { name: "紅茶棕",   hex: "#7A4030" },
+            { name: "深秋磚紅", hex: "#8B4040" }
+          ]},
+          { title: "✦ 橡木暖棕", colors: [
+            { name: "榛果棕",   hex: "#7A5535" },
+            { name: "焦糖栗子", hex: "#8B5025" },
+            { name: "暖栗棕",   hex: "#6B4028" },
+            { name: "琥珀橡木", hex: "#9A6035" }
+          ]}
+        ]
+      },
+      winter: {
+        tag: "❄️ 冬季型 命定髮色",
+        accent: "#6080B0",
+        particleColor: 0xa0c0f0,
+        groups: [
+          { title: "✦ 曜石深黑", colors: [
+            { name: "曜石黑",   hex: "#1A1820" },
+            { name: "藍黑棕",   hex: "#252535" },
+            { name: "深邃黑",   hex: "#151518" },
+            { name: "冷夜黑",   hex: "#202028" }
+          ]},
+          { title: "✦ 鋼鐵灰藍", colors: [
+            { name: "鈦銀灰",   hex: "#5A5A65" },
+            { name: "木炭灰",   hex: "#404048" },
+            { name: "冰河灰",   hex: "#707085" },
+            { name: "幽靈白棕", hex: "#8888A0" }
+          ]}
+        ]
+      }
+    };
+
+    const carousel = document.getElementById('colorCarousel');
+    const hairDye = document.getElementById('hairDye');
+
+    // === 🆕 新功能二：專屬染髮提案資料庫 ===
+    const proposalDatabase = {
+      "#9A6A46": { formula: "以 8 度的溫潤金黃栗色為基底，調入 15% 溫和焦糖橙調，展現輕盈絲滑的高級暖光質感。", makeup: "適合搭配蜜桃色、杏色系腮紅，眼妝可使用暖金色微光亮粉，唇部抹上透亮肉桂奶茶色。", shampoo: "建議使用含有溫和植物精油的暖色調補色洗髮精，維持髮絲內部的焦糖金黃麥芽光澤。" },
+      "#A67B5B": { formula: "選用 7 度蜂蜜棕調，混和 20% 的亞麻綠基底以降低紅感，調配出霧面透明感極佳的輕盈暖棕色。", makeup: "完美對應燕麥色眼影與珊瑚橘色調唇膏，底妝強調清透、帶有奶油肌的自然光澤感。", shampoo: "推薦抗 UV 紫外線護色精華與高效保濕洗髮精，鎖住微量亞麻茶棕色素，防止曬後枯黃。" },
+      "#C4A882": { formula: "強烈建議漂褪至 8.5 度以上，使用純淨霧感奶茶調染膏，融入 10% 珍珠冷灰以中和原生髮的黃色素。", makeup: "極適合時髦的裸色系歐美感彩妝，搭配根根分明的野生眉與帶有柔霧感的水蜜桃色唇萃。", shampoo: "必須使用去黃紫護色洗髮精與奶茶色補色劑交替使用，每週一次深層結構護髮以維持髮絲彈性。" },
+      "#D4C0A0": { formula: "精準漂至 9 度，以淺燕麥米色為核心，添加 5% 的香檳金，創造出高透光、宛如混血兒般的頂級髮色。", makeup: "搭配淡雅的偽素顏妝容、淡粉色雙頰與水光質地的潤唇膏，凸顯整體輕透、不食人間煙火的仙氣。", shampoo: "推薦極致修護型鎖色洗髮精，因漂髮度數較高，需著重於結構鏈鍵與蛋白質的補充。" },
+      "#B8782A": { formula: "以經典大地暖棕為底，融合 30% 琥珀高光金與微量肉桂色，在陽光下會折射出耀眼的絲絨金芒。", makeup: "非常適合大地色煙燻眼妝，搭配香檳金打亮盤勾勒顴骨線條，唇彩選用飽滿的暖磚紅或泰奶色。", shampoo: "建議選用富含摩洛哥堅果油的抗氧化護色洗髮精，維持琥珀油脂感的高雅折射率。" },
+      "#C4724A": { formula: "以 7 度飽和銅色基底，精準揉入 15% 活力胡蘿蔔橘。此配方不需高度漂髮即可顯現極高的顯白飽和度。", makeup: "大膽嘗試同色系妝容！日系活力橘色腮紅塗抹於眼下，搭配柿子橘或髒橘色霧面唇釉。", shampoo: "銅橘色極易流失，務必持續使用暖橘色專用補色洗髮精，並洗頭時切勿使用過熱的水。" },
+      "#C8956B": { formula: "微帶粉紅基調的暖杏色，配方採用 8 度柔和棕加入 10% 蜜桃粉，中和調配出極度溫柔、沒有攻擊性的鄰家髮色。", makeup: "推薦粉嫩杏桃色腮紅、臥蠺點綴亮片，唇部則使用果凍感澄澈櫻花粉色調，打造減齡視覺感。", shampoo: "推薦選用弱酸性（pH5.5）無矽靈弱酸護色洗髮精，保護脆弱的微粉紅色素粒子不輕易脫落。" },
+      "#8F5830": { formula: "深沉濃郁的栗子外殼色，巧妙加入 10% 的黃昏日落紅，讓原本厚重的深髮色在走動時透出溫暖層次。", makeup: "完美契合秋楓彩妝風格！紅棕色調眼影混搭溫柔的茶玫瑰色唇彩，營造知性優雅的學術氣質。", shampoo: "使用深色系鎖色洗髮精，能有效拉長日落栗色飽和度，維持原生優質霧光感。" },
+      "#8A7F79": { formula: "調合 6 度碳灰與 40% 的煙燻冷棕，不需完全漂白即可壓制頭髮底層的橘紅光，呈現細緻的高級冷霧面。", makeup: "極度推薦莫蘭迪色系、帶藍調的粉色腮紅，眼妝以低飽和灰棕色為主，擦上玫瑰豆沙色唇膏。", shampoo: "建議選用冷灰色系護色洗髮精，能夠有效抑止泛紅或泛橘的枯黃感出現。" },
+      "#6B6065": { formula: "低調黑巧棕融入 20% 深冷茶綠，創造出在室內接近原生黑髮，在自然光下卻能呈現透明冷翠光澤的頂級心機色。", makeup: "適合乾淨清透的冷白底妝，搭配冷粉色系唇頰彩，展現冰美人般的空靈冷冽感。", shampoo: "適合日常頭皮舒緩兼鎖色洗髮精，著重在維持冷萃茶色的高雅透光度與髮絲柔順度。" },
+      "#9B95A8": { formula: "需要精準去黃至 8.5 度，以透明丁香紫膏體混和 25% 灰藍，打造極度仙氣、隨著洗髮會越洗越好看的微醺紫灰。", makeup: "極度契合紫色系修容盤、冷調打亮。眼妝使用浪漫的薰衣草紫微光，搭配水光梅子色唇彩。", shampoo: "強烈指定冷紫調去黃補色洗髮精，能完美抗衡頭髮本身的泛黃因子，延長浪漫薰衣草灰色調。" },
+      "#A09298": { formula: "在法式冷棕中添加高比例的珍珠白光澤感試劑，透過精緻折射光隱藏髮絲毛躁，讓髮質在視覺上顯得宛如絲緞。", makeup: "適合搭配帶有珠光偏光的眼影，雙頰抹上低飽和煙燻粉，配上啞光木質玫瑰唇色。", shampoo: "推薦奢華珍珠光澤鎖色髮浴，富含水解蠶絲蛋白，讓霧面棕髮依然保有頂級絲滑感。" },
+      "#7A6A65": { formula: "打破奶茶色必為暖色的迷思，混和冷灰與微量紫蘿蘭調，將奶茶色完美改造為冰感、煙燻不顯黃的夏季命定色。", makeup: "適合乾淨俐落的妝容，眼影採用水泥灰棕，口紅選用帶有冷調的裸粉色或烤奶色。", shampoo: "推薦冷色調專用護色洗髮精，防止冷煙燻調退回傳統暖黃奶茶色。" },
+      "#3D3D4F": { formula: "極致優雅的暗夜藍黑。以 3 度墨黑為基底融合 35% 皇家極光藍，給人一種沉穩卻深不可測的高級時尚感。", makeup: "搭配精緻犀利的黑色眼線，唇部使用具有高對比度的漿果色或冷紅色，非常顯白且充滿氣場。", shampoo: "強烈建議使用藍黑色專用補色洗髮精，因為藍色色素極易隨水分流失。" },
+      "#3A3640": { formula: "完全去除紅感的極冷霧黑。透過微量綠色與藍色調和劑，打造出比原生黑髮更乾淨、更帶柔霧高級質感的黑夜色彩。", makeup: "適合簡約妝容，著重在無瑕底妝與一抹冷色調玫瑰紅唇，就能呈現極具個人風格的復古高冷感。", shampoo: "一般弱酸性高效持色洗髮精即可，避免使用高去油、高鹼性的深層洗髮精。" },
+      "#5A4E58": { formula: "濃郁的可可豆棕色中揉入 15% 霧感迷霧紫，完美平衡了大地色的溫暖，變身為夏季型專屬的知性深色提案。", makeup: "極適合上班族與正式場合！搭配肉桂粉色腮紅與潤澤豆沙唇，低調展現沉穩幹練風範。", shampoo: "建議搭配修護型亮澤鎖色髮浴，定時為髮絲補水，維持可可質地的沉穩深邃反射。" },
+      "#4A3326": { formula: "70% 濃醇黑巧克力融合 30% 榛果暖調。這款髮色不需要任何漂髮，卻能在陽光下展現出如同絲絨般滑順的豐盈大地質感。", makeup: "完美對應秋季型的楓葉妝！暖大地色眼影、南瓜色腮紅，搭配啞光紅棕色唇膏，復古感十足。", shampoo: "推薦咖啡色系或暖色調鎖色洗髮精，能有效填補巧克力色素，長期維持色澤的濃郁醇厚感。" },
+      "#6A4535": { formula: "經典的意式摩卡色，調入些舉紅棕暖光，能大幅度提亮亞洲人偏黃的暗沉膚色，帶來宛如自帶復古濾鏡的高級感。", makeup: "極適合搭配充滿暖意的泰式妝容。濃密的睫毛、古銅色系打亮，配上髒橘色或胡桃木色唇彩。", shampoo: "建議選用富含天然果油的弱酸性護色髮浴，防止暖調紅棕色粒子在日常洗髮中流失。" },
+      "#7A4030": { formula: "彷彿在伯爵紅茶中加入了香醇楓糖。配方含有高比例的溫暖紅銅色素，是非常顯氣色、帶有輕奢英倫名媛風範的髮色。", makeup: "適合搭配精緻奢華的妝容。微煙燻紅棕眼影，搭配低飽和肉桂橘腮紅，以及氣場全開的磚紅色飽滿唇膏。", shampoo: "紅色分子細小極易流失，請務必持續使用紅茶色或暖紅調專屬補色洗髮精，洗髮水溫切勿過高。" },
+      "#8B4040": { formula: "秋季型天花板髮色！高度飽和的濃郁複古磚紅。不需要漂白即可上色，完美壓制亞洲人的蠟黃，在人群中辨識度極高。", makeup: "推薦歐美感微煙燻暖調眼妝，修容部分強調立體感，唇部則是不二選擇的啞光經典濃郁磚紅色。", shampoo: "極度指定紅銅色補色洗髮精。建議洗髮後搭配免沖洗持色精華，抵禦紫外線對強烈紅色分子的破壞。" },
+      "#7A5535": { formula: "完美復刻烘焙榛果的溫柔色澤，在金黃色與大地棕之間取得完美平衡。帶有適度的啞光霧面感，給人一種既知性又高雅的舒適感。", makeup: "適合溫柔的日常通勤妝容。燕麥色眼影打底，搭配溫暖的蜜桃茶色雙頰，唇部使用水潤的泰奶色。", shampoo: "推薦保濕修護型護色洗髮精。因為榛果棕極看重髮絲保水度，一旦乾燥就會顯得枯黃失去高級感。" },
+      "#8B5025": { formula: "糖炒栗子外殼的油亮金棕，融合 20% 的香檳金，折射光澤極強，能夠大幅提升乾癟髮絲的豐盈度與視覺髮量。", makeup: "非常推薦搭配溫暖的金箔、亮片眼妝，搭配微醺感南瓜色腮紅，唇膏大膽抹上焦糖番茄色。", shampoo: "建議選用含有堅果精華的暖色增亮鎖色髮浴，能有效延長金黃焦糖色澤的亮麗程度。" },
+      "#6B4028": { formula: "溫潤內斂的深栗子色。配方側重於極致的穩重與低調透明感，是一款完全不挑場合、能完美凸顯秋季型沉穩底蘊的色澤。", makeup: "適合簡約高雅的妝容。霧面無瑕底妝、自然野生眉、淡淡的杏色修容，再抹上一抹溫柔豆沙唇。", shampoo: "日常使用溫和、無硫酸鹽的溫和護色洗髮精即可，維持原生的溫潤木質霧光。" },
+      "#9A6035": { formula: "8 度橡木暖棕加入大比例的琥珀微光高光。整體呈現出極具層次感的輕歐美線條染視覺效果，完美修飾臉部線條。", makeup: "極適合搭配混血感彩妝。灰色或棕色隱形眼鏡，搭配立體打亮盤與富有復古氣息的土色系唇釉。", shampoo: "強烈建議與暖金調補色洗髮精搭配使用，每週搭配髮膜進行熱敷深層修護，維持琥珀線條的高光立體感。" },
+      "#1A1820": { formula: "純度極高的經典深邃黑，揉入 5% 的冷調靛藍，徹底拔除任何泛紅發橘的原生雜質，呈現出如同黑曜石般的鏡面高光。", makeup: "極致冷冽對比妝容！雪白無瑕底妝、俐落上揚的純黑眼線，配上正紅色、漿果色或氣場全開的深深紅唇膏。", shampoo: "建議選用黑豆或黑色專用鎖色髮浴，維持黑色分子的純淨度，防止因日常洗髮退色而產生黃斑。" },
+      "#252535": { formula: "4 度深沉墨棕中調入 30% 星空午夜藍。在室內低調沉穩，一旦走到強光下則會爆發出極度璀璨的深邃藍色極光。", makeup: "適合搭配銀白色偏光打亮，眼妝使用冷灰色系，唇彩大膽選用冷調帶紫的梅子玫瑰色或櫻桃紅。", shampoo: "藍色分子極度不穩定，強烈指定冷藍色補色洗髮精，且絕對要避免使用深層清潔或控油洗髮精。" },
+      "#151518": { formula: "如同無底深淵般的純淨深黑，不帶任何一絲彩色色素，徹底展現出冬季型天生自帶的極致高冷與無與倫比的強大氣場。", makeup: "簡約即是奢華。僅需乾淨俐落的眉毛、根根分明的睫毛，配上一抹飽滿、啞光的法式正紅唇，高貴無比。", shampoo: "選用高抗氧化、pH 弱酸性的高端持色洗髮精，著重維持黑髮的鏡面折射率與水潤度。" },
+      "#202028": { formula: "微帶炭灰感、如同冬日午夜冰冷街道的黑。加入 15% 霧面極冷炭灰，比傳統死黑更具有層次感與現代都市時尚感。", makeup: "非常推薦冷感小煙燻眼妝，修容部分選用灰色調陰影盤，搭配具有高級啞光感的裸莓色唇膏。", shampoo: "建議冷灰色系洗髮精與修護髮膜交替使用，保持炭灰色調的極致霧感，防止因熱工具導致泛黃。" },
+      "#5A5A65": { formula: "需漂髮至 9.5 度極致乾淨基底。配方融合大量鈦銀金屬灰與微量丁香紫防止泛黃，打造未來感爆棚的頂級金屬髮色。", makeup: "前衛未來感妝容！銀色亮片眼影、強烈的冷色調修容，唇彩選擇高飽和的冷艷紅或是極具個性的裸灰色。", shampoo: "必須嚴格執行去黃紫洗與鈦銀灰補色洗輪替，並絕對避開溫泉與高溫電棒捲。" },
+      "#404048": { formula: "低調的高級水泥木炭灰。在 6 度的底色上融入高濃度的冷灰色素，呈現出一種帶著迷霧感、彷彿高嶺之花的清冷視覺。", makeup: "完美搭配莫蘭迪冷色調彩妝。眼妝採用消腫冷大地色，搭配低補和煙燻玫瑰腮紅與冷調木質唇釉。", shampoo: "推薦霧感冷灰護色洗髮精，能精準鎖住炭灰色素粒子，防止其退成普通的泛黃棕色。" },
+      "#707085": { formula: "漂髮至 9 度，揉入 20% 的冰河冷藍與 40% 的迷霧灰。是一款帶有淡淡冷藍偏光的頂級灰色調，極度顯白且充滿仙氣。", makeup: "適合搭配精緻的透明感妝容。清透的水光底妝、冰藍色眼影點綴，唇部使用晶瑩剔透的梅子凍唇蜜。", shampoo: "極度強烈指定冰藍色或銀灰色去黃補色劑，且洗髮時務必使用冷水，以防冰河藍色素瞬間褪去。" },
+      "#8888A0": { formula: "極具藝術感的極淺白金棕，融入了 15% 的幽靈紫羅蘭偏光。這款顏色極具層次，在走動時會不斷折射出若隱若現的銀白光芒。", makeup: "極度適合混血精靈妝容。濃郁的眼線、亮色偏光修容，搭配極具質感的冷色調櫻桃紅唇膏，漸變效果驚艷全場。", shampoo: "因為屬於極高難度的淺色髮，建議完全使用高端鏈鍵修護洗髮精，搭配最高強度的紫調去黃護髮素。" }
+    };
+
+    function selectColor(el, hexCode, colorName, isCustom = false) {
+      document.querySelectorAll('.color-item').forEach(e => e.classList.remove('active'));
+      el.classList.add('active');
+      hairDye.setAttribute('fill', hexCode);
+      
+      // 若是手動調色，可以即時更新自訂盤上顯示的顏色名稱（HEX）
+      if(isCustom) {
+        el.querySelector('.color-name').textContent = hexCode.toUpperCase();
+        colorName = hexCode.toUpperCase();
+      }
+
+      // 🆕 更新專屬染髮提案小卡
+      updateProposalCard(colorName || hexCode.toUpperCase(), hexCode);
+    }
+
+    // 🆕 新功能二核心：更新提案卡片
+    function updateProposalCard(name, hex) {
+      const card = document.getElementById('proposalCard');
+      const dot = document.getElementById('proposalDot');
+      const nameEl = document.getElementById('proposalName');
+      const hexEl = document.getElementById('proposalHex');
+      const formulaEl = document.getElementById('proposalFormula');
+      const makeupEl = document.getElementById('proposalMakeup');
+      const shampooEl = document.getElementById('proposalShampoo');
+
+      const formattedHex = hex.toUpperCase();
+      const data = proposalDatabase[formattedHex] || {
+        formula: "精選奢華色調配比，為您的推薦髮色進行特別深度調配。",
+        makeup: "建議搭配乾淨清透底妝，與同色系眼唇彩凸顯命定感。",
+        shampoo: "建議選用弱酸性修護型護色洗髮精，維持髮絲亮麗光澤。"
+      };
+
+      // 動畫效果
+      card.classList.remove('visible');
+      setTimeout(() => {
+        dot.style.backgroundColor = formattedHex;
+        nameEl.textContent = name;
+        hexEl.textContent = formattedHex;
+        formulaEl.textContent = data.formula;
+        makeupEl.textContent = data.makeup;
+        shampooEl.textContent = data.shampoo;
+        card.classList.add('visible');
+      }, 150);
+    }
+
+    function renderCarousel(seasonKey) {
+      const data = hairColorData[seasonKey];
+      document.getElementById('seasonTag').textContent = data.tag;
+      // 更新 season-tag 顏色
+      document.getElementById('seasonTag').style.color = data.accent;
+      carousel.innerHTML = '';
+
+      // 1. 更新 Three.js 粒子顏色
+      if(window.particleSystem) updateParticleColor(data.particleColor);
+
+      // 2. 自由調色鈕
+      const customDiv = document.createElement('div');
+      customDiv.className = 'color-item custom-color-btn';
+      customDiv.innerHTML = `
+        <div class="color-swatch" style="overflow:hidden">
+          <input type="color" id="nativeColorPicker" value="#ff0000" oninput="handleCustomColor(this.value, this.parentElement.parentElement)">
+        </div>
+        <span class="color-name">無極限</span>
+      `;
+      carousel.appendChild(customDiv);
+
+      // 3. 分組插入色卡
+      let firstColorHex = null;
+      let firstColorName = null;
+      data.groups.forEach((group, gi) => {
+        // 分隔標題
+        const titleEl = document.createElement('div');
+        titleEl.style.cssText = 'width:100%;text-align:center;font-size:10px;letter-spacing:0.2em;color:#b0a0a0;margin:6px 0 2px 0;font-family:"Noto Serif TC",serif;';
+        titleEl.textContent = group.title;
+        carousel.appendChild(titleEl);
+
+        group.colors.forEach((c, ci) => {
+          const div = document.createElement('div');
+          const isFirst = gi === 0 && ci === 0;
+          div.className = `color-item${isFirst ? ' active' : ''}`;
+          div.innerHTML = `<div class="color-swatch" style="background:${c.hex}"></div><span class="color-name">${c.name}</span>`;
+          div.onclick = () => selectColor(div, c.hex, c.name);
+          carousel.appendChild(div);
+          if(isFirst) { firstColorHex = c.hex; firstColorName = c.name; }
+        });
+
+        // 分隔線
+        if(gi < data.groups.length - 1) {
+          const divider = document.createElement('div');
+          divider.className = 'palette-divider';
+          carousel.appendChild(divider);
+        }
+      });
+
+      if(firstColorHex) {
+        hairDye.setAttribute('fill', firstColorHex);
+        // 同步更新提案卡片
+        updateProposalCard(firstColorName, firstColorHex);
+      }
+    }
+
+    function handleCustomColor(hexValue, parentEl) {
+      selectColor(parentEl, hexValue, null, true);
+    }
+
+    renderCarousel('spring');
+
+    // === 🆕 新功能一：跨頁面智慧導航（LocalStorage 連動）===
+    (function initSmartNavigation() {
+      const seasonMap = {
+        '春季': 'spring', '暖春': 'spring', '亮春': 'spring', '淺春': 'spring',
+        '夏季': 'summer', '冷夏': 'summer', '柔夏': 'summer', '淺夏': 'summer',
+        '秋季': 'autumn', '暖秋': 'autumn', '深秋': 'autumn', '柔秋': 'autumn',
+        '冬季': 'winter', '冷冬': 'winter', '深冬': 'winter', '亮冬': 'winter'
+      };
+
+      const seasonLabelMap = {
+        'spring': '春季型',
+        'summer': '夏季型',
+        'autumn': '秋季型',
+        'winter': '冬季型'
+      };
+
+      // 嘗試從 LocalStorage 讀取色彩鑑定結果
+      const storedResult = localStorage.getItem('destinyColorResult');
+      // 支援多種可能的 key 名稱
+      const storedSeason = localStorage.getItem('destinyColorSeason');
+      const storedType = localStorage.getItem('userColorType');
+
+      let detectedSeason = null;
+      let detectedLabel = '';
+
+      // 優先使用直接存的 season key
+      if (storedSeason && ['spring', 'summer', 'autumn', 'winter'].includes(storedSeason)) {
+        detectedSeason = storedSeason;
+        detectedLabel = seasonLabelMap[storedSeason];
+      }
+      // 嘗試從結果文字中解析
+      else if (storedResult) {
+        for (const [keyword, season] of Object.entries(seasonMap)) {
+          if (storedResult.includes(keyword)) {
+            detectedSeason = season;
+            detectedLabel = storedResult;
+            break;
+          }
+        }
+      }
+      // 嘗試 userColorType
+      else if (storedType) {
+        for (const [keyword, season] of Object.entries(seasonMap)) {
+          if (storedType.includes(keyword)) {
+            detectedSeason = season;
+            detectedLabel = storedType;
+            break;
+          }
+        }
+      }
+
+      // 如果偵測到結果，顯示智慧導航提示並自動切換
+      if (detectedSeason) {
+        const banner = document.getElementById('smartNavBanner');
+        const bannerBody = document.getElementById('smartNavBody');
+        const selector = document.getElementById('seasonSelector');
+
+        bannerBody.innerHTML = `系統偵測到您在「我的命定色」測驗中的結果為 <span class="banner-highlight">${detectedLabel}</span>，已自動為您切換至最適合的命定髮色推薦！`;
+
+        banner.classList.add('show');
+
+        // 自動切換下拉選單
+        selector.value = detectedSeason;
+        renderCarousel(detectedSeason);
+      }
+    })();
+
+    function dismissSmartBanner() {
+      const banner = document.getElementById('smartNavBanner');
+      banner.style.animation = 'none';
+      banner.style.transition = 'all 0.3s ease';
+      banner.style.opacity = '0';
+      banner.style.transform = 'translateY(-10px)';
+      setTimeout(() => {
+        banner.classList.remove('show');
+        banner.style.display = 'none';
+      }, 300);
+    }
+
+    // === 真實相機與拍照邏輯 ===
+    let videoStream = null;
+    const webcam = document.getElementById('live-webcam');
+    const modal = document.getElementById('cameraModal');
+    const userPhoto = document.getElementById('userPhoto');
+
+    async function openCamera() {
+      modal.classList.add('active');
+      try {
+        videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+        webcam.srcObject = videoStream;
+      } catch (err) {
+        alert("無法啟動相機！請允許視訊權限。");
+        closeCamera();
+      }
+    }
+
+    function closeCamera() {
+      modal.classList.remove('active');
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+      }
+    }
+
+    function takePhoto() {
+      // 1. 閃光特效
+      const flash = document.getElementById('flashFx');
+      flash.classList.remove('show');
+      void flash.offsetWidth; // trigger reflow
+      flash.classList.add('show');
+
+      // 2. 使用 Canvas 擷取畫面
+      const canvas = document.getElementById('snapshotCanvas');
+      canvas.width = webcam.videoWidth;
+      canvas.height = webcam.videoHeight;
+      const ctx = canvas.getContext('2d');
+      // 處理前鏡頭的鏡像翻轉
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(webcam, 0, 0, canvas.width, canvas.height);
+      
+      const photoDataURL = canvas.toDataURL('image/jpeg');
+
+      // 3. 關閉相機並模擬 AI 載入
+      setTimeout(() => {
+        closeCamera();
+        
+        // 將剛拍下的真實照片塞回編輯器中！
+        userPhoto.style.backgroundImage = `url(${photoDataURL})`;
+        hairDye.setAttribute('fill', 'transparent'); 
+        
+        const scanUI = document.getElementById('scanUI');
+        scanUI.classList.add('active');
+
+        // 等待 AI 「假處理」完畢恢復色彩
+        setTimeout(() => {
+          scanUI.classList.remove('active');
+          const firstColorItem = document.querySelectorAll('.color-item')[1]; // 0是客製化, 1是第一個命定色
+          if(firstColorItem) firstColorItem.click();
+        }, 2000);
+      }, 300); // 等待一點閃光感受
+    }
+
+    // === 自行上傳照片邏輯 ===
+    function triggerUpload() {
+      document.getElementById('fileUpload').click();
+    }
+
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const photoDataURL = e.target.result;
+          
+          // 將上傳的首圖塞入編輯器並暫停渲染髮色
+          userPhoto.style.backgroundImage = `url(${photoDataURL})`;
+          hairDye.setAttribute('fill', 'transparent'); 
+          
+          const scanUI = document.getElementById('scanUI');
+          scanUI.classList.add('active');
+
+          // 模擬分析載入
+          setTimeout(() => {
+            scanUI.classList.remove('active');
+            const firstColorItem = document.querySelectorAll('.color-item')[1];
+            if(firstColorItem) firstColorItem.click();
+          }, 2000);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  </script>
+
+  <script>
+    // === Three.js 季節粒子背景 ===
+    (function() {
+      const canvas = document.getElementById('threeCanvas');
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.z = 5;
+
+      // 粒子幾何體
+      const COUNT = 180;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(COUNT * 3);
+      const speeds = [];
+      for (let i = 0; i < COUNT; i++) {
+        pos[i*3]   = (Math.random() - 0.5) * 12;
+        pos[i*3+1] = (Math.random() - 0.5) * 18;
+        pos[i*3+2] = (Math.random() - 0.5) * 4;
+        speeds.push(0.003 + Math.random() * 0.008);
+      }
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+
+      let currentColor = new THREE.Color(0xf5c8a0);
+      const mat = new THREE.PointsMaterial({
+        color: currentColor, size: 0.06,
+        transparent: true, opacity: 0.55,
+        sizeAttenuation: true
+      });
+
+      const particles = new THREE.Points(geo, mat);
+      scene.add(particles);
+      window.particleSystem = particles;
+
+      // 更新粒子顏色
+      window.updateParticleColor = function(hexColor) {
+        const target = new THREE.Color(hexColor);
+        let steps = 0;
+        const interval = setInterval(() => {
+          mat.color.lerp(target, 0.08);
+          steps++;
+          if (steps > 40) clearInterval(interval);
+        }, 16);
+      };
+
+      // 動畫迴圈
+      function animate() {
+        requestAnimationFrame(animate);
+        const pos = geo.attributes.position.array;
+        for (let i = 0; i < COUNT; i++) {
+          pos[i*3+1] += speeds[i];
+          if (pos[i*3+1] > 9) pos[i*3+1] = -9;
+        }
+        geo.attributes.position.needsUpdate = true;
+        particles.rotation.y += 0.0008;
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      window.addEventListener('resize', () => {
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+      });
+    })();
+  </script>
+
+</body>
+</html>
